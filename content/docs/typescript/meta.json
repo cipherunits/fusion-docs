@@ -1,0 +1,7 @@
+{
+  "title": "TypeScript",
+  "description": "TypeScript SDK",
+  "icon": "FileType",
+  "root": true,
+  "pages": ["v1"]
+}

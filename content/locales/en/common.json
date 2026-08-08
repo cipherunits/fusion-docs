@@ -1,0 +1,13 @@
+{
+  "welcome": "Welcome to Fusion Docs",
+  "description": "Official SDKs for TypeScript, Python, and C#.",
+  "openDocs": "Open documentation",
+  "language": "Language",
+  "productsHeading": "Choose an SDK",
+  "typescript": "TypeScript",
+  "python": "Python",
+  "csharp": "C#",
+  "typescriptDesc": "Node.js and browser client",
+  "pythonDesc": "Python client library",
+  "csharpDesc": ".NET client library"
+}
