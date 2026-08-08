@@ -1,0 +1,22 @@
+# CipherScope Configuration
+# Docs: https://github.com/cipherunits/CipherScope#configuration
+
+[project]
+name = "Fusion Docs"
+
+[brand]
+enabled = true
+# thin | light | regular | bold | heavy
+style = "heavy"
+
+[info]
+enabled = true
+env = true              # which .env profile is active
+package_manager = true  # npm | pnpm | yarn | bun
+version = true          # from package.json
+
+[developer]
+enabled = true
+name = "cipherunits"
+website = "cipherunit.xyz"
+github = "https://github.com/cipherunits/fusion-docs/"

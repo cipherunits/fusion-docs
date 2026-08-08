@@ -1,15 +1,36 @@
 {
   "name": "fusion-docs",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "Cipher Unit",
+    "email": "cipherunit.dev@gmail.com",
+    "url": "https://cipherunit.xyz"
+  },
+  "homepage": "https://cipherunit.xyz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cipherunits/fusion-docs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cipherunits/fusion-docs/issues"
+  },
   "scripts": {
-    "dev": "next dev",
+    "cipherscope": "cipher-scope banner",
+    "dev": "pnpm cipherscope && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm lint",
+    "clean": "rm -rf .next out dist node_modules/.cache",
+    "prepare": "husky"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "cipher-scope": "^0.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.30.0",
@@ -28,6 +49,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
