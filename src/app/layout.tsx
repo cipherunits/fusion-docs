@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Fusion Framework',
-    template: '%s | Fusion Framework',
+    default: 'Fusion',
+    template: '%s | Fusion',
   },
   description:
     'Fusion enables you to build high-quality backends with a unified developer experience across Node.js, Python, and C#',

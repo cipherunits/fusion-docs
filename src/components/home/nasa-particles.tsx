@@ -138,7 +138,7 @@ export function NasaParticles() {
       </ParticlesProvider>
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-2 bg-background/70"
+        className="pointer-events-none fixed inset-0 z-2 bg-background/80"
       />
     </>
   );

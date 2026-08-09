@@ -129,4 +129,22 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 no longer sets pointer on buttons by default */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
+/* Docs sidebar footer: language + theme side by side */
+#nd-sidebar .flex.flex-col.p-4.pt-2:has([data-theme-toggle]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#nd-sidebar .flex.flex-col.p-4.pt-2:has([data-theme-toggle]) > .mb-2 {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 0;
 }

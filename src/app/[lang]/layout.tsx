@@ -1,8 +1,8 @@
 import localFont from 'next/font/local';
 import { Geist_Mono } from 'next/font/google';
-import { RootProvider } from 'fumadocs-ui/provider/next';
 import { i18nProvider } from 'fumadocs-ui/i18n';
 import { notFound } from 'next/navigation';
+import { Provider } from '@/components/provider';
 import { translations } from '@/lib/layout.shared';
 import { type AppLocale, i18n, localeDirection } from '@/lib/i18n';
 import '@/app/styles/globals.css';
@@ -63,9 +63,9 @@ export default async function LangLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <RootProvider i18n={i18nProvider(translations, locale)}>
+        <Provider i18n={i18nProvider(translations, locale)}>
           {children}
-        </RootProvider>
+        </Provider>
       </body>
     </html>
   );

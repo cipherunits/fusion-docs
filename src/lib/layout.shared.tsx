@@ -15,18 +15,21 @@ export const translations = i18n
 export function baseOptions(locale: string): BaseLayoutProps {
   return {
     i18n: true,
+    themeSwitch: {
+      mode: 'light-dark-system',
+    },
     nav: {
       title: (
         <>
           <Image
             src="/images/logo-fusion.jpg"
-            alt="Fusion Framework"
+            alt="Fusion"
             width={28}
             height={26}
             className="rounded-sm"
             priority
           />
-          Fusion Framework
+          Fusion 
         </>
       ),
       url: `/${locale}`,
@@ -43,5 +46,5 @@ export function baseOptions(locale: string): BaseLayoutProps {
         active: 'url',
       }
     ],
-  };
+};
 }
