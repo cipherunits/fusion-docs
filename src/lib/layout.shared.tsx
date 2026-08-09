@@ -39,7 +39,7 @@ export function baseOptions(locale: string): BaseLayoutProps {
       },
       {
         text: 'Developers',
-        url: "https://cipherunit.xyz/",
+        url: "https://cipherunit.xyz/team",
         active: 'url',
       }
     ],
