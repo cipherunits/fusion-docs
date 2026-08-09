@@ -1,5 +1,5 @@
 allowBuilds:
-  '@tsparticles/engine': set this to true or false
+  '@tsparticles/engine': true
   esbuild: true
   sharp: false
   unrs-resolver: false
