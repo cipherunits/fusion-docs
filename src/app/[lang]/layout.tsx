@@ -1,5 +1,6 @@
 import localFont from 'next/font/local';
 import { Geist_Mono } from 'next/font/google';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { i18nProvider } from 'fumadocs-ui/i18n';
 import { notFound } from 'next/navigation';
 import { Provider } from '@/components/provider';
@@ -66,6 +67,7 @@ export default async function LangLayout({
         <Provider i18n={i18nProvider(translations, locale)}>
           {children}
         </Provider>
+        <SpeedInsights />
       </body>
     </html>
   );
