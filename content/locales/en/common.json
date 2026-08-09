@@ -1,7 +1,8 @@
 {
-  "welcome": "Welcome to Fusion Docs",
-  "description": "Official SDKs for TypeScript, Python, and C#.",
-  "openDocs": "Open documentation",
+  "welcome": "The Framework for Backends",
+  "description": "Fusion enables you to build high-quality backends with a unified developer experience across Node.js, Python, and C#",
+  "openDocs": "Get Started",
+  "openLearn": "Learn Fusion",
   "language": "Language",
   "productsHeading": "Choose an SDK",
   "typescript": "TypeScript",
