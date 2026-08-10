@@ -47,16 +47,20 @@ export const localeDirection = {
 };
 ```
 
-Also add a display name in `src/lib/layout.shared.tsx` under `translations` (same pattern as English).
-
 ### 2. UI strings
 
-Copy:
+Copy both namespaces:
 
 ```text
 content/locales/en/common.json
-→ content/locales/fa/common.json
+→ content/locales/{lang}/common.json
+
+content/locales/en/fumadocs-ui.json
+→ content/locales/{lang}/fumadocs-ui.json
 ```
+
+- `common.json` — home page, nav links, custom labels
+- `fumadocs-ui.json` — language display name, Search, TOC, theme switcher, …
 
 Translate the **values** only. Keep the keys unchanged:
 
@@ -69,31 +73,20 @@ Translate the **values** only. Keep the keys unchanged:
 
 ### 3. Documentation pages
 
-This project uses **dot locale** file names.
-
-English (default):
+Docs live in **locale folders**, same idea as `content/locales/`:
 
 ```text
-content/docs/python/v1/getting-started.mdx
+content/docs/en/python/v1/getting-started.mdx   # English (source)
+content/docs/fa/python/v1/getting-started.mdx   # Persian (optional)
+content/docs/ru/python/v1/getting-started.mdx   # Russian (optional)
 ```
 
-Persian:
-
-```text
-content/docs/python/v1/getting-started.fa.mdx
-```
-
-Same for other pages and for `meta.json` when needed:
-
-```text
-meta.json
-meta.fa.json
-```
+**Fallback:** If a page is missing under `fa/` or `ru/`, the site shows the English page. You can ship English-only docs; other locales catch up later.
 
 Workflow:
 
-1. Copy the English `.mdx` file.
-2. Rename with `.{locale}` before the extension.
+1. Copy the English folder/file under `content/docs/en/...`.
+2. Paste into `content/docs/{lang}/...` with the same path.
 3. Translate titles, descriptions, and body text.
 4. Leave code blocks, commands, package names, and API identifiers as in English.
 

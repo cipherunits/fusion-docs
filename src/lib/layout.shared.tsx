@@ -2,17 +2,17 @@ import Image from 'next/image';
 import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { getCommon } from '@/lib/common-messages';
+import { fumadocsUiLocales } from '@/lib/fumadocs-ui-locales';
 
 export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  .add({
-    en: {
-      displayName: 'English',
-    },
-  });
+  .add(fumadocsUiLocales);
 
 export function baseOptions(locale: string): BaseLayoutProps {
+  const common = getCommon(locale);
+
   return {
     i18n: true,
     themeSwitch: {
@@ -29,22 +29,22 @@ export function baseOptions(locale: string): BaseLayoutProps {
             className="rounded-sm"
             priority
           />
-          Fusion 
+          Fusion
         </>
       ),
       url: `/${locale}`,
     },
     links: [
       {
-        text: 'Docs',
-        url: "/docs",
+        text: common.navDocs,
+        url: `/${locale}/docs`,
         active: 'nested-url',
       },
       {
-        text: 'Developers',
-        url: "https://cipherunit.xyz/team",
+        text: common.navDevelopers,
+        url: 'https://cipherunit.xyz/team',
         active: 'url',
-      }
+      },
     ],
-};
+  };
 }

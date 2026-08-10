@@ -64,7 +64,10 @@ export default async function LangLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <Provider i18n={i18nProvider(translations, locale)}>
+        <Provider
+          dir={localeDirection[locale] ?? 'ltr'}
+          i18n={i18nProvider(translations, locale)}
+        >
           {children}
         </Provider>
         <SpeedInsights />

@@ -1,0 +1,7 @@
+{
+  "title": "Python",
+  "description": "Python SDK",
+  "icon": "CodeXml",
+  "root": true,
+  "pages": ["v1"]
+}

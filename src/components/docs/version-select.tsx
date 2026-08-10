@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18next/client';
 import {
   type DocProductId,
   docVersions,
@@ -18,6 +19,7 @@ import {
 } from '@/lib/docs';
 
 export function VersionSelect() {
+  const { t } = useT('common');
   const router = useRouter();
   const params = useParams<{ lang?: string; slug?: string[] }>();
   const [open, setOpen] = useState(false);
@@ -47,7 +49,7 @@ export function VersionSelect() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        aria-label="Choose a version"
+        aria-label={t('chooseVersion')}
         className={cn(
           buttonVariants({ color: 'secondary' }),
           'text-fd-muted-foreground mb-2 w-full justify-start gap-1.5 bg-fd-secondary/50 text-start',
@@ -59,7 +61,7 @@ export function VersionSelect() {
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-0.5 p-1" align="start">
         <p className="text-fd-muted-foreground p-2 text-xs font-medium">
-          Choose a version
+          {t('chooseVersion')}
         </p>
         {versions.map((item) => (
           <button

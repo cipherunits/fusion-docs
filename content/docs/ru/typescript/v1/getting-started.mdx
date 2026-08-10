@@ -1,0 +1,20 @@
+---
+title: Начало работы
+description: Установка и инициализация TypeScript SDK
+---
+
+## Установка
+
+```bash
+pnpm add @cipherunits/fusion
+```
+
+## Быстрый старт
+
+```ts
+import { Fusion } from '@cipherunits/fusion';
+
+const client = new Fusion({
+  apiKey: process.env.FUSION_API_KEY,
+});
+```

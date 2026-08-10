@@ -1,0 +1,17 @@
+{
+  "welcome": "فریم‌ورک برای بک‌اندها",
+  "description": "Fusion به شما امکان می‌دهد بک‌اندهای باکیفیت را با تجربه توسعه‌دهندگی یکپارچه در Node.js، Python و C# بسازید.",
+  "openDocs": "شروع کنید",
+  "openLearn": "یادگیری Fusion",
+  "language": "زبان",
+  "navDocs": "مستندات",
+  "navDevelopers": "توسعه‌دهندگان",
+  "chooseVersion": "انتخاب نسخه",
+  "productsHeading": "یک SDK انتخاب کنید",
+  "typescript": "TypeScript",
+  "python": "Python",
+  "csharp": "C#",
+  "typescriptDesc": "کلاینت Node.js و مرورگر",
+  "pythonDesc": "کتابخانه کلاینت Python",
+  "csharpDesc": "کتابخانه کلاینت .NET"
+}

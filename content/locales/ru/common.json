@@ -1,0 +1,17 @@
+{
+  "welcome": "Фреймворк для бэкенда",
+  "description": "Fusion позволяет создавать высококачественные бэкенды с единым опытом разработки для Node.js, Python и C#",
+  "openDocs": "Начать работу",
+  "openLearn": "Изучить Fusion",
+  "language": "Язык",
+  "navDocs": "Документация",
+  "navDevelopers": "Разработчики",
+  "chooseVersion": "Выберите версию",
+  "productsHeading": "Выберите SDK",
+  "typescript": "TypeScript",
+  "python": "Python",
+  "csharp": "C#",
+  "typescriptDesc": "Клиент для Node.js и браузера",
+  "pythonDesc": "Клиентская библиотека для Python",
+  "csharpDesc": "Клиентская библиотека для .NET"
+}

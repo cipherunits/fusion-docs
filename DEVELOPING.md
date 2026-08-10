@@ -73,7 +73,9 @@ Important entry points:
 
 - `src/lib/i18n.ts` — locales list and text direction
 - `src/lib/source.ts` — Fumadocs content loader
-- `src/lib/layout.shared.tsx` — nav title, links, UI locale display names
+- `src/lib/layout.shared.tsx` — nav title, links (copy from `content/locales`)
+- `content/locales/{lang}/common.json` — home / nav UI strings
+- `content/locales/{lang}/fumadocs-ui.json` — Fumadocs chrome + language display names
 - `src/lib/docs.ts` — product / version helpers
 - `src/proxy.ts` — i18n middleware
 
@@ -88,11 +90,12 @@ content/docs/{product}/{version}/…
 Products today: `typescript`, `python`, `csharp`.  
 Register versions in `src/lib/docs.ts` when you add a new version folder.
 
-Locale files for docs use the **dot** parser:
+Locale files for docs use the **dir** parser (one folder per language):
 
 ```text
-getting-started.mdx      # en (default)
-getting-started.fa.mdx   # fa
+content/docs/en/…/getting-started.mdx
+content/docs/fa/…/getting-started.mdx
+content/docs/ru/…/getting-started.mdx
 ```
 
 UI copy:
@@ -107,9 +110,8 @@ Loaded via `@content/locales/...` (see `src/lib/i18next`).
 
 1. Extend `languages` in `src/lib/i18n.ts`.
 2. Set `localeDirection` (`ltr` / `rtl`).
-3. Add display name in `src/lib/layout.shared.tsx` translations.
-4. Add `content/locales/{lang}/common.json` (and other namespaces as needed).
-5. Add `*.{lang}.mdx` / `meta.{lang}.json` under `content/docs` as required.
+3. Add `content/locales/{lang}/common.json` and `fumadocs-ui.json` (copy from `en`).
+4. Add pages under `content/docs/{lang}/...` (copy from `en` as needed).
 
 ## Branching & commits
 
