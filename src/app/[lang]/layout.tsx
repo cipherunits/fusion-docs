@@ -68,11 +68,11 @@ export default async function LangLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <Provider dir={dir} i18n={i18nProvider(translations, locale)}>
-          <DocsProductsProvider products={products}>
+        <DocsProductsProvider products={products}>
+          <Provider dir={dir} i18n={i18nProvider(translations, locale)}>
             {children}
-          </DocsProductsProvider>
-        </Provider>
+          </Provider>
+        </DocsProductsProvider>
         <SpeedInsights />
       </body>
     </html>
