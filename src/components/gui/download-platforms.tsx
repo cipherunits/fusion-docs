@@ -39,17 +39,20 @@ export function DownloadPlatforms({ messages }: DownloadPlatformsProps) {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
+      <header className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
         <h1 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl">
           {m.downloadTitle}
         </h1>
         <p className="text-muted-foreground mt-4 text-base text-pretty sm:text-lg">
           {m.downloadDescription}
         </p>
-      </div>
+      </header>
 
       <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-10 lg:gap-16">
-        <section className="flex flex-col items-center gap-8">
+        <section
+          aria-labelledby="download-windows"
+          className="flex flex-col items-center gap-8"
+        >
           <Image
             src="/images/gui/windows-logo.png"
             alt={m.windows}
@@ -58,6 +61,10 @@ export function DownloadPlatforms({ messages }: DownloadPlatformsProps) {
             className="size-16 object-contain sm:size-20"
             priority
           />
+
+          <h2 id="download-windows" className="sr-only">
+            {m.windows}
+          </h2>
 
           <Button
             type="button"
@@ -81,7 +88,10 @@ export function DownloadPlatforms({ messages }: DownloadPlatformsProps) {
           </div>
         </section>
 
-        <section className="flex flex-col items-center gap-8">
+        <section
+          aria-labelledby="download-linux"
+          className="flex flex-col items-center gap-8"
+        >
           <Image
             src="/images/gui/linux-logo.png"
             alt={m.linux}
@@ -90,6 +100,10 @@ export function DownloadPlatforms({ messages }: DownloadPlatformsProps) {
             className="size-16 object-contain sm:size-20"
             priority
           />
+
+          <h2 id="download-linux" className="sr-only">
+            {m.linux}
+          </h2>
 
           <div className="grid w-full max-w-xs grid-cols-2 gap-2">
             <Button

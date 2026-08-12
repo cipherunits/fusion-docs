@@ -16,7 +16,7 @@
   "pythonDesc": "کتابخانه کلاینت Python",
   "csharpDesc": "کتابخانه کلاینت .NET",
   "downloadTitle": "دانلود Fusion Desktop",
-  "downloadDescription": "اپلیکیشن دسکتاپ برای مدیریت و کاوش بک‌اندهای Fusion.",
+  "downloadDescription": "Fusion Desktop را برای ویندوز و لینوکس دانلود کنید. نصب‌کننده‌های x64 و Arm به‌همراه بسته‌های .deb، .rpm و CLI برای مدیریت بک‌اندهای Fusion.",
   "windows": "ویندوز",
   "windowsVersions": "ویندوز ۱۰، ۱۱",
   "linux": "لینوکس",

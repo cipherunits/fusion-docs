@@ -161,6 +161,46 @@ export function buildPageMetadata(options: {
   };
 }
 
+function organizationJsonLd() {
+  return {
+    '@type': 'Organization',
+    '@id': `${siteConfig.org.url}/#organization`,
+    name: siteConfig.org.name,
+    url: siteConfig.org.url,
+    email: siteConfig.org.email,
+    sameAs: [siteConfig.org.github],
+    logo: absoluteUrl('/images/logo-fusion.jpg'),
+  };
+}
+
+function websiteJsonLd() {
+  return {
+    '@type': 'WebSite',
+    '@id': `${getSiteUrl()}/#website`,
+    name: siteConfig.name,
+    url: getSiteUrl(),
+    description: siteConfig.description,
+    publisher: { '@id': `${siteConfig.org.url}/#organization` },
+    inLanguage: i18n.languages,
+  };
+}
+
+function breadcrumbJsonLd(
+  url: string,
+  breadcrumbs: { name: string; url: string }[],
+) {
+  return {
+    '@type': 'BreadcrumbList',
+    '@id': `${url}#breadcrumb`,
+    itemListElement: breadcrumbs.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
 export function docsJsonLd(options: {
   title: string;
   description?: string;
@@ -173,24 +213,8 @@ export function docsJsonLd(options: {
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Organization',
-        '@id': `${siteConfig.org.url}/#organization`,
-        name: siteConfig.org.name,
-        url: siteConfig.org.url,
-        email: siteConfig.org.email,
-        sameAs: [siteConfig.org.github],
-        logo: absoluteUrl('/images/logo-fusion.jpg'),
-      },
-      {
-        '@type': 'WebSite',
-        '@id': `${getSiteUrl()}/#website`,
-        name: siteConfig.name,
-        url: getSiteUrl(),
-        description: siteConfig.description,
-        publisher: { '@id': `${siteConfig.org.url}/#organization` },
-        inLanguage: i18n.languages,
-      },
+      organizationJsonLd(),
+      websiteJsonLd(),
       {
         '@type': 'TechArticle',
         '@id': `${url}#article`,
@@ -207,16 +231,76 @@ export function docsJsonLd(options: {
           '@id': url,
         },
       },
+      breadcrumbJsonLd(url, breadcrumbs),
+    ],
+  };
+}
+
+/** OG image path for the desktop download page. */
+export function getGuiOgImageUrl(locale: string): string {
+  return `/${locale}/og/gui`;
+}
+
+export function downloadJsonLd(options: {
+  title: string;
+  description: string;
+  locale: string;
+  url: string;
+  appName: string;
+  breadcrumbs: { name: string; url: string }[];
+}) {
+  const { title, description, locale, url, appName, breadcrumbs } = options;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationJsonLd(),
+      websiteJsonLd(),
       {
-        '@type': 'BreadcrumbList',
-        '@id': `${url}#breadcrumb`,
-        itemListElement: breadcrumbs.map((item, index) => ({
-          '@type': 'ListItem',
-          position: index + 1,
-          name: item.name,
-          item: item.url,
-        })),
+        '@type': 'WebPage',
+        '@id': `${url}#webpage`,
+        name: title,
+        description,
+        url,
+        inLanguage: locale,
+        isPartOf: { '@id': `${getSiteUrl()}/#website` },
+        about: { '@id': `${url}#software` },
+        mainEntity: { '@id': `${url}#software` },
+        breadcrumb: { '@id': `${url}#breadcrumb` },
+        primaryImageOfPage: absoluteUrl('/images/logo-fusion.jpg'),
       },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${url}#software`,
+        name: appName,
+        alternateName: 'Fusion Desktop',
+        description,
+        url,
+        image: absoluteUrl('/images/logo-fusion.jpg'),
+        applicationCategory: 'DeveloperApplication',
+        applicationSubCategory: 'Backend management',
+        operatingSystem: ['Windows 10', 'Windows 11', 'Linux'],
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock',
+          url,
+        },
+        publisher: { '@id': `${siteConfig.org.url}/#organization` },
+        author: { '@id': `${siteConfig.org.url}/#organization` },
+        inLanguage: locale,
+        isAccessibleForFree: true,
+        downloadUrl: url,
+        installUrl: url,
+        softwareHelp: absoluteUrl(`/${locale}/docs`),
+        featureList: [
+          'Windows installers (x64, Arm64)',
+          'Linux packages (.deb, .rpm, .tar.gz)',
+          'CLI builds',
+        ],
+      },
+      breadcrumbJsonLd(url, breadcrumbs),
     ],
   };
 }

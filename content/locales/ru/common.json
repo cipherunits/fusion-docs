@@ -16,7 +16,7 @@
   "pythonDesc": "Клиентская библиотека для Python",
   "csharpDesc": "Клиентская библиотека для .NET",
   "downloadTitle": "Скачать Fusion Desktop",
-  "downloadDescription": "Десктоп-приложение для управления и исследования бэкендов Fusion.",
+  "downloadDescription": "Скачайте Fusion Desktop для Windows и Linux. Установщики x64 и Arm, а также пакеты .deb, .rpm и CLI для управления бэкендами Fusion.",
   "windows": "Windows",
   "windowsVersions": "Windows 10, 11",
   "linux": "Linux",

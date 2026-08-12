@@ -17,6 +17,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
         languages: languageAlternates('/'),
       },
     });
+
+    entries.push({
+      url: absoluteUrl(`/${lang}/gui`),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+      alternates: {
+        languages: languageAlternates('/gui'),
+      },
+    });
   }
 
   const pagesBySlug = new Map<string, { url: string }[]>();

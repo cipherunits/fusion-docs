@@ -16,7 +16,7 @@
   "pythonDesc": "Python client library",
   "csharpDesc": ".NET client library",
   "downloadTitle": "Download Fusion Desktop",
-  "downloadDescription": "Desktop app for managing and exploring your Fusion backends.",
+  "downloadDescription": "Download Fusion Desktop for Windows and Linux. Installers for x64 and Arm, plus .deb, .rpm, and CLI builds to manage your Fusion backends.",
   "windows": "Windows",
   "windowsVersions": "Windows 10, 11",
   "linux": "Linux",
