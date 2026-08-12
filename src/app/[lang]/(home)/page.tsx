@@ -1,8 +1,32 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getT } from '@/lib/i18next';
 import { Button } from '@/components/ui/button';
 import { getDocHref, latestVersion } from '@/lib/docs';
 import { NasaParticles } from '@/components/home/nasa-particles';
+import { buildPageMetadata, siteConfig } from '@/lib/seo';
+import { getCommon } from '@/lib/common-messages';
+
+export async function generateMetadata({
+  params,
+}: PageProps<'/[lang]'>): Promise<Metadata> {
+  const { lang } = await params;
+  const common = getCommon(lang);
+
+  return {
+    ...buildPageMetadata({
+      title: siteConfig.name,
+      description: common.description,
+      locale: lang,
+      path: `/${lang}`,
+      pathWithoutLocale: '/',
+      type: 'website',
+    }),
+    title: {
+      absolute: siteConfig.name,
+    },
+  };
+}
 
 export default async function HomePage({ params }: PageProps<'/[lang]'>) {
   const { lang } = await params;

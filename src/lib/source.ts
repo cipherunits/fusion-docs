@@ -21,3 +21,14 @@ export const source = loader({
     }
   },
 });
+
+export function getPageImageUrl(page: (typeof source)['$inferPage']) {
+  const segments = [...page.slugs, 'image.png'];
+
+  return {
+    segments,
+    url:
+      '/' +
+      [page.locale, 'og', 'docs', ...segments].filter(Boolean).join('/'),
+  };
+}

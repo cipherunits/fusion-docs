@@ -3,3 +3,6 @@ allowBuilds:
   esbuild: true
   sharp: false
   unrs-resolver: false
+minimumReleaseAgeExclude:
+  - cipher-scope@0.0.6
+  - cipher-scope@0.1.0

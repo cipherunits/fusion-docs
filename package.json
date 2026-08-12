@@ -1,6 +1,6 @@
 {
   "name": "fusion-docs",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": false,
   "license": "MIT",
   "author": {
@@ -34,7 +34,7 @@
     "@tsparticles/react": "^4.3.2",
     "@tsparticles/slim": "^4.3.2",
     "@vercel/speed-insights": "^2.0.0",
-    "cipher-scope": "^0.0.3",
+    "cipher-scope": "^0.0.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "fumadocs-core": "^16.14.2",
