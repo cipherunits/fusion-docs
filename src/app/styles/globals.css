@@ -136,6 +136,30 @@
   }
 }
 
+/*
+ * Docs layout: fill the viewport on large screens.
+ * Fumadocs defaults --fd-layout-width to 97rem, which keeps the sidebar +
+ * content cluster centered with large empty gutters on ultrawide monitors.
+ */
+#nd-docs-layout {
+  --fd-layout-width: 100%;
+}
+
+/* Center the MDX article in the main column (between sidebar and TOC) */
+@media (min-width: 1280px) {
+  #nd-page {
+    justify-self: center;
+    margin-inline: auto;
+  }
+}
+
+/* Prevent code blocks from causing horizontal page overflow on small screens */
+#nd-page pre,
+#nd-page .shiki {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* Docs sidebar footer: language + theme side by side */
 #nd-sidebar .flex.flex-col.p-4.pt-2:has([data-theme-toggle]) {
   flex-direction: row;
