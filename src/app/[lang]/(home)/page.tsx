@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getT } from '@/lib/i18next';
 import { Button } from '@/components/ui/button';
-import { getDefaultDocHref } from '@/lib/docs';
 import { NasaParticles } from '@/components/home/nasa-particles';
 import { buildPageMetadata, siteConfig } from '@/lib/seo';
 import { getCommon } from '@/lib/common-messages';
@@ -31,7 +30,7 @@ export async function generateMetadata({
 export default async function HomePage({ params }: PageProps<'/[lang]'>) {
   const { lang } = await params;
   const { t } = await getT(lang, 'common');
-  const docsHref = getDefaultDocHref(lang) ?? `/${lang}/docs`;
+  const docsHref = `/${lang}/docs`;
 
   return (
     <>

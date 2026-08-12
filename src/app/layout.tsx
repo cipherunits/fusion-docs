@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   creator: siteConfig.org.name,
   publisher: siteConfig.org.name,
   keywords: [
-    'Fusion',
     'Fusion Framework',
+    'Fusion',
     'Cipher Unit',
     'backend framework',
     'Node.js',

@@ -1,0 +1,7 @@
+{
+  "title": "CLI",
+  "description": "رابط خط فرمان",
+  "icon": "Terminal",
+  "root": true,
+  "pages": ["v1"]
+}

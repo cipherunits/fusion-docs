@@ -1,0 +1,7 @@
+{
+  "title": "CLI",
+  "description": "Интерфейс командной строки",
+  "icon": "Terminal",
+  "root": true,
+  "pages": ["v1"]
+}

@@ -95,13 +95,9 @@ export function getDocHref(
   return `/${parts.join('/')}`;
 }
 
-/** First product’s latest docs URL for a locale (docs index redirect). */
-export function getDefaultDocHref(lang: string): string | null {
-  const [first] = getDocProducts(lang);
-  if (!first?.latestVersion) {
-    return null;
-  }
-  return getDocHref(lang, first.id, first.latestVersion);
+/** Docs landing URL (overview) — no SDK selected yet. */
+export function getDefaultDocHref(lang: string): string {
+  return `/${lang}/docs`;
 }
 
 /** Parse `/docs/{product}/{version}/...` using the locale’s content tree. */

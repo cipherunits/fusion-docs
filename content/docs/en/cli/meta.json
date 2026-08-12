@@ -1,0 +1,7 @@
+{
+  "title": "CLI",
+  "description": "Command-line interface",
+  "icon": "Terminal",
+  "root": true,
+  "pages": ["v1"]
+}

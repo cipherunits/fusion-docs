@@ -5,12 +5,11 @@ import {
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/layouts/docs/page';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getBreadcrumbItems } from 'fumadocs-core/breadcrumb';
-import { getDefaultDocHref } from '@/lib/docs';
 import { JsonLd } from '@/components/json-ld';
 import {
   absoluteUrl,
@@ -24,16 +23,7 @@ export default async function Page(
   props: PageProps<'/[lang]/docs/[[...slug]]'>,
 ) {
   const params = await props.params;
-
-  if (!params.slug || params.slug.length === 0) {
-    const href = getDefaultDocHref(params.lang);
-    if (!href) {
-      notFound();
-    }
-    redirect(href);
-  }
-
-  const slug = params.slug;
+  const slug = params.slug ?? [];
   const page = source.getPage(slug, params.lang);
   if (!page) {
     notFound();
@@ -100,24 +90,16 @@ export async function generateMetadata(
   props: PageProps<'/[lang]/docs/[[...slug]]'>,
 ): Promise<Metadata> {
   const params = await props.params;
+  const slug = params.slug ?? [];
+  const page = source.getPage(slug, params.lang);
 
-  if (!params.slug || params.slug.length === 0) {
-    return buildPageMetadata({
-      title: 'Documentation',
-      locale: params.lang,
-      path: `/${params.lang}/docs`,
-      pathWithoutLocale: '/docs',
-      type: 'website',
-    });
-  }
-
-  const page = source.getPage(params.slug, params.lang);
   if (!page) {
     notFound();
   }
 
   const image = getPageImageUrl(page).url;
-  const pathWithoutLocale = `/docs/${page.slugs.join('/')}`;
+  const pathWithoutLocale =
+    page.slugs.length === 0 ? '/docs' : `/docs/${page.slugs.join('/')}`;
 
   return buildPageMetadata({
     title: page.data.title,

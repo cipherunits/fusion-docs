@@ -3,8 +3,8 @@ import { type AppLocale, i18n } from '@/lib/i18n';
 import { getLocaleMeta } from '@/lib/locales-registry';
 
 export const siteConfig = {
-  name: 'Fusion',
-  shortName: 'Fusion',
+  name: 'Fusion Framework',
+  shortName: 'Fusion Framework',
   description:
     'Fusion enables you to build high-quality backends with a unified developer experience across Node.js, Python, and C#',
   org: {
