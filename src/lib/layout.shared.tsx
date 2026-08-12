@@ -41,6 +41,11 @@ export function baseOptions(locale: string): BaseLayoutProps {
         active: 'nested-url',
       },
       {
+        text: common.app,
+        url: `/${locale}/gui`,
+        active: 'nested-url',
+      },
+      {
         text: common.navDevelopers,
         url: 'https://cipherunit.xyz/team',
         active: 'url',
