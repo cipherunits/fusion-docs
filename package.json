@@ -17,10 +17,7 @@
     "url": "https://github.com/cipherunits/fusion-docs/issues"
   },
   "scripts": {
-    "cipherscope": "cipher-scope banner",
-    "dev": "pnpm cipherscope && next dev",
-    "build": "pnpm cipherscope && next build",
-    "start": "pnpm cipherscope && next start",
+    "dev": "next dev",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --noEmit",
