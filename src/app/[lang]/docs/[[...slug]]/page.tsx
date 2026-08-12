@@ -9,7 +9,8 @@ import { notFound, redirect } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getDocHref, latestVersion } from '@/lib/docs';
+import { getBreadcrumbItems } from 'fumadocs-core/breadcrumb';
+import { getDefaultDocHref } from '@/lib/docs';
 import { JsonLd } from '@/components/json-ld';
 import {
   absoluteUrl,
@@ -25,7 +26,11 @@ export default async function Page(
   const params = await props.params;
 
   if (!params.slug || params.slug.length === 0) {
-    redirect(getDocHref(params.lang, 'typescript', latestVersion.typescript));
+    const href = getDefaultDocHref(params.lang);
+    if (!href) {
+      notFound();
+    }
+    redirect(href);
   }
 
   const slug = params.slug;
@@ -36,24 +41,28 @@ export default async function Page(
 
   const MDX = page.data.body;
   const common = getCommon(params.lang);
+  const tree = source.getPageTree(params.lang);
+  const trail = getBreadcrumbItems(page.url, tree, {
+    includeRoot: { url: absoluteUrl(`/${params.lang}/docs`) },
+    includePage: true,
+  });
+
   const breadcrumbs = [
     { name: siteConfig.name, url: absoluteUrl(`/${params.lang}`) },
     { name: common.navDocs, url: absoluteUrl(`/${params.lang}/docs`) },
-    ...slug.map((segment, index) => {
-      const crumbPath = `/${params.lang}/docs/${slug.slice(0, index + 1).join('/')}`;
-      const label =
-        segment === 'typescript'
-          ? common.typescript
-          : segment === 'python'
-            ? common.python
-            : segment === 'csharp'
-              ? common.csharp
-              : segment;
-
-      return {
-        name: index === slug.length - 1 ? page.data.title : label,
-        url: absoluteUrl(crumbPath),
-      };
+    ...trail.flatMap((item) => {
+      if (!item.url) {
+        return [];
+      }
+      const url = item.url.startsWith('http')
+        ? item.url
+        : absoluteUrl(item.url);
+      return [
+        {
+          name: typeof item.name === 'string' ? item.name : String(item.name),
+          url,
+        },
+      ];
     }),
   ];
 

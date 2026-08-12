@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { type AppLocale, i18n } from '@/lib/i18n';
+import { getLocaleMeta } from '@/lib/locales-registry';
 
 export const siteConfig = {
   name: 'Fusion',
@@ -13,12 +14,6 @@ export const siteConfig = {
     github: 'https://github.com/cipherunits/fusion-docs',
   },
 } as const;
-
-const openGraphLocale: Record<AppLocale, string> = {
-  en: 'en_US',
-  fa: 'fa_IR',
-  ru: 'ru_RU',
-};
 
 /** Absolute site origin (no trailing slash). Set NEXT_PUBLIC_SITE_URL in production. */
 export function getSiteUrl(): string {
@@ -76,10 +71,10 @@ export function localeOpenGraph(locale: string) {
     : i18n.defaultLanguage) as AppLocale;
 
   return {
-    locale: openGraphLocale[lang],
+    locale: getLocaleMeta(lang).ogLocale,
     alternateLocale: i18n.languages
       .filter((l) => l !== lang)
-      .map((l) => openGraphLocale[l]),
+      .map((l) => getLocaleMeta(l).ogLocale),
   };
 }
 

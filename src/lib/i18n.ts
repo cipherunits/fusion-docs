@@ -1,25 +1,34 @@
 import { defineI18n } from 'fumadocs-core/i18n';
+import {
+  defaultLocale,
+  discoveredLocales,
+  getLocaleDirection,
+} from '@/lib/locales-registry';
 
 /**
- * Locale routing config (developers).
- * Translators work only under `/content` — see that folder for docs + UI strings.
+ * Locale routing — languages are discovered from content/locales/{lang}/meta.json.
+ * Translators only touch /content (docs + locale folders).
  */
 export const i18n = defineI18n({
-  defaultLanguage: 'en',
-  languages: ['en', 'fa', 'ru'],
+  defaultLanguage: defaultLocale,
+  languages: discoveredLocales,
   /**
-   * Missing docs / meta for a locale inherit English.
-   * Authors write English first; other locales catch up later.
+   * Missing docs / meta for a locale inherit the default language.
+   * Authors write the default locale first; other locales catch up later.
    */
-  fallbackLanguage: 'en',
-  /** Locale folders: content/docs/{en,fa,ru}/... (same idea as content/locales) */
+  fallbackLanguage: defaultLocale,
+  /** Locale folders: content/docs/{lang}/... (same idea as content/locales) */
   parser: 'dir',
 });
 
 export type AppLocale = (typeof i18n.languages)[number];
 
-export const localeDirection: Record<string, 'ltr' | 'rtl'> = {
-  en: 'ltr',
-  fa: 'rtl',
-  ru: 'ltr',
-};
+export function localeDirectionFor(locale: string): 'ltr' | 'rtl' {
+  return getLocaleDirection(locale);
+}
+
+/** @deprecated prefer localeDirectionFor — kept for call sites that index by locale */
+export const localeDirection: Record<string, 'ltr' | 'rtl'> =
+  Object.fromEntries(
+    discoveredLocales.map((lang) => [lang, getLocaleDirection(lang)]),
+  );

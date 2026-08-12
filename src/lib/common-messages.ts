@@ -1,24 +1,41 @@
-import en from '@content/locales/en/common.json';
-import fa from '@content/locales/fa/common.json';
-import ru from '@content/locales/ru/common.json';
-import type { AppLocale } from '@/lib/i18n';
-
-const commonByLocale = {
-  en,
-  fa,
-  ru,
-} as const satisfies Record<AppLocale, typeof en>;
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type en from '@content/locales/en/common.json';
+import { defaultLocale, discoveredLocales } from '@/lib/locales-registry';
 
 export type CommonMessages = typeof en;
 
-/** Locale UI copy with English fallback for any missing key. */
+function loadCommonFile(locale: string): Record<string, string> | null {
+  try {
+    const filePath = join(
+      process.cwd(),
+      'content/locales',
+      locale,
+      'common.json',
+    );
+    return JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, string>;
+  } catch {
+    return null;
+  }
+}
+
+const fallback = (loadCommonFile(defaultLocale) ??
+  loadCommonFile(discoveredLocales[0] ?? 'en') ??
+  {}) as CommonMessages;
+
+/** Locale UI copy with default-locale fallback for any missing key. */
 export function getCommon(locale: string): CommonMessages {
-  if (locale === 'en' || !(locale in commonByLocale)) {
-    return en;
+  if (locale === defaultLocale) {
+    return fallback;
+  }
+
+  const messages = loadCommonFile(locale);
+  if (!messages) {
+    return fallback;
   }
 
   return {
-    ...en,
-    ...commonByLocale[locale as AppLocale],
+    ...fallback,
+    ...messages,
   };
 }

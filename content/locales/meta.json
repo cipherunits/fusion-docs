@@ -1,0 +1,20 @@
+{
+  "defaultLanguage": "en",
+  "locales": {
+    "en": {
+      "name": "English",
+      "dir": "ltr",
+      "ogLocale": "en_US"
+    },
+    "fa": {
+      "name": "فارسی",
+      "dir": "rtl",
+      "ogLocale": "fa_IR"
+    },
+    "ru": {
+      "name": "Русский",
+      "dir": "ltr",
+      "ogLocale": "ru_RU"
+    }
+  }
+}

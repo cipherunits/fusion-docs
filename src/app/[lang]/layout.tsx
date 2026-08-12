@@ -4,8 +4,10 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { i18nProvider } from 'fumadocs-ui/i18n';
 import { notFound } from 'next/navigation';
 import { Provider } from '@/components/provider';
+import { DocsProductsProvider } from '@/components/docs/docs-products-context';
 import { translations } from '@/lib/layout.shared';
-import { type AppLocale, i18n, localeDirection } from '@/lib/i18n';
+import { type AppLocale, i18n, localeDirectionFor } from '@/lib/i18n';
+import { getDocProducts } from '@/lib/docs';
 import '@/app/styles/globals.css';
 
 const inter = localFont({
@@ -55,20 +57,21 @@ export default async function LangLayout({
   }
 
   const locale = lang as AppLocale;
+  const dir = localeDirectionFor(locale);
+  const products = getDocProducts(locale).map(({ id, title }) => ({ id, title }));
 
   return (
     <html
       lang={locale}
-      dir={localeDirection[locale] ?? 'ltr'}
+      dir={dir}
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        <Provider
-          dir={localeDirection[locale] ?? 'ltr'}
-          i18n={i18nProvider(translations, locale)}
-        >
-          {children}
+        <Provider dir={dir} i18n={i18nProvider(translations, locale)}>
+          <DocsProductsProvider products={products}>
+            {children}
+          </DocsProductsProvider>
         </Provider>
         <SpeedInsights />
       </body>

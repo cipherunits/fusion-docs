@@ -17,21 +17,20 @@ import {
   TagsListItem,
 } from 'fumadocs-ui/components/dialog/search';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
-import { docProducts } from '@/lib/docs';
-
-const DEFAULT_TAG = 'python';
-
-const searchTags = [
-  ...docProducts.filter((product) => product.id === DEFAULT_TAG),
-  ...docProducts.filter((product) => product.id !== DEFAULT_TAG),
-];
+import { useDocsProducts } from '@/components/docs/docs-products-context';
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
-  const [tag, setTag] = useState(DEFAULT_TAG);
+  const products = useDocsProducts();
+  const defaultTag = products[0]?.id ?? '';
+  const [tag, setTag] = useState(defaultTag);
+  const activeTag = products.some((product) => product.id === tag)
+    ? tag
+    : defaultTag;
+
   const { search, setSearch, query } = useDocsSearch({
     client: fetchClient({
-      tag,
+      ...(activeTag ? { tag: activeTag } : {}),
       ...(locale ? { locale } : {}),
     }),
   });
@@ -50,22 +49,24 @@ export default function CustomSearchDialog(props: SharedProps) {
     >
       <SearchDialogOverlay />
       <SearchDialogContent>
-        <div className="border-fd-border border-b px-3 pt-3 pb-2">
-          <TagsList
-            tag={tag}
-            onTagChange={(value) => {
-              if (value) {
-                setTag(value);
-              }
-            }}
-          >
-            {searchTags.map((product) => (
-              <TagsListItem key={product.id} value={product.id}>
-                {product.title}
-              </TagsListItem>
-            ))}
-          </TagsList>
-        </div>
+        {products.length > 0 ? (
+          <div className="border-fd-border border-b px-3 pt-3 pb-2">
+            <TagsList
+              tag={activeTag}
+              onTagChange={(value) => {
+                if (value) {
+                  setTag(value);
+                }
+              }}
+            >
+              {products.map((product) => (
+                <TagsListItem key={product.id} value={product.id}>
+                  {product.title}
+                </TagsListItem>
+              ))}
+            </TagsList>
+          </div>
+        ) : null}
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />

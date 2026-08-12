@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronDown, Tag } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -11,14 +11,13 @@ import {
 } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/i18next/client';
-import {
-  type DocProductId,
-  docVersions,
-  isDocProductId,
-  latestVersion,
-} from '@/lib/docs';
 
-export function VersionSelect() {
+type VersionSelectProps = {
+  /** Version ids for the active product, from content meta order. */
+  versions: string[];
+};
+
+export function VersionSelect({ versions }: VersionSelectProps) {
   const { t } = useT('common');
   const router = useRouter();
   const params = useParams<{ lang?: string; slug?: string[] }>();
@@ -29,22 +28,18 @@ export function VersionSelect() {
   const product = slug[0];
   const version = slug[1];
 
-  const activeProduct: DocProductId | null =
-    product && isDocProductId(product) ? product : null;
-
-  const versions = useMemo(
-    () => (activeProduct ? [...docVersions[activeProduct]] : []),
-    [activeProduct],
-  );
-
-  if (!activeProduct || versions.length === 0) {
+  if (!product || versions.length === 0) {
     return null;
   }
 
   const currentVersion =
     version && versions.includes(version)
       ? version
-      : latestVersion[activeProduct];
+      : (versions[0] ?? version ?? '');
+
+  if (!currentVersion) {
+    return null;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -79,7 +74,7 @@ export function VersionSelect() {
                 return;
               }
               const rest = slug.slice(2);
-              const href = `/${[lang, 'docs', activeProduct, item, ...rest].join('/')}`;
+              const href = `/${[lang, 'docs', product, item, ...rest].join('/')}`;
               router.push(href);
             }}
           >

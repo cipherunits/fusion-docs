@@ -8,7 +8,8 @@ import { fumadocsUiLocales } from '@/lib/fumadocs-ui-locales';
 export const translations = i18n
   .translations()
   .extend(uiTranslations())
-  .add(fumadocsUiLocales);
+  // Locales are content-driven; widen for fumadocs generics.
+  .add(fumadocsUiLocales as never);
 
 export function baseOptions(locale: string): BaseLayoutProps {
   const common = getCommon(locale);
