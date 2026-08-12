@@ -1,0 +1,148 @@
+---
+title: ماژول‌ها
+description: ساخت و نصب پکیج‌های کتابخانه‌ای قابل انتشار Fusion
+---
+
+## Overview
+
+**ماژول**های Fusion پکیج‌های کتابخانه‌ای قابل انتشار هستند — نه پلاگین route.
+یک پکیج معمولی می‌نویسید (Python، TypeScript یا Rust)، روی GitHub می‌گذارید، بعد با CLI داخل اپ Fusion نصب می‌کنید. از آن به بعد مثل هر dependency دیگری import می‌کنید.
+
+```mermaid
+flowchart LR
+  init["fusion module init"] --> pkg["ریپوی پکیج"]
+  pkg --> gh["GitHub"]
+  gh --> add["fusion add --github"]
+  add --> app["اپ Fusion"]
+  app --> import["import پکیج"]
+```
+
+## نام‌گذاری پیشنهادی
+
+این الگو **پیشنهادی** است، اجباری نیست. می‌توانید در `fusion.module.toml` عوضش کنید.
+
+| Host | الگو | مثال (`--name jwt`) |
+| --- | --- | --- |
+| Python | `fusion_<name>_mod` | `fusion_jwt_mod` → `from fusion_jwt_mod import ...` |
+| npm / TypeScript | `fusion-<name>-mod` | `fusion-jwt-mod` → `import { ... } from "fusion-jwt-mod"` |
+
+پیش‌فرض ریپو / پوشه: `fusion-<name>-mod`.
+
+## ساخت ماژول
+
+```bash
+fusion module init
+```
+
+در حالت تعاملی این‌ها پرسیده می‌شود:
+
+1. زبان پیاده‌سازی — **Python**، **TypeScript** یا **Rust**
+2. نام ماژول (id)
+3. توضیحات
+4. پوشهٔ خروجی (پیش‌فرض `fusion-<id>-mod`)
+
+غیرتعاملی:
+
+```bash
+fusion module init --lang python --name example --description "اولین ماژول من"
+fusion module init --lang rust --name auth --description "ابزار احراز هویت" ./fusion-auth-mod
+```
+
+### زبان‌ها
+
+| زبان | خروجی |
+| --- | --- |
+| **Python** | پکیج خالص پایتون در `python/fusion_<name>_mod/` |
+| **TypeScript** | پکیج npm با `js/` و `src/` |
+| **Rust** | هستهٔ Rust مشترک + بایندینگ اختیاری **PyO3** و **N-API** برای هدف‌گیری همزمان Python و TypeScript |
+
+Rust وقتی مفید است که یک هستهٔ native برای همهٔ hostها بخواهید.
+
+### ساختار اسکفولد (Python)
+
+```text
+fusion-example-mod/
+├── fusion.module.toml
+├── pyproject.toml
+├── README.md
+└── python/
+    └── fusion_example_mod/
+        ├── __init__.py
+        └── hello.py
+```
+
+اسکفولد یک `hello()` نمونه دارد. آن را با API خودتان عوض کنید.
+
+## Manifest
+
+هر ماژول فایل `fusion.module.toml` دارد:
+
+```toml
+[module]
+id = "example"
+name = "example"
+version = "0.1.0"
+description = "اولین ماژول من"
+
+[module.impl]
+language = "python"
+
+[module.targets]
+python = true
+typescript = false
+
+[module.entry]
+python = "fusion_example_mod"
+
+[module.build]
+python = "pip install -e ."
+```
+
+- **`entry`** — نام پکیج برای import (یا نام npm برای TypeScript)
+- **`build`** — دستورهایی که `fusion add` بعد از دانلود اجرا می‌کند
+- **`targets`** — زبان‌های host که ماژول پشتیبانی می‌کند
+
+## انتشار
+
+1. پکیج را پیاده کنید
+2. روی GitHub push کنید
+3. داخل اپ Fusion دستور `fusion add` را بزنید
+
+## نصب داخل اپ
+
+از پروژه‌ای که `fusion-framework.toml` دارد:
+
+```bash
+fusion add --github OWNER/fusion-example-mod
+fusion add --github OWNER/fusion-example-mod@v1.0.0
+fusion add --github https://github.com/OWNER/fusion-example-mod
+```
+
+CLI این کارها را می‌کند:
+
+1. دانلود ریپو
+2. اعتبارسنجی `fusion.module.toml`
+3. کپی به `.fusion/modules/<id>/`
+4. اجرای build / install (`pip install -e .`، `maturin` یا `npm`)
+5. ثبت در `fusion-framework.toml` زیر `[[modules]]`
+6. برای hostهای TypeScript، لینک در `package.json`
+
+## استفاده در اپ
+
+Python:
+
+```python
+from fusion_example_mod import hello
+
+print(hello("world"))
+```
+
+TypeScript:
+
+```ts
+import { hello } from "fusion-example-mod";
+
+console.log(hello("world"));
+```
+
+توابع را از routeها، سرویس‌ها یا هر جای دیگر اپ صدا بزنید — ماژول‌ها کتابخانهٔ معمولی هستند.
