@@ -1,0 +1,36 @@
+---
+title: Config
+description: fusion.<env>.json and Settings in C#
+---
+
+## Overview
+
+Settings load through FFI from the same `fusion.<env>.json` files as other languages (`FUSION_ENV`, default `dev`).
+
+```csharp
+SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
+var host = SettingsStore.Current.Host;
+var port = SettingsStore.Current.Port;
+var secret = SettingsStore.Current.Get("secret_key");
+```
+
+## Startup
+
+```csharp
+SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
+using var app = new FusionApp(SettingsStore.GetSettings());
+app.Listen(); // host/port from settings
+```
+
+## API
+
+| API | Role |
+| --- | --- |
+| `EnsureLoaded(extraRoots…)` | Discover JSON |
+| `LoadJson(path, env, roots…)` | Explicit load |
+| `Get(key, default?)` | JSON node / value |
+| `Merge(object)` | Overlay |
+| `Host` / `Port` / `Debug` / `Env` | Common fields |
+| `SettingsStore.Configure(values)` | Merge into singleton |
+
+`commands` in JSON are for Fusion Tool only.

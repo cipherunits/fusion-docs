@@ -1,23 +1,25 @@
 ---
-title: TypeScript
+title: TypeScript / Node.js
 description: Fusion Framework for TypeScript and Node.js
 ---
 
 ## Overview
 
-TypeScript / Node.js bindings for **Fusion Framework** are **coming soon**.
+Node.js bindings use the same Rust core as Python. DX mirrors Python: `FusionApp`, `route` / `router`, middleware, `status`, and `settings`.
 
-The shared Rust core already powers a Node addon experimental path, but the published developer API and docs for production use are not ready yet.
+Handlers use `this.params` / `this.query` / `this.body` / `this.state` — there is **no** Python-style signature parameter injection.
 
-You are viewing **v1**. This section will expand when the TypeScript package ships.
+Package: `fusion-framework` (npm) from `crates/fusion-node`.
 
-## What to use today
+## Guides in this section
 
-- Build APIs with the [Python package](../../python/v1)
-- Scaffold a TypeScript-shaped project layout with [Fusion Tool](../../cli/v1/getting-started):
+| Page | Topic |
+| --- | --- |
+| [Getting started](./getting-started) | Install, scaffold, first server |
+| [Router](./router) | `route` / `router`, path tokens, responses |
+| [Config](./config) | `fusion.<env>.json` and `settings` |
+| [Middleware](./middleware) | Global + route middleware |
 
-```bash
-fusion init --lang typescript --name my-app
-```
+## Shared concepts
 
-That creates the same project structure (`fusion.<env>.json`, `main.ts`, `core/settings.ts`, and so on). Prefer Python for runnable servers until the Node binding is officially released.
+Routing, JSON env files, and middleware match the [Python guides](../../python/v1). OpenAPI/Swagger for Node is lighter than Python in the current release.

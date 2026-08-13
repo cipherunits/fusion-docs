@@ -1,0 +1,61 @@
+---
+title: Middleware
+description: Global and route middleware for C# — no framework defaults
+---
+
+## Overview
+
+```csharp
+delegate object? FusionMiddleware(FusionRequest request, Func<FusionRequest, object?> callNext);
+```
+
+**No default middleware.** Use `app.Use(...)` and/or `[Route(..., Roles = ...)]`.
+
+## Global
+
+```csharp
+var MIDDLEWARE = new List<FusionMiddleware>
+{
+    // Middleware.BearerJwt(),
+};
+
+using var app = new FusionApp(SettingsStore.GetSettings());
+foreach (var mw in MIDDLEWARE) app.Use(mw);
+app.Listen();
+```
+
+## Custom middleware
+
+```csharp
+FusionMiddleware RequireApiKey = (request, callNext) =>
+{
+    if (!request.Headers.TryGetValue("x-api-key", out var key) || key != "secret")
+        return new Dictionary<string, object?>
+        {
+            ["status"] = 401,
+            ["body"] = new { detail = "invalid api key" },
+        };
+    return callNext(request);
+};
+```
+
+Write to `request.State`; handlers read `State`.
+
+## Roles / JWT helpers
+
+```csharp
+MIDDLEWARE.Add(Middleware.BearerJwt()); // optional verify: callback
+
+[Route("/api/admin", Roles = new[] { "admin" })]
+public class AdminModule : FusionBaseApi
+{
+    public object Get() => Response(new { ok = true });
+}
+```
+
+```csharp
+Middleware.RequireRoles("admin", "super_admin");
+Middleware.RequireRoles(new[] { "admin" }, claim: "roles", stateKey: "jwt");
+```
+
+Default bearer decode is unverified base64url — supply `verify` for production.

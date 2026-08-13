@@ -1,0 +1,58 @@
+---
+title: Config
+description: fusion.<env>.json and settings in Node.js
+---
+
+## Overview
+
+Runtime config is shared with Python: JSON files named `fusion.<env>.json`, selected by `FUSION_ENV` (default `dev`).
+
+```ts
+import { settings, getSettings, configure } from "fusion-framework";
+
+settings.ensureLoaded([process.cwd()]);
+const host = settings.host;
+const debug = settings.get("debug", false);
+```
+
+## Startup pattern
+
+```ts
+settings.ensureLoaded([process.cwd()]);
+const app = new FusionApp(getSettings());
+await app.listen();
+```
+
+`FusionApp` listens on `host` / `port` from settings unless you pass overrides to `listen(host, port)`.
+
+## API
+
+| API | Role |
+| --- | --- |
+| `settings.ensureLoaded(extraRoots?)` | Discover and load `fusion.<env>.json` |
+| `settings.loadJson(path?, env?, extraRoots?)` | Explicit path / env |
+| `settings.get(key, default?)` | Nested key lookup |
+| `settings.merge(object)` | Overlay values |
+| `configure(object)` | Merge into the singleton |
+| `getSettings()` | `{ host, port, debug, env }` snapshot for `FusionApp` |
+
+Env placeholders in JSON (UPPERCASE strings) resolve from process environment — same rules as Python.
+
+## File shape
+
+```json
+{
+  "env": "dev",
+  "config": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "debug": true,
+    "secret_key": "SECRET_KEY"
+  },
+  "commands": {
+    "run": "npx tsx main.ts"
+  }
+}
+```
+
+`commands` are for [Fusion Tool](../../cli/v1/command), not the HTTP runtime.

@@ -1,6 +1,6 @@
 {
   "title": "TypeScript",
-  "description": "TypeScript / Node.js (coming soon)",
+  "description": "TypeScript / Node.js binding for Fusion Framework",
   "icon": "FileType",
   "root": true,
   "pages": ["v1"]

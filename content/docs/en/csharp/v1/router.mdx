@@ -1,0 +1,54 @@
+---
+title: Router
+description: Register class-based APIs with [Route] in C#
+---
+
+## Overview
+
+Annotate a `FusionBaseApi` subclass with `[Route(...)]`, then call `Route.Register<T>()` or `Route.RegisterAll(assembly)` before `Listen()`.
+
+```csharp
+[Route("api/[module]/{id}", Tags = new[] { "items" }, Desc = "Items by id")]
+public class ItemModule : FusionBaseApi
+{
+    public object Get()
+    {
+        Params.TryGetValue("id", out var id);
+        return Response(new { id }, Status.HTTP_SUCCESS);
+    }
+}
+
+Route.Register<ItemModule>();
+```
+
+HTTP verbs are public instance methods named `Get`, `Post`, `Put`, `Patch`, `Delete`, … (case-insensitive).
+
+## Path templates
+
+Same tokens as Python/Node: static segments, `[module]`, `{name}` → `Params["name"]`.
+
+`Version = "v1"` prefixes the resolved path.
+
+## Options on `[Route]`
+
+| Property | Purpose |
+| --- | --- |
+| `Tags`, `Desc`, `Title`, `Deprecated` | Metadata (Swagger when enabled later) |
+| `Version` | Path prefix |
+| `Roles` | Appends role middleware |
+| `RoleClaim` / `RoleStateKey` | Customize claim lookup |
+
+You can also `Route.Register(type, path, middleware:, roles:)`.
+
+## Request view
+
+| Member | Content |
+| --- | --- |
+| `Method`, `Path`, `Body` | Basics |
+| `Headers`, `Params`, `Query` | Maps |
+| `State` | Middleware bag (`JsonNode`) |
+| `Response(body, status, headers?)` | Envelope helper |
+
+## Errors
+
+Throw `HttpException` or return `{ status, body }` dictionaries.

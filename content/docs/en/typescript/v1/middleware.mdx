@@ -1,0 +1,78 @@
+---
+title: Middleware
+description: Global and route middleware for Node.js — no framework defaults
+---
+
+## Overview
+
+Same model as Python:
+
+```text
+(request, callNext) => response | callNext(request)
+```
+
+**No default middleware.** Register globally in `main.ts` or per-route via `route(..., { middleware, roles })`.
+
+## Two layers
+
+1. **Global** — `app.use(mw)` from a `MIDDLEWARE` array  
+2. **Route** — `middleware: [...]` or `roles: [...]` on `route`
+
+Order: global first, then route, then handler.
+
+## Register in `main.ts`
+
+```ts
+import { FusionApp, getSettings, settings, bearerJwt } from "fusion-framework";
+
+const MIDDLEWARE = [
+  // bearerJwt(), // optional
+];
+
+settings.ensureLoaded();
+const app = new FusionApp(getSettings());
+for (const mw of MIDDLEWARE) app.use(mw);
+await app.listen();
+```
+
+## Write middleware
+
+```ts
+function requireApiKey(request, callNext) {
+  const key = request.headers?.["x-api-key"];
+  if (key !== "secret") {
+    return { status: 401, body: { detail: "invalid api key" } };
+  }
+  return callNext(request);
+}
+```
+
+Share data via `request.state` (created if missing). Handlers read `this.state`.
+
+## Route middleware / roles
+
+```ts
+route("/api/admin", { roles: ["admin", "super_admin"] })(
+  class AdminModule extends FusionBaseApi {
+    get() {
+      return this.response({ user: this.state.jwt?.sub });
+    }
+  },
+);
+```
+
+Helpers:
+
+```ts
+import { bearerJwt, requireRoles } from "fusion-framework";
+
+bearerJwt({ verify, stateKey: "jwt", header: "Authorization" });
+requireRoles("admin");
+requireRoles({ roles: ["admin"], claim: "roles", stateKey: "jwt" });
+```
+
+Default `bearerJwt` base64url-decodes the JWT payload without crypto verification — pass `verify` for production.
+
+## Async
+
+Middleware may be `async` and `await callNext(request)`. Handlers may be `async` too.

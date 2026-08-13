@@ -1,0 +1,70 @@
+---
+title: Router
+description: Register class-based APIs with route / router in Node.js
+---
+
+## Overview
+
+Decorate a `FusionBaseApi` subclass with `route(...)` (or `router`). Registration happens when the module is imported — import it from `main.ts` before `listen()`.
+
+```ts
+import { FusionBaseApi, route, status } from "fusion-framework";
+
+export const ItemModule = route("/api/[module]/{id}", {
+  tags: ["items"],
+  desc: "Items by id",
+})(
+  class ItemModule extends FusionBaseApi {
+    get() {
+      return this.response({ id: this.params.id }, status.HTTP_SUCCESS);
+    }
+  },
+);
+```
+
+Path params are read from `this.params` (strings). Coerce with `coerceParam` if needed — Node does **not** bind handler signatures like Python.
+
+## `route` vs `router`
+
+| Symbol | Role |
+| --- | --- |
+| `route(path, options?)` | Primary — path + Swagger metadata + middleware / roles |
+| `router(path, options?)` | Same function (alias) |
+
+## Path templates
+
+| Token | Meaning |
+| --- | --- |
+| Static text | Exact segment |
+| `[module]` | Class name stem, lowercased, `Module` suffix stripped |
+| `{name}` | Dynamic path param → `this.params.name` |
+
+```ts
+route("api/[module]/{id}")(class ProductModule extends FusionBaseApi { ... });
+// → /api/product/{id}
+```
+
+`version: "v1"` prefixes the resolved path: `/v1/api/product/...`.
+
+## Options
+
+| Option | Purpose |
+| --- | --- |
+| `tags`, `desc`, `title`, `deprecated` | OpenAPI metadata (when enabled) |
+| `version` | Path prefix |
+| `middleware` | Route-only middleware list |
+| `roles` | Appends `requireRoles(...)` |
+| `roleClaim` / `roleStateKey` | Customize roles claim lookup |
+
+## Request view
+
+| Accessor | Content |
+| --- | --- |
+| `this.method` / `this.path` / `this.body` | Request basics |
+| `this.headers` / `this.params` / `this.query` | Maps |
+| `this.state` | Middleware bag |
+| `this.response(body, status?, headers?)` | Envelope helper |
+
+## Errors
+
+Throw or return `HTTPException` / `{ status, body }` envelopes. See [Middleware](./middleware).
