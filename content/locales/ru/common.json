@@ -3,5 +3,6 @@
   "navDocs": "Документация",
   "app": "Desktop",
   "navDevelopers": "Разработчики",
-  "chooseVersion": "Выберите версию"
+  "chooseVersion": "Выберите версию",
+  "version": "Версия"
 }

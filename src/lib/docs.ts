@@ -3,6 +3,13 @@ import type { Folder, Node, Root } from 'fumadocs-core/page-tree';
 import { source } from '@/lib/source';
 import { i18n } from '@/lib/i18n';
 
+export type DocVersion = {
+  /** Folder / URL segment, e.g. `v1`. */
+  id: string;
+  /** Exact package release from version `meta.json` description, e.g. `1.1.3`. */
+  release?: string;
+};
+
 export type DocProduct = {
   id: string;
   title: string;
@@ -30,10 +37,22 @@ function productFolders(tree: Root): Folder[] {
   );
 }
 
+function versionRelease(folder: Folder): string | undefined {
+  return typeof folder.description === 'string' && folder.description.trim()
+    ? folder.description.trim()
+    : undefined;
+}
+
+function versionEntriesOf(product: Folder): DocVersion[] {
+  return product.children.filter(isFolder).map((folder) => {
+    const id = folderSegment(folder);
+    const release = versionRelease(folder);
+    return release ? { id, release } : { id };
+  });
+}
+
 function versionsOf(product: Folder): string[] {
-  return product.children
-    .filter(isFolder)
-    .map((folder) => folderSegment(folder));
+  return versionEntriesOf(product).map((version) => version.id);
 }
 
 /** SDK products for a locale — discovered from `content/docs/{locale}` page tree. */
@@ -122,7 +141,7 @@ export function parseDocsSlug(slug?: string[], locale?: string) {
 export function getVersionsFromTree(
   tree: Root,
   productId?: string,
-): string[] {
+): DocVersion[] {
   if (!productId) {
     return [];
   }
@@ -130,5 +149,5 @@ export function getVersionsFromTree(
   const product = productFolders(tree).find(
     (folder) => folderSegment(folder) === productId,
   );
-  return product ? versionsOf(product) : [];
+  return product ? versionEntriesOf(product) : [];
 }

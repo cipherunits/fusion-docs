@@ -1,4 +1,8 @@
 {
   "title": "v1",
-  "pages": ["index", "getting-started"]
+  "description": "1.2.3",
+  "pages": [
+    "index",
+    "getting-started"
+  ]
 }

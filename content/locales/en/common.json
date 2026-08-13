@@ -3,5 +3,6 @@
   "navDocs": "Docs",
   "app": "Desktop",
   "navDevelopers": "Developers",
-  "chooseVersion": "Choose a version"
+  "chooseVersion": "Choose a version",
+  "version": "Version"
 }

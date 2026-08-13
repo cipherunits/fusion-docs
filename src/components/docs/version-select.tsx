@@ -11,10 +11,11 @@ import {
 } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/i18next/client';
+import type { DocVersion } from '@/lib/docs';
 
 type VersionSelectProps = {
-  /** Version ids for the active product, from content meta order. */
-  versions: string[];
+  /** Version entries for the active product, from content meta order. */
+  versions: DocVersion[];
 };
 
 export function VersionSelect({ versions }: VersionSelectProps) {
@@ -32,12 +33,11 @@ export function VersionSelect({ versions }: VersionSelectProps) {
     return null;
   }
 
-  const currentVersion =
-    version && versions.includes(version)
-      ? version
-      : (versions[0] ?? version ?? '');
+  const current =
+    (version ? versions.find((item) => item.id === version) : undefined) ??
+    versions[0];
 
-  if (!currentVersion) {
+  if (!current) {
     return null;
   }
 
@@ -51,7 +51,7 @@ export function VersionSelect({ versions }: VersionSelectProps) {
         )}
       >
         <Tag className="size-4.5" />
-        <span>{currentVersion}</span>
+        <span>{current.id}</span>
         <ChevronDown className="ms-auto size-3.5" />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-0.5 p-1" align="start">
@@ -60,25 +60,37 @@ export function VersionSelect({ versions }: VersionSelectProps) {
         </p>
         {versions.map((item) => (
           <button
-            key={item}
+            key={item.id}
             type="button"
             className={cn(
-              'rounded-lg px-2 py-1.5 text-start text-sm transition-colors',
-              item === currentVersion
+              'rounded-lg px-2 py-1.5 text-start transition-colors',
+              item.id === current.id
                 ? 'bg-fd-primary/10 text-fd-primary'
                 : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
             )}
             onClick={() => {
               setOpen(false);
-              if (item === currentVersion) {
+              if (item.id === current.id) {
                 return;
               }
               const rest = slug.slice(2);
-              const href = `/${[lang, 'docs', product, item, ...rest].join('/')}`;
+              const href = `/${[lang, 'docs', product, item.id, ...rest].join('/')}`;
               router.push(href);
             }}
           >
-            {item}
+            <span className="block text-sm font-medium">{item.id}</span>
+            {item.release ? (
+              <span
+                className={cn(
+                  'mt-0.5 block text-xs',
+                  item.id === current.id
+                    ? 'text-fd-primary/70'
+                    : 'text-fd-muted-foreground',
+                )}
+              >
+                {t('version')} {item.release}
+              </span>
+            ) : null}
           </button>
         ))}
       </PopoverContent>
