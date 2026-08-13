@@ -1,10 +1,23 @@
 ---
-title: TypeScript SDK
-description: Overview of the Fusion TypeScript SDK
+title: TypeScript
+description: Fusion Framework for TypeScript and Node.js
 ---
 
 ## Overview
 
-The TypeScript documentation covers the Fusion client for Node.js and the browser.
+TypeScript / Node.js bindings for **Fusion Framework** are **coming soon**.
 
-You are viewing **v1**. New versions will appear in the version selector when published.
+The shared Rust core already powers a Node addon experimental path, but the published developer API and docs for production use are not ready yet.
+
+You are viewing **v1**. This section will expand when the TypeScript package ships.
+
+## What to use today
+
+- Build APIs with the [Python package](../../python/v1)
+- Scaffold a TypeScript-shaped project layout with [Fusion Tool](../../cli/v1/getting-started):
+
+```bash
+fusion init --lang typescript --name my-app
+```
+
+That creates the same project structure (`fusion.<env>.json`, `main.ts`, `core/settings.ts`, and so on). Prefer Python for runnable servers until the Node binding is officially released.

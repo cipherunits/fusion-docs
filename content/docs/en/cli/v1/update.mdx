@@ -1,0 +1,22 @@
+---
+title: Update
+description: Upgrade Fusion Tool to the latest release
+---
+
+## Update Fusion Tool
+
+```bash
+fusion update
+```
+
+This checks the latest [GitHub release](https://github.com/cipherunits/fusion-tool/releases), downloads the build for your platform if a newer version exists, and replaces the running `fusion` binary in place.
+
+- Works the same on Linux, macOS, and Windows
+- Keeps the current install location — no reinstall or `PATH` change
+- Does nothing if you are already up to date
+
+If Fusion Tool was installed to a system-wide directory, run the update with write permission for that path:
+
+```bash
+sudo fusion update
+```

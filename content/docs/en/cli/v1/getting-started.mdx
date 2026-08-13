@@ -1,18 +1,132 @@
 ---
 title: Getting Started
-description: Install and use the Fusion CLI
+description: Install Fusion Tool and create a project
 ---
 
 ## Installation
 
-```bash
-npm install -g @cipherunits/fusion-cli
+Choose your operating system:
+
+```bash tab="Linux"
+curl -fsSL https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.sh | bash
 ```
 
-## Quick start
+```powershell tab="Windows"
+irm https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.ps1 | iex
+```
+
+```bash tab="macOS"
+curl -fsSL https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.sh | bash
+```
+
+On Windows, the installer places `fusion.exe` under `%LOCALAPPDATA%\Programs\fusion` and updates your user `PATH`. Open a **new** terminal afterward, then verify:
+
+```bash
+fusion --help
+```
+
+You can also install from source with Rust:
+
+```bash
+git clone https://github.com/cipherunits/fusion-tool.git
+cd fusion-tool && cargo install --path .
+```
+
+## Check the version
+
+```bash
+fusion --version
+```
+
+Example output:
+
+```text
+fusion 1.0.9
+```
+
+## Create a project
+
+### Interactive
+
+```bash
+fusion init
+```
+
+Or create into a directory:
 
 ```bash
 fusion init my-app
-cd my-app
-fusion start
 ```
+
+You will be prompted for:
+
+1. Language — Python (TypeScript and ASP.NET Core are listed as coming soon)
+2. Project name
+3. Project description
+
+### Non-interactive
+
+```bash
+fusion init --lang python --name fusion-test --description "A Fusion Framework project"
+```
+
+| Argument | Description |
+| --- | --- |
+| `[DIRECTORY]` | Target folder (created if missing; defaults to the current directory) |
+| `--lang` | `python`, `typescript`, or `asp-core` |
+| `--name` | Project name |
+| `--description` | Project description |
+
+Options you omit are still asked interactively.
+
+Examples:
+
+```bash
+fusion init --lang python --name my-app
+fusion init ./apps/demo --lang python --name demo
+```
+
+## Generated layout
+
+For a Python project, `fusion init` creates a small starter app — including a sample **products** module:
+
+```text
+├── core/
+│   └── settings.py
+├── src/
+│   └── modules/
+│       └── products/
+│           └── products.py
+├── main.py
+├── fusion-framework.toml
+├── fusion.dev.json
+├── fusion.prod.json
+├── fusion.stage.json
+└── .gitignore
+```
+
+- **`main.py`** — entrypoint: imports your modules (so `@route` classes register), then calls `run("settings")`
+- **`src/modules/products/products.py`** — sample API module where you can also set per-route Swagger metadata (`tags`, `desc`, `version`, …)
+- **`core/settings.py`** — loads the `config` block from `fusion.<env>.json` (`FUSION_ENV`, default `dev`)
+
+TypeScript and ASP.NET Core projects get the same layout with language-appropriate file extensions (`main.ts` / `core/settings.ts`, and so on).
+
+## Run the project
+
+Install the framework, then start the default `run` command in the `dev` environment:
+
+```bash
+pip install fusion-framework
+fusion command run:dev
+```
+
+With the default `fusion.dev.json` (`host` `127.0.0.1`, `port` `8080`, Swagger enabled):
+
+| What | URL |
+| --- | --- |
+| API | [http://127.0.0.1:8080](http://127.0.0.1:8080) |
+| Swagger UI | [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger) |
+
+Swagger / OpenAPI is **generated automatically** from your `@route` modules. Open the Swagger UI to try endpoints without writing a separate client.
+
+Next: [Commands & environments](./command) for custom envs, commands, and global Swagger config.

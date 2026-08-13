@@ -1,18 +1,22 @@
 ---
 title: Getting Started
-description: Install and initialize the C# SDK
+description: ASP.NET Core support status and how to prepare
 ---
 
-## Installation
+## Status
+
+**ASP.NET Core support is coming soon.** There is no NuGet package or recommended quickstart yet.
+
+## Prepare a project scaffold
+
+Fusion Tool can create an ASP.NET Core project shell:
 
 ```bash
-dotnet add package CipherUnits.Fusion
+fusion init --lang asp-core --name my-app --description "My Fusion app"
 ```
 
-## Quick start
+This sets up environment files and language-appropriate entrypoints. Runtime APIs will be documented here when the binding is released.
 
-```csharp
-using CipherUnits.Fusion;
+## Until then
 
-var client = new FusionClient(apiKey: "...");
-```
+Follow the [Python Getting Started](../../python/v1/getting-started) guide for a working Fusion API, and use [Fusion Tool](../../cli/v1) to manage environments and commands.

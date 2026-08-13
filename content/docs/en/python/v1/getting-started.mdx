@@ -1,18 +1,208 @@
 ---
 title: Getting Started
-description: Install and initialize the Python SDK
+description: Install Fusion Framework for Python and write your first API
 ---
 
 ## Installation
 
 ```bash
-pip install cipherunits-fusion
+pip install fusion-framework
 ```
 
-## Quick start
+Scaffold a project with [Fusion Tool](../../cli/v1/getting-started) so you get the standard layout (`main.py`, `core/settings.py`, sample `products` module, and environment files):
+
+```bash
+fusion init --lang python --name my-app --description "My Fusion API"
+cd my-app
+pip install fusion-framework
+```
+
+## Project layout (what `fusion init` creates)
+
+```text
+├── main.py                          # entrypoint — always starts the app here
+├── core/
+│   └── settings.py
+└── src/
+    └── modules/
+        └── products/
+            └── products.py          # sample module — edit / copy this pattern
+```
+
+### `main.py`
+
+The entrypoint imports your modules (so `@route` classes register), then starts the server. Keep `run("settings")` here — do not put it inside module files:
 
 ```python
-from fusion import Fusion
+"""Entry point: import API classes, then start from settings."""
 
-client = Fusion(api_key="...")
+import src.modules.products.products  # registers @route classes
+from fusion_framework.app import run
+
+if __name__ == "__main__":
+    run("settings")
 ```
+
+When you add another module, import it in `main.py` the same way.
+
+### Sample `products` module
+
+`fusion init` ships a small **products** API. You write handlers on a `FusionBaseApi` subclass and pass Swagger metadata on `@route`:
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route(
+    "api/[module]/",
+    tags=["swagger"],
+    desc="Fusion Framework Api",
+    version="v1",
+    deprecated=False,
+)
+class ProductModule(FusionBaseApi):
+    """Product management module."""
+
+    def get(self):
+        return self.response({"products_id": 12}, status=status.HTTP_SUCCESS)
+
+    def post(self):
+        return self.response({"products_id": 12}, status=status.HTTP_201_CREATED)
+
+    def delete(self):
+        return self.response({"products_id": 12}, status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self):
+        return self.response({"products_id": 12}, status=status.HTTP_SUCCESS)
+```
+
+`[module]` resolves from the class name (`ProductModule` → `product`), so this route becomes `/api/product/`.
+
+Per-route Swagger options on `@route`:
+
+| Argument | Purpose |
+| --- | --- |
+| `tags` | OpenAPI tags (grouping in Swagger UI) |
+| `desc` | Operation / API description |
+| `title` | Optional title |
+| `version` | API version metadata |
+| `deprecated` | Mark the route deprecated in OpenAPI |
+
+Global Swagger UI settings (path, auth schemes, UI options) live in `fusion.<env>.json` — see [Commands & environments](../../cli/v1/command).
+
+## Run it
+
+```bash
+fusion command run:dev
+```
+
+Then open:
+
+- **API:** [http://127.0.0.1:8080](http://127.0.0.1:8080)
+- **Swagger UI:** [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger)
+
+Swagger is generated automatically from your `@route` modules. Use the UI to explore and call the sample products endpoints.
+
+## Status codes
+
+Use the `status` module instead of raw integers:
+
+```python
+from fusion_framework import status
+
+status.HTTP_SUCCESS        # 200
+status.HTTP_201_CREATED    # 201
+status.HTTP_204_NO_CONTENT # 204
+status.HTTP_404_NOT_FOUND  # 404
+```
+
+```python
+return self.response({"ok": True}, status=status.HTTP_SUCCESS)
+```
+
+## Handlers
+
+Implement HTTP methods as usual: `get`, `post`, `put`, `patch`, `delete`.
+
+### Parameter binding
+
+Arguments are taken from the method signature. The source depends on the parameter name:
+
+1. If the name matches a **path** parameter → path
+2. Else if the method is `POST` / `PUT` / `PATCH` and the name appears in the JSON **body** → body
+3. Else if the name appears in the **query** string → query
+4. Missing optional parameters (default or annotation) arrive as `None`
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.http import HTTPException
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/{id}", tags=["items"], desc="Items by id")
+class Items(FusionBaseApi):
+    def get(self, id: int):
+        return self.response({"id": id}, status=status.HTTP_SUCCESS)
+
+    def post(self, id: int, title: str = "untitled"):
+        # id ← path, title ← JSON body (optional via default)
+        return self.response(
+            {"id": id, "title": title},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+@route("api/[module]/", tags=["products"], desc="Products list")
+class Products(FusionBaseApi):
+    def get(self, id: int):
+        # GET /api/products/?id=12
+        if not id:
+            raise HTTPException(400, {"message": "id is required"})
+        return self.response({"products_id": id}, status=status.HTTP_SUCCESS)
+```
+
+Remember: put new modules under `src/modules/...` and **import them from `main.py`**. Leave `if __name__ == "__main__": run("settings")` only in `main.py`.
+
+### Responses
+
+Use `self.response(body, status=status.HTTP_SUCCESS, **headers)` for the response envelope. Dicts and lists are serialized as JSON by the core.
+
+### Errors
+
+```python
+from fusion_framework.http import HTTPException
+
+raise HTTPException(404, {"detail": "not found"})
+```
+
+### Async handlers
+
+```python
+@route("/")
+class Root(FusionBaseApi):
+    def get(self):
+        return self.response({"status": "ok"}, status=status.HTTP_SUCCESS)
+
+    async def post(self):
+        return self.response({"status": "async ok"}, status=status.HTTP_SUCCESS)
+```
+
+## Configuration
+
+Runtime settings come from `fusion.<env>.json` (`FUSION_ENV`, default `dev`). See [Commands & environments](../../cli/v1/command) for the full file shape and Swagger UI config.
+
+## Core APIs
+
+| Symbol | Role |
+| --- | --- |
+| `FusionBaseApi` | Request view (`method`, `path`, `body`, `headers`, `params`, `query`) and `response(...)` |
+| `route(...)` | Register a module; optional Swagger metadata (`tags`, `desc`, `title`, `version`, `deprecated`) |
+| `router(path)` | Alias of `route(path)` without Swagger metadata |
+| `status` | HTTP status constants (`HTTP_SUCCESS` → 200, …) |
+| `run("settings")` | Load settings and listen — call from `main.py` only |
+| `HTTPException` | Raise an HTTP error response |
+
+Under the hood, PyO3 bridges to `fusion-core` for routing, binding, and serialization.

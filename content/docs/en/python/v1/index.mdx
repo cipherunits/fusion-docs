@@ -1,10 +1,29 @@
 ---
-title: Python SDK
-description: Overview of the Fusion Python SDK
+title: Python
+description: Build HTTP APIs with Fusion Framework for Python
 ---
 
 ## Overview
 
-The Python documentation covers the Fusion client for Python applications.
+The Python package is the primary language binding for **Fusion Framework**.
+
+You define class-based HTTP modules with `@route` and `FusionBaseApi`. Routing, parameter binding, parsing, and response serialization run in the shared Rust core (`fusion-core`). Python stays a thin developer-experience layer.
+
+Install with:
+
+```bash
+pip install fusion-framework
+```
 
 You are viewing **v1**. New versions will appear in the version selector when published.
+
+## What you get
+
+- Class-based APIs: `get` / `post` / `put` / `patch` / `delete`
+- Typed handler parameters bound from path, JSON body, or query
+- Auto-generated Swagger / OpenAPI UI (`fusion.<env>.json` + per-route `@route` metadata)
+- `status` helpers such as `status.HTTP_SUCCESS` (200)
+- Sync and async handlers
+- `HTTPException` for structured error responses
+
+Scaffold with `fusion init` to get `main.py`, settings, and a sample **products** module — then [Getting Started](./getting-started).

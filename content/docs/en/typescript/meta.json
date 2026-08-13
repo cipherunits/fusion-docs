@@ -1,6 +1,6 @@
 {
   "title": "TypeScript",
-  "description": "TypeScript SDK",
+  "description": "TypeScript / Node.js (coming soon)",
   "icon": "FileType",
   "root": true,
   "pages": ["v1"]

@@ -1,6 +1,6 @@
 {
   "title": "C#",
-  "description": "C# SDK",
+  "description": "ASP.NET Core (coming soon)",
   "icon": "Braces",
   "root": true,
   "pages": ["v1"]

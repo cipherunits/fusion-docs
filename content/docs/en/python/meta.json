@@ -1,6 +1,6 @@
 {
   "title": "Python",
-  "description": "Python SDK",
+  "description": "Python binding for Fusion Framework",
   "icon": "CodeXml",
   "root": true,
   "pages": ["v1"]

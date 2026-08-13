@@ -1,10 +1,37 @@
 ---
-title: CLI
+title: Fusion Tool
 description: Overview of the Fusion command-line interface
 ---
 
-## Overview
+# What is Fusion Tool?
 
-The CLI documentation covers the Fusion command-line tool for scaffolding, managing, and running backends from the terminal.
+**Fusion Tool** is the official CLI for **Fusion Framework**.
 
-You are viewing **v1**. New versions will appear in the version selector when published.
+Use it to scaffold projects, manage environment configs, and run the commands you declare in each environment — from one binary on Linux, macOS, and Windows.
+
+With Fusion Tool you can:
+
+- Create new Fusion Framework projects (`fusion init`)
+- Run project commands per environment (`fusion command`)
+- Upgrade the CLI in place (`fusion update`)
+
+## Commands at a glance
+
+| Command | Purpose |
+| --- | --- |
+| `fusion init` | Scaffold a new project |
+| `fusion command <name>` | Run a command from `fusion.<env>.json` |
+| `fusion update` | Upgrade to the latest release |
+| `fusion --version` | Print the installed CLI version |
+
+See [Getting Started](./getting-started) for install and project setup, and [Commands](./command) for environments and `fusion command`.
+
+## Fusion Desktop
+
+Fusion Tool is also available as a graphical app through [**Fusion Desktop**](https://fusion.cipherunit.xyz/en/gui).
+
+![Fusion Desktop](./fusion_desktop.jpeg)
+
+Fusion Desktop is available for **Windows and Linux**, with installers and builds for common architectures.
+
+[Download Fusion Desktop](https://fusion.cipherunit.xyz/en/gui)

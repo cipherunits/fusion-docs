@@ -1,20 +1,35 @@
 ---
 title: Introduction
-description: Overview of Fusion documentation and available SDKs
+description: Overview of Fusion Framework
 ---
 
-## Welcome
+## What is Fusion?
 
-Fusion is a backend framework with a unified developer experience across multiple languages.
+**Fusion Framework** is a cross-platform backend framework built on a shared Rust core and **FMA (Fusion Module Architecture)**.
 
-This documentation covers concepts, setup, and SDKs. Pick an SDK from the sidebar when you are ready to integrate.
+You write class-based HTTP APIs in your preferred language. Routing, request parsing, parameter binding, and response serialization run in the Rust engine — language bindings stay thin and focused on developer experience.
 
-## SDKs
+## Language support
 
-Use the language that fits your stack. Each SDK section has its own versions and getting-started guides.
+| Language | Status |
+| --- | --- |
+| **Python** | Available — `pip install fusion-framework` |
+| **TypeScript / Node.js** | Coming soon |
+| **ASP.NET Core (C#)** | Coming soon |
 
-## Next steps
+Start with the [Python guide](./python/v1) for a working API today.
 
-1. Choose an SDK in the sidebar.
-2. Open **Getting Started** for install and a minimal example.
-3. Explore the rest of that SDK’s docs for APIs and patterns.
+## Tooling
+
+- **[Fusion Tool](./cli/v1)** — the official CLI for scaffolding projects, managing environments, and running project commands
+- **[Fusion Desktop](https://fusion.cipherunit.xyz/en/gui)** — a graphical interface for managing Fusion backends on Windows and Linux
+
+Fusion is open source under the [BSD License](https://github.com/cipherunits/fusion-framework/blob/main/LICENSE/).
+
+## Versioning
+
+Fusion is a young framework, so we use a deliberate versioning strategy while the core stabilizes.
+
+The goal is continuous improvement toward a reliable foundation for production backends.
+
+![Fusion Framework versioning chart](./fusion-framework-versioning-chart.png)

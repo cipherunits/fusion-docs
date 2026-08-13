@@ -1,20 +1,22 @@
 ---
 title: Getting Started
-description: Install and initialize the TypeScript SDK
+description: TypeScript support status and how to prepare
 ---
 
-## Installation
+## Status
+
+**TypeScript / Node.js support is coming soon.** There is no stable published package or recommended quickstart yet.
+
+## Prepare a project scaffold
+
+You can still create a TypeScript project shell with Fusion Tool:
 
 ```bash
-pnpm add @cipherunits/fusion
+fusion init --lang typescript --name my-app --description "My Fusion app"
 ```
 
-## Quick start
+This generates environment files and a `main.ts` / `core/settings.ts` layout. Runtime APIs for Node will be documented here when the binding is released.
 
-```ts
-import { Fusion } from '@cipherunits/fusion';
+## Until then
 
-const client = new Fusion({
-  apiKey: process.env.FUSION_API_KEY,
-});
-```
+Follow the [Python Getting Started](../../python/v1/getting-started) guide for a working Fusion API, and use [Fusion Tool](../../cli/v1) to manage environments and commands.
