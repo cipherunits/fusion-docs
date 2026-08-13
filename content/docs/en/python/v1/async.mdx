@@ -1,0 +1,156 @@
+---
+title: Async
+description: Async handlers and async middleware in Fusion Python
+---
+
+## Overview
+
+Fusion supports **async** HTTP handlers and **async** middleware. Sync and async can coexist in the same app. When any middleware or the handler is async, that request runs on the shared asyncio runtime bridged from Rust.
+
+## Async handlers
+
+Define the method with `async def`:
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/")
+class JobModule(FusionBaseApi):
+    def get(self):
+        return self.response({"mode": "sync"}, status=status.HTTP_SUCCESS)
+
+    async def post(self):
+        # await DB / HTTP / asyncio APIs here
+        result = await do_work()
+        return self.response(result, status=status.HTTP_201_CREATED)
+```
+
+Rules:
+
+- Same parameter binding as sync (`path` / `body` / `query`)
+- Same `self.response(...)` / `HTTPException`
+- Do not block the event loop with heavy sync I/O inside `async def` — use async libraries or `asyncio.to_thread`
+
+## Async middleware
+
+```python
+async def auth_middleware(request, call_next):
+    token = (request.get("headers") or {}).get("authorization")
+    if not token:
+        return {"status": 401, "body": {"detail": "missing token"}}
+
+    user = await load_user(token)  # your async call
+    if not user:
+        return {"status": 401, "body": {"detail": "invalid"}}
+
+    request.setdefault("state", {})
+    request["state"]["user"] = user
+    return await call_next(request)
+```
+
+Register like any other middleware:
+
+```python
+MIDDLEWARE = [auth_middleware]
+```
+
+**Important:** in async middleware, always:
+
+```python
+return await call_next(request)
+```
+
+`call_next` returns an awaitable when the chain is async.
+
+## Mixing sync and async
+
+```python
+def logging_mw(request, call_next):
+    print(request["path"])
+    return call_next(request)
+
+async def timing_mw(request, call_next):
+    import time
+    t0 = time.perf_counter()
+    response = await call_next(request)
+    ms = (time.perf_counter() - t0) * 1000
+    print(f"{request['path']} {ms:.1f}ms")
+    return response
+
+MIDDLEWARE = [logging_mw, timing_mw]
+```
+
+If **any** middleware in the chain (or the handler) is a coroutine function, Fusion runs the whole chain with `await`.
+
+## Full example
+
+```python
+# main.py
+import src.modules.jobs.jobs
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+
+async def attach_request_id(request, call_next):
+    import uuid
+    request.setdefault("state", {})
+    request["state"]["request_id"] = str(uuid.uuid4())
+    return await call_next(request)
+
+
+MIDDLEWARE = [attach_request_id]
+
+
+def main() -> None:
+    load_settings_module("settings")
+    app = FusionApp(get_settings())
+    for mw in MIDDLEWARE:
+        app.use(mw)
+    app.listen()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+```python
+# src/modules/jobs/jobs.py
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/")
+class JobModule(FusionBaseApi):
+    async def get(self):
+        rid = self.state.get("request_id")
+        data = await fetch_jobs()
+        return self.response(
+            {"request_id": rid, "jobs": data},
+            status=status.HTTP_SUCCESS,
+        )
+```
+
+## Under the hood
+
+1. Rust receives the HTTP request and dispatches to the Python handler bridge  
+2. Middleware chain runs (sync path or async path)  
+3. Async work is submitted to Fusion’s shared asyncio loop so concurrent requests do not block each other  
+
+You do not start an event loop in `main.py` yourself — `app.listen()` owns the server lifecycle.
+
+## Checklist
+
+| Goal | Pattern |
+| --- | --- |
+| Async API method | `async def get/post/...` |
+| Async middleware | `async def mw(request, call_next): return await call_next(request)` |
+| Register global MW | `MIDDLEWARE` + `app.use` in `main.py` |
+| Read MW data in handler | `self.state["…"]` |
+| Errors | `raise HTTPException(...)` (works in async handlers too) |
+
+See also [Middleware](./middleware) and [Router](./router).

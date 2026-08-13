@@ -1,0 +1,147 @@
+---
+title: Router
+description: Register class-based APIs with @route, path tokens, parameters, and Swagger metadata
+---
+
+## Overview
+
+Routing in Fusion Python is declarative. You decorate a `FusionBaseApi` subclass with `@route(...)`. At import time the class is registered; when the app mounts, each HTTP method you define (`get`, `post`, …) becomes a real route in the Rust core.
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/{id}", tags=["items"], desc="Items by id")
+class ItemModule(FusionBaseApi):
+    def get(self, id: int):
+        return self.response({"id": id}, status=status.HTTP_SUCCESS)
+```
+
+Import the module from `main.py` so registration runs before `listen()`.
+
+## `@route` vs `router`
+
+| Symbol | Role |
+| --- | --- |
+| `route(path, **options)` | Primary decorator — path + Swagger + middleware / roles |
+| `router(path)` | Alias of `route(path)` with no extra metadata |
+
+Prefer `@route` for new code.
+
+## Path templates
+
+Path segments are resolved when the class is registered.
+
+| Token | Meaning | Example |
+| --- | --- | --- |
+| Static text | Exact segment | `api` → `/api/...` |
+| `[module]` | Stem of the class name, lowercased, with `Module` / `MODULE` stripped | `ProductModule` → `product` |
+| `{name}` | Dynamic path parameter bound to a handler argument | `{id}` → `id: int` |
+
+```python
+@route("api/[module]/{id}")
+class ProductModule(FusionBaseApi):
+    def get(self, id: int):
+        ...
+# Resolves to: /api/product/{id}
+```
+
+### Version prefix
+
+Pass `version=` to prefix the resolved path:
+
+```python
+@route("api/[module]/", version="v1")
+class ProductModule(FusionBaseApi):
+    ...
+# → /v1/api/product/
+```
+
+## Swagger / OpenAPI options
+
+These only affect documentation (Swagger UI / `openapi.json`), not runtime routing:
+
+| Argument | Type | Purpose |
+| --- | --- | --- |
+| `tags` | `list[str]` | Group operations in Swagger |
+| `desc` | `str` | Description |
+| `title` | `str` | Summary / title |
+| `version` | `str` | Path prefix (also used as API versioning) |
+| `deprecated` | `bool` | Mark operations deprecated |
+
+Global Swagger UI settings (`path`, auth, UI) live in `fusion.<env>.json` — see [Commands & environments](../../cli/v1/command).
+
+## Route middleware and roles
+
+| Argument | Purpose |
+| --- | --- |
+| `middleware` | List of `(request, call_next)` callables for this route only |
+| `roles` | Shorthand — appends a role guard (expects JWT payload in `request["state"]["jwt"]`) |
+
+```python
+@route("api/admin", roles=["admin", "super_admin"])
+class AdminModule(FusionBaseApi):
+    def get(self):
+        user = self.state.get("jwt", {})
+        return self.response({"sub": user.get("sub")})
+```
+
+See [Middleware](./middleware) for the full model (global vs route-level).
+
+## Parameter binding
+
+Handler arguments are filled from the request automatically:
+
+1. Name matches a **path** parameter → path  
+2. Else if method is `POST` / `PUT` / `PATCH` and the name is in the JSON **body** → body  
+3. Else if the name is in the **query** string → query  
+4. Missing optional / defaulted args arrive as `None`
+
+```python
+@route("api/[module]/{id}")
+class ItemModule(FusionBaseApi):
+    def get(self, id: int):
+        # GET /api/item/12
+        return self.response({"id": id})
+
+    def post(self, id: int, title: str = "untitled"):
+        # id ← path, title ← JSON body
+        return self.response({"id": id, "title": title}, status=status.HTTP_201_CREATED)
+```
+
+Types (`int`, `str`, `float`, `bool`, `Optional[...]`) drive coercion. Invalid values become `400`.
+
+## Request view on the class
+
+Inside a handler you always have `self`:
+
+| Property | Source |
+| --- | --- |
+| `self.method` | HTTP method |
+| `self.path` | Request path |
+| `self.body` | Raw body string |
+| `self.headers` | Header map |
+| `self.params` | Path params |
+| `self.query` | Query string |
+| `self.state` | Per-request data from middleware |
+
+```python
+def get(self):
+    return self.response({
+        "path": self.path,
+        "q": self.query.get("q"),
+    })
+```
+
+## Responses and errors
+
+```python
+return self.response({"ok": True}, status=status.HTTP_SUCCESS)
+
+from fusion_framework.http import HTTPException
+raise HTTPException(404, {"detail": "not found"})
+```
+
+Dicts / lists are JSON-encoded by the core. See [Async](./async) for `async def` handlers.

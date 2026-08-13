@@ -1,10 +1,28 @@
 ---
-title: SDK پایتون
-description: نمای کلی Fusion Python SDK
+title: Python
+description: ساخت APIهای HTTP با Fusion Framework برای پایتون
 ---
 
 ## نمای کلی
 
-مستندات Python کلاینت Fusion را برای برنامه‌های پایتون پوشش می‌دهد.
+بستهٔ پایتون binding اصلی **Fusion Framework** است.
 
-شما در حال مشاهده **v1** هستید. نسخه‌های جدید وقتی منتشر شوند در انتخابگر نسخه ظاهر می‌شوند.
+ماژول‌های HTTP کلاس‌محور را با `@route` و `FusionBaseApi` تعریف می‌کنید. مسیریابی، بایندینگ پارامتر، پارس و سریالایز پاسخ در هستهٔ مشترک Rust (`fusion-core`) اجرا می‌شود.
+
+```bash
+pip install fusion-framework
+```
+
+شما در حال مشاهده **v1** هستید.
+
+## راهنماهای این نسخه
+
+| صفحه | موضوع |
+| --- | --- |
+| [شروع سریع](./getting-started) | نصب، scaffold، اولین API |
+| [Router](./router) | `@route`، توکن مسیر، بایندینگ، Swagger |
+| [Config](./config) | `fusion.<env>.json`، `load_settings_module`، `get_settings` |
+| [Middleware](./middleware) | middleware سراسری / روی route |
+| [Async](./async) | handler و middleware ناهمگام |
+
+با `fusion init` پروژه بسازید، سپس از [شروع سریع](./getting-started) ادامه دهید.
