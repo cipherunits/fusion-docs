@@ -1,20 +1,72 @@
 ---
 title: شروع کار
-description: نصب و راه‌اندازی TypeScript SDK
+description: شروع سریع TypeScript / Node.js برای Fusion Framework
 ---
 
 ## نصب
 
+از مونوریپو فریم‌ورک (توسعه):
+
 ```bash
-pnpm add @cipherunits/fusion
+cd crates/fusion-node
+npm install
+npm run build:debug
 ```
 
-## شروع سریع
+پکیج منتشرشده:
+
+```bash
+npm i fusion-framework
+```
+
+## Scaffold با Fusion Tool
+
+```bash
+fusion init --lang typescript --name my-app
+```
+
+`main.ts`، `core/settings.ts`، ماژول نمونه، `fusion.<env>.json` و (در نسخه‌های جدید tool) `package.json` / `tsconfig.json` ساخته می‌شود.
+
+## اولین API
 
 ```ts
-import { Fusion } from '@cipherunits/fusion';
+import "./src/modules/products/products";
 
-const client = new Fusion({
-  apiKey: process.env.FUSION_API_KEY,
-});
+import { FusionApp, getSettings, settings } from "fusion-framework";
+
+// Global middleware (optional). Framework ships with none by default.
+const MIDDLEWARE: Array<(req: any, next: any) => any> = [];
+
+async function main() {
+  settings.ensureLoaded([process.cwd()]);
+  const app = new FusionApp(getSettings());
+  for (const mw of MIDDLEWARE) app.use(mw);
+  await app.listen();
+}
+
+main();
 ```
+
+نمونهٔ ماژول:
+
+```ts
+import { FusionBaseApi, route, status } from "fusion-framework";
+
+export const ProductModule = route("api/[module]", {
+  tags: ["swagger"],
+  desc: "Products",
+})(
+  class ProductModule extends FusionBaseApi {
+    get() {
+      return this.response({ products_id: 12 }, status.HTTP_SUCCESS);
+    }
+  },
+);
+```
+
+## بعدی
+
+- [Router](./router) — مسیرها، `this.params`، پاسخ‌ها  
+- [Config](./config) — `fusion.<env>.json`  
+- [Middleware](./middleware) — `bearerJwt`، `roles`  
+- مفاهیم: [شروع کار پایتون](../../python/v1/getting-started)

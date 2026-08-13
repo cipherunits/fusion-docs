@@ -1,0 +1,68 @@
+---
+title: Async
+description: Handler و middleware ناهمگام در Fusion Python
+---
+
+## نمای کلی
+
+Fusion از handler و middleware **async** پشتیبانی می‌کند. sync و async در یک اپ قابل ترکیب‌اند. اگر هر middleware یا خود handler ناهمگام باشد، آن درخواست روی runtime مشترک asyncio اجرا می‌شود.
+
+## Handler ناهمگام
+
+```python
+@route("api/[module]/")
+class JobModule(FusionBaseApi):
+    def get(self):
+        return self.response({"mode": "sync"})
+
+    async def post(self):
+        result = await do_work()
+        return self.response(result, status=status.HTTP_201_CREATED)
+```
+
+- همان بایندینگ پارامتر sync  
+- همان `self.response` / `HTTPException`  
+- داخل `async def` I/O سنگین sync نکنید  
+
+## Middleware ناهمگام
+
+```python
+async def auth_middleware(request, call_next):
+    token = (request.get("headers") or {}).get("authorization")
+    if not token:
+        return {"status": 401, "body": {"detail": "missing token"}}
+
+    user = await load_user(token)
+    request.setdefault("state", {})
+    request["state"]["user"] = user
+    return await call_next(request)
+```
+
+```python
+MIDDLEWARE = [auth_middleware]
+```
+
+حتماً: `return await call_next(request)`.
+
+## ترکیب sync و async
+
+```python
+MIDDLEWARE = [logging_mw, timing_mw]  # یکی sync، یکی async
+```
+
+اگر **هر** عضو زنجیره coroutine باشد، کل زنجیره با `await` اجرا می‌شود.
+
+## مثال کامل
+
+در `main.py` middleware async ثبت کنید؛ در ماژول `async def get` بنویسید و از `self.state` بخوانید.
+
+جزئیات middleware: [Middleware](./middleware) · مسیریابی: [Router](./router).
+
+## چک‌لیست
+
+| هدف | الگو |
+| --- | --- |
+| متد API ناهمگام | `async def get/post/...` |
+| middleware ناهمگام | `async def mw(...): return await call_next(request)` |
+| ثبت سراسری | `MIDDLEWARE` + `app.use` در `main.py` |
+| خواندن داده | `self.state["…"]` |

@@ -1,18 +1,55 @@
 ---
-title: Начало работы
-description: Установка и инициализация C# SDK
+title: Getting Started
+description: C# quickstart for Fusion Framework
 ---
 
-## Установка
+## Prerequisites
 
 ```bash
-dotnet add package CipherUnits.Fusion
+# from fusion-framework repo
+cargo build -p fusion-ffi
+dotnet build bindings/csharp/FusionFramework
 ```
 
-## Быстрый старт
+Optional: `export FUSION_FFI_PATH=$PWD/target/debug/libfusion_ffi.so` (`.dll` / `.dylib` on Windows/macOS).
+
+## Scaffold
+
+```bash
+fusion init --lang csharp --name my-app
+# aliases: asp-core, aspnetcore
+```
+
+## First API
 
 ```csharp
-using CipherUnits.Fusion;
+using FusionFramework;
 
-var client = new FusionClient(apiKey: "...");
+[Route("api/[module]")]
+public class ProductModule : FusionBaseApi
+{
+    public object Get() =>
+        Response(new { products_id = 12 }, Status.HTTP_SUCCESS);
+}
+
+public static class Program
+{
+    static readonly List<FusionMiddleware> Middleware = new();
+
+    public static void Main()
+    {
+        Route.RegisterAll(typeof(Program).Assembly);
+        SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
+        using var app = new FusionApp(SettingsStore.GetSettings());
+        foreach (var mw in Middleware) app.Use(mw);
+        app.Listen();
+    }
+}
 ```
+
+Sample in the monorepo: `examples/csharp_hello`.
+
+## Next
+
+- [Router](./router) · [Config](./config) · [Middleware](./middleware)  
+- Concepts: [Python Getting Started](../../python/v1/getting-started)

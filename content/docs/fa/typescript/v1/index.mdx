@@ -1,10 +1,25 @@
 ---
-title: SDK تایپ‌اسکریپت
-description: نمای کلی Fusion TypeScript SDK
+title: TypeScript / Node.js
+description: Fusion Framework برای TypeScript و Node.js
 ---
 
 ## نمای کلی
 
-مستندات TypeScript کلاینت Fusion را برای Node.js و مرورگر پوشش می‌دهد.
+باندینگ Node.js همان هستهٔ Rust پایتون را دارد. DX شبیه پایتون است: `FusionApp`، `route` / `router`، middleware، `status` و `settings`.
 
-شما در حال مشاهده **v1** هستید. نسخه‌های جدید وقتی منتشر شوند در انتخابگر نسخه ظاهر می‌شوند.
+هندلرها از `this.params` / `this.query` / `this.body` / `this.state` استفاده می‌کنند — **بدون** تزریق پارامتر به امضای تابع مثل پایتون.
+
+پکیج: `fusion-framework` (npm) از `crates/fusion-node`.
+
+## راهنماهای این بخش
+
+| صفحه | موضوع |
+| --- | --- |
+| [شروع کار](./getting-started) | نصب، scaffold، اولین سرور |
+| [Router](./router) | `route` / `router`، توکن مسیر، پاسخ‌ها |
+| [Config](./config) | `fusion.<env>.json` و `settings` |
+| [Middleware](./middleware) | middleware سراسری + روی route |
+
+## مفاهیم مشترک
+
+مسیریابی، فایل‌های JSON محیط، و middleware با [راهنماهای پایتون](../../python/v1) هم‌خوان است. OpenAPI/Swagger برای Node در این نسخه سبک‌تر از پایتون است.

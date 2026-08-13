@@ -1,10 +1,25 @@
 ---
-title: C# SDK
-description: Обзор Fusion C# SDK
+title: C#
+description: Fusion Framework for C# via fusion-ffi
 ---
 
-## Обзор
+## Overview
 
-Документация C# описывает клиент Fusion для приложений .NET.
+C# bindings call the Rust core through **`fusion-ffi`** (C ABI). DX mirrors Python/Node: `FusionApp`, `[Route]`, middleware, `Status`, and settings.
 
-Вы просматриваете **v1**. Новые версии появятся в селекторе версий после публикации.
+v1 focuses on a **runnable HTTP API**. Full OpenAPI/Swagger parity with Python is not included yet.
+
+Managed package: `bindings/csharp/FusionFramework` (NuGet when published).
+
+## Guides in this section
+
+| Page | Topic |
+| --- | --- |
+| [Getting started](./getting-started) | Build FFI, package, first server |
+| [Router](./router) | `[Route]`, path tokens, responses |
+| [Config](./config) | `fusion.<env>.json` via FFI |
+| [Middleware](./middleware) | Global + route middleware |
+
+## Shared concepts
+
+Same JSON env files and middleware mental model as [Python](../../python/v1).

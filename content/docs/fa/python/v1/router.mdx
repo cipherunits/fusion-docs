@@ -1,0 +1,133 @@
+---
+title: Router
+description: ثبت APIهای کلاس‌محور با @route، توکن‌های مسیر، پارامترها و متادیتای Swagger
+---
+
+## نمای کلی
+
+مسیریابی در Fusion Python اعلانی است. یک زیرکلاس `FusionBaseApi` را با `@route(...)` تزئین می‌کنید. هنگام import کلاس ثبت می‌شود؛ وقتی اپ mount می‌شود، هر متد HTTP (`get`, `post`, …) به یک route واقعی در هسته Rust تبدیل می‌شود.
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/{id}", tags=["items"], desc="Items by id")
+class ItemModule(FusionBaseApi):
+    def get(self, id: int):
+        return self.response({"id": id}, status=status.HTTP_SUCCESS)
+```
+
+ماژول را از `main.py` import کنید تا قبل از `listen()` ثبت شود.
+
+## `@route` در برابر `router`
+
+| نماد | نقش |
+| --- | --- |
+| `route(path, **options)` | دکوراتور اصلی — مسیر + Swagger + middleware / roles |
+| `router(path)` | معادل `route(path)` بدون متادیتای اضافه |
+
+برای کد جدید از `@route` استفاده کنید.
+
+## قالب مسیر
+
+سگمنت‌ها هنگام ثبت کلاس resolve می‌شوند.
+
+| توکن | معنی | مثال |
+| --- | --- | --- |
+| متن ثابت | سگمنت دقیق | `api` → `/api/...` |
+| `[module]` | نام کلاس بدون پسوند `Module`، حروف کوچک | `ProductModule` → `product` |
+| `{name}` | پارامتر دینامیک مسیر | `{id}` → `id: int` |
+
+```python
+@route("api/[module]/{id}")
+class ProductModule(FusionBaseApi):
+    def get(self, id: int):
+        ...
+# نتیجه: /api/product/{id}
+```
+
+### پیشوند نسخه
+
+با `version=` مسیر resolve‌شده پیشوند می‌گیرد:
+
+```python
+@route("api/[module]/", version="v1")
+class ProductModule(FusionBaseApi):
+    ...
+# → /v1/api/product/
+```
+
+## گزینه‌های Swagger / OpenAPI
+
+فقط روی مستندات اثر دارند، نه روی مسیریابی runtime:
+
+| آرگومان | نوع | کاربرد |
+| --- | --- | --- |
+| `tags` | `list[str]` | گروه‌بندی در Swagger |
+| `desc` | `str` | توضیحات |
+| `title` | `str` | عنوان |
+| `version` | `str` | پیشوند مسیر (نسخه‌بندی API) |
+| `deprecated` | `bool` | علامت deprecated |
+
+تنظیمات سراسری UI در `fusion.<env>.json` است — [Commands & environments](../../cli/v1/command).
+
+## Middleware و roles روی route
+
+| آرگومان | کاربرد |
+| --- | --- |
+| `middleware` | لیست `(request, call_next)` فقط برای این route |
+| `roles` | میانبر گارد نقش (payload در `request["state"]["jwt"]`) |
+
+```python
+@route("api/admin", roles=["admin", "super_admin"])
+class AdminModule(FusionBaseApi):
+    def get(self):
+        user = self.state.get("jwt", {})
+        return self.response({"sub": user.get("sub")})
+```
+
+جزئیات کامل: [Middleware](./middleware).
+
+## بایندینگ پارامتر
+
+آرگومان‌های handler به‌صورت خودکار پر می‌شوند:
+
+1. نام با پارامتر **path** یکی باشد → path  
+2. وگرنه اگر متد `POST` / `PUT` / `PATCH` باشد و نام در JSON **body** باشد → body  
+3. وگرنه اگر در **query** باشد → query  
+4. آرگومان‌های optional / با default اگر نباشند → `None`
+
+```python
+@route("api/[module]/{id}")
+class ItemModule(FusionBaseApi):
+    def get(self, id: int):
+        return self.response({"id": id})
+
+    def post(self, id: int, title: str = "untitled"):
+        return self.response({"id": id, "title": title}, status=status.HTTP_201_CREATED)
+```
+
+## ویوی درخواست روی کلاس
+
+| پراپرتی | منبع |
+| --- | --- |
+| `self.method` | متد HTTP |
+| `self.path` | مسیر |
+| `self.body` | بدنه خام |
+| `self.headers` | هدرها |
+| `self.params` | پارامترهای path |
+| `self.query` | query string |
+| `self.state` | دادهٔ middleware |
+
+## پاسخ و خطا
+
+```python
+return self.response({"ok": True}, status=status.HTTP_SUCCESS)
+
+from fusion_framework.http import HTTPException
+raise HTTPException(404, {"detail": "not found"})
+```
+
+برای `async def` ببینید: [Async](./async).

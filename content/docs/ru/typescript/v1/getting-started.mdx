@@ -1,20 +1,72 @@
 ---
-title: Начало работы
-description: Установка и инициализация TypeScript SDK
+title: Getting Started
+description: TypeScript / Node.js quickstart for Fusion Framework
 ---
 
-## Установка
+## Install
+
+From the framework monorepo (development):
 
 ```bash
-pnpm add @cipherunits/fusion
+cd crates/fusion-node
+npm install
+npm run build:debug
 ```
 
-## Быстрый старт
+Published package:
+
+```bash
+npm i fusion-framework
+```
+
+## Scaffold with Fusion Tool
+
+```bash
+fusion init --lang typescript --name my-app
+```
+
+Creates `main.ts`, `core/settings.ts`, sample module, `fusion.<env>.json`, and (from recent tool versions) `package.json` / `tsconfig.json`.
+
+## First API
 
 ```ts
-import { Fusion } from '@cipherunits/fusion';
+import "./src/modules/products/products";
 
-const client = new Fusion({
-  apiKey: process.env.FUSION_API_KEY,
-});
+import { FusionApp, getSettings, settings } from "fusion-framework";
+
+// Global middleware (optional). Framework ships with none by default.
+const MIDDLEWARE: Array<(req: any, next: any) => any> = [];
+
+async function main() {
+  settings.ensureLoaded([process.cwd()]);
+  const app = new FusionApp(getSettings());
+  for (const mw of MIDDLEWARE) app.use(mw);
+  await app.listen();
+}
+
+main();
 ```
+
+Module example:
+
+```ts
+import { FusionBaseApi, route, status } from "fusion-framework";
+
+export const ProductModule = route("api/[module]", {
+  tags: ["swagger"],
+  desc: "Products",
+})(
+  class ProductModule extends FusionBaseApi {
+    get() {
+      return this.response({ products_id: 12 }, status.HTTP_SUCCESS);
+    }
+  },
+);
+```
+
+## Next
+
+- [Router](./router) — paths, `this.params`, responses  
+- [Config](./config) — `fusion.<env>.json`  
+- [Middleware](./middleware) — `bearerJwt`, `roles`  
+- Concepts overview: [Python Getting Started](../../python/v1/getting-started)

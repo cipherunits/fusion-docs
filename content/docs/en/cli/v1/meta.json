@@ -1,4 +1,4 @@
 {
   "title": "v1",
-  "pages": ["index", "getting-started", "command", "update"]
+  "pages": ["index", "getting-started", "command", "modules","update"]
 }

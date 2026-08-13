@@ -60,7 +60,7 @@ fusion init my-app
 
 You will be prompted for:
 
-1. Language — Python (TypeScript and ASP.NET Core are listed as coming soon)
+1. Language — Python, TypeScript, or C# (`asp-core` / `csharp`)
 2. Project name
 3. Project description
 
@@ -73,7 +73,7 @@ fusion init --lang python --name fusion-test --description "A Fusion Framework p
 | Argument | Description |
 | --- | --- |
 | `[DIRECTORY]` | Target folder (created if missing; defaults to the current directory) |
-| `--lang` | `python`, `typescript`, or `asp-core` |
+| `--lang` | `python`, `typescript`, `csharp`, or `asp-core` (C# aliases) |
 | `--name` | Project name |
 | `--description` | Project description |
 
@@ -105,11 +105,11 @@ For a Python project, `fusion init` creates a small starter app — including a 
 └── .gitignore
 ```
 
-- **`main.py`** — entrypoint: imports your modules (so `@route` classes register), then calls `run("settings")`
+- **`main.py`** — entrypoint: imports your modules (so `@route` classes register), wires optional `MIDDLEWARE`, builds `FusionApp` from settings, then listens
 - **`src/modules/products/products.py`** — sample API module where you can also set per-route Swagger metadata (`tags`, `desc`, `version`, …)
 - **`core/settings.py`** — loads the `config` block from `fusion.<env>.json` (`FUSION_ENV`, default `dev`)
 
-TypeScript and ASP.NET Core projects get the same layout with language-appropriate file extensions (`main.ts` / `core/settings.ts`, and so on).
+TypeScript projects use the same layout with `main.ts`, `core/settings.ts`, and a sample module under `src/modules/…`. C# (`csharp` / `asp-core`) scaffolds a .NET-style entrypoint and modules with `[Route]` instead of `@route`.
 
 ## Run the project
 

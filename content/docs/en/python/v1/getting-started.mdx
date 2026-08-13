@@ -31,19 +31,33 @@ pip install fusion-framework
 
 ### `main.py`
 
-The entrypoint imports your modules (so `@route` classes register), then starts the server. Keep `run("settings")` here — do not put it inside module files:
+The entrypoint imports your modules (so `@route` classes register), loads settings, registers optional middleware, then starts the server. Keep startup logic here — do not put `listen()` inside module files:
 
 ```python
-"""Entry point: import API classes, then start from settings."""
+"""Entry point: register routes, middleware, and start the server."""
 
 import src.modules.products.products  # registers @route classes
-from fusion_framework.app import run
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+# Global middleware (optional). Framework ships with none by default.
+MIDDLEWARE: list = []
+
+
+def main() -> None:
+    load_settings_module("settings")
+    app = FusionApp(get_settings())
+    for middleware in MIDDLEWARE:
+        app.use(middleware)
+    app.listen()
+
 
 if __name__ == "__main__":
-    run("settings")
+    main()
 ```
 
-When you add another module, import it in `main.py` the same way.
+When you add another module, import it in `main.py` the same way. See [Middleware](./middleware) and [Config](./config).
 
 ### Sample `products` module
 
@@ -164,7 +178,9 @@ class Products(FusionBaseApi):
         return self.response({"products_id": id}, status=status.HTTP_SUCCESS)
 ```
 
-Remember: put new modules under `src/modules/...` and **import them from `main.py`**. Leave `if __name__ == "__main__": run("settings")` only in `main.py`.
+Remember: put new modules under `src/modules/...` and **import them from `main.py`**. Leave app startup (`load_settings_module` / `FusionApp` / `listen`) only in `main.py`.
+
+Details: [Router](./router).
 
 ### Responses
 
@@ -190,19 +206,30 @@ class Root(FusionBaseApi):
         return self.response({"status": "async ok"}, status=status.HTTP_SUCCESS)
 ```
 
+Full guide: [Async](./async).
+
 ## Configuration
 
-Runtime settings come from `fusion.<env>.json` (`FUSION_ENV`, default `dev`). See [Commands & environments](../../cli/v1/command) for the full file shape and Swagger UI config.
+Runtime settings come from `fusion.<env>.json` (`FUSION_ENV`, default `dev`). Load them in `main.py` with `load_settings_module` / `get_settings`.
+
+Full guide: [Config](./config). Also see [Commands & environments](../../cli/v1/command).
+
+## Middleware
+
+No middleware runs by default. Register your own in `main.py` (`MIDDLEWARE` + `app.use`) or on `@route(..., middleware=..., roles=...)`.
+
+Full guide: [Middleware](./middleware).
 
 ## Core APIs
 
 | Symbol | Role |
 | --- | --- |
-| `FusionBaseApi` | Request view (`method`, `path`, `body`, `headers`, `params`, `query`) and `response(...)` |
-| `route(...)` | Register a module; optional Swagger metadata (`tags`, `desc`, `title`, `version`, `deprecated`) |
+| `FusionBaseApi` | Request view (`method`, `path`, `body`, `headers`, `params`, `query`, `state`) and `response(...)` |
+| `route(...)` | Register a module; Swagger metadata + optional `middleware` / `roles` |
 | `router(path)` | Alias of `route(path)` without Swagger metadata |
 | `status` | HTTP status constants (`HTTP_SUCCESS` → 200, …) |
-| `run("settings")` | Load settings and listen — call from `main.py` only |
+| `FusionApp` / `app.use` / `listen` | App + global middleware — call from `main.py` |
+| `load_settings_module` / `get_settings` | Load `fusion.<env>.json` + `core/settings.py` |
 | `HTTPException` | Raise an HTTP error response |
 
 Under the hood, PyO3 bridges to `fusion-core` for routing, binding, and serialization.

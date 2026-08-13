@@ -1,10 +1,25 @@
 ---
-title: SDK سی‌شارپ
-description: نمای کلی Fusion C# SDK
+title: C#
+description: Fusion Framework برای C# از طریق fusion-ffi
 ---
 
 ## نمای کلی
 
-مستندات C# کلاینت Fusion را برای برنامه‌های .NET پوشش می‌دهد.
+باندینگ C# هستهٔ Rust را از طریق **`fusion-ffi`** (C ABI) صدا می‌زند. DX شبیه پایتون/Node است: `FusionApp`، `[Route]`، middleware، `Status` و settings.
 
-شما در حال مشاهده **v1** هستید. نسخه‌های جدید وقتی منتشر شوند در انتخابگر نسخه ظاهر می‌شوند.
+نسخهٔ v1 روی یک **API HTTP قابل اجرا** تمرکز دارد. برابری کامل OpenAPI/Swagger با پایتون هنوز نیست.
+
+پکیج مدیریت‌شده: `bindings/csharp/FusionFramework` (NuGet وقتی منتشر شود).
+
+## راهنماهای این بخش
+
+| صفحه | موضوع |
+| --- | --- |
+| [شروع کار](./getting-started) | ساخت FFI، پکیج، اولین سرور |
+| [Router](./router) | `[Route]`، توکن مسیر، پاسخ‌ها |
+| [Config](./config) | `fusion.<env>.json` از طریق FFI |
+| [Middleware](./middleware) | middleware سراسری + روی route |
+
+## مفاهیم مشترک
+
+همان فایل‌های JSON محیط و مدل ذهنی middleware مثل [پایتون](../../python/v1).

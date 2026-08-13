@@ -22,8 +22,19 @@ You are viewing **v1**. New versions will appear in the version selector when pu
 - Class-based APIs: `get` / `post` / `put` / `patch` / `delete`
 - Typed handler parameters bound from path, JSON body, or query
 - Auto-generated Swagger / OpenAPI UI (`fusion.<env>.json` + per-route `@route` metadata)
+- Global and route **middleware** (none by default — you register your own)
 - `status` helpers such as `status.HTTP_SUCCESS` (200)
-- Sync and async handlers
+- Sync and **async** handlers and middleware
 - `HTTPException` for structured error responses
 
-Scaffold with `fusion init` to get `main.py`, settings, and a sample **products** module — then [Getting Started](./getting-started).
+## Guides in this version
+
+| Page | Topic |
+| --- | --- |
+| [Getting Started](./getting-started) | Install, scaffold, first API |
+| [Router](./router) | `@route`, path tokens, binding, Swagger |
+| [Config](./config) | `fusion.<env>.json`, `load_settings_module`, `get_settings` |
+| [Middleware](./middleware) | Global / route middleware, JWT helpers |
+| [Async](./async) | Async handlers and async middleware |
+
+Scaffold with `fusion init`, then start at [Getting Started](./getting-started).

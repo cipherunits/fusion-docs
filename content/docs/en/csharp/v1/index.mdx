@@ -1,23 +1,25 @@
 ---
-title: C# / ASP.NET Core
-description: Fusion Framework for ASP.NET Core
+title: C#
+description: Fusion Framework for C# via fusion-ffi
 ---
 
 ## Overview
 
-**ASP.NET Core (C#)** support for **Fusion Framework** is **coming soon**.
+C# bindings call the Rust core through **`fusion-ffi`** (C ABI). DX mirrors Python/Node: `FusionApp`, `[Route]`, middleware, `Status`, and settings.
 
-Fusion Tool already lists `asp-core` as a language option for scaffolding, but the .NET binding and package are not released yet.
+v1 focuses on a **runnable HTTP API**. Full OpenAPI/Swagger parity with Python is not included yet.
 
-You are viewing **v1**. This section will expand when C# support ships.
+Managed package: `bindings/csharp/FusionFramework` (NuGet when published).
 
-## What to use today
+## Guides in this section
 
-- Build APIs with the [Python package](../../python/v1)
-- Optionally scaffold an ASP.NET-shaped layout with [Fusion Tool](../../cli/v1/getting-started):
+| Page | Topic |
+| --- | --- |
+| [Getting started](./getting-started) | Build FFI, package, first server |
+| [Router](./router) | `[Route]`, path tokens, responses |
+| [Config](./config) | `fusion.<env>.json` via FFI |
+| [Middleware](./middleware) | Global + route middleware |
 
-```bash
-fusion init --lang asp-core --name my-app
-```
+## Shared concepts
 
-Prefer Python for production backends until the C# package is available.
+Same JSON env files and middleware mental model as [Python](../../python/v1).

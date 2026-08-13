@@ -1,6 +1,6 @@
 {
   "title": "C#",
-  "description": "ASP.NET Core (coming soon)",
+  "description": "C# binding for Fusion Framework (fusion-ffi)",
   "icon": "Braces",
   "root": true,
   "pages": ["v1"]

@@ -1,0 +1,168 @@
+---
+title: Config
+description: Load fusion.<env>.json and core/settings.py with fusion_framework.config
+---
+
+## Overview
+
+`fusion_framework.config` is the Python façade over shared settings in `fusion-core`.
+
+Runtime values live in **`fusion.<env>.json`** (like a typed `.env` per environment). Optional Python overlay lives in **`core/settings.py`**. The active environment comes from **`FUSION_ENV`** (default: `dev`).
+
+```python
+from fusion_framework.config import load_settings_module, get_settings
+
+load_settings_module("settings")
+s = get_settings()
+print(s.host, s.port, s.debug)
+```
+
+## What the module exports
+
+| Symbol | Role |
+| --- | --- |
+| `settings` | Global singleton settings object |
+| `Settings` | Class (usually you use the singleton) |
+| `get_settings()` | Ensure JSON is loaded, return the singleton |
+| `load_settings_module(...)` | Load JSON + merge UPPERCASE attrs from a Python module |
+| `configure(**kwargs)` | Set values in code without editing JSON |
+
+Also available as:
+
+```python
+from fusion_framework import settings
+```
+
+## Typical startup in `main.py`
+
+```python
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+MIDDLEWARE: list = []
+
+def main() -> None:
+    load_settings_module("settings")   # 1) JSON + core/settings.py
+    app = FusionApp(get_settings())    # 2) host / port / debug
+    for mw in MIDDLEWARE:
+        app.use(mw)
+    app.listen()                       # 3) start server
+
+if __name__ == "__main__":
+    main()
+```
+
+## `load_settings_module`
+
+```python
+load_settings_module("settings")
+# or
+load_settings_module("core.settings")
+```
+
+What it does:
+
+1. Discovers and loads `fusion.<env>.json` from the project (and parent dirs)
+2. Imports the Python module (`settings` → also tries `core.settings`)
+3. Merges only **UPPERCASE** names from that module onto the settings object
+
+```python
+# core/settings.py
+from fusion_framework import settings
+
+SECRET_KEY = settings.get("secret_key")
+DEBUG = settings.get("debug", default=False)
+```
+
+These names become available as `settings.get("secret_key")` / `settings.get("SECRET_KEY")` after load.
+
+## `get_settings`
+
+Returns the same singleton. If JSON was not loaded yet, it calls `ensure_loaded` (looks next to `__main__` and cwd).
+
+```python
+s = get_settings()
+s.host   # str, default "127.0.0.1"
+s.port   # int, default 3000 (or from JSON)
+s.debug  # bool
+s.env    # "dev" | "prod" | "stage" | …
+```
+
+## The `settings` object
+
+| API | Purpose |
+| --- | --- |
+| `settings.get("key", default=...)` | Read a config key |
+| `settings["key"]` | Same, raises `KeyError` if missing |
+| `"key" in settings` | Membership |
+| `settings.host` / `.port` / `.debug` / `.env` | Common fields |
+| `settings.config` | Full config map as a dict |
+| `settings.merge({...})` | Overlay a dict |
+| `settings.configure(**kwargs)` | Overlay keyword args |
+| `settings.load_json(...)` | Load JSON explicitly |
+| `settings.ensure_loaded()` | Lazy-load if needed |
+| `settings.clear()` | Reset |
+
+```python
+from fusion_framework import settings
+
+settings.get("secret_key")
+settings.get("missing", default=False)
+settings.port
+```
+
+### Environment placeholders
+
+If a string value in JSON is `ALL_CAPS` (e.g. `"HOST"`), the core resolves it from the process environment at read time.
+
+## `fusion.<env>.json` shape
+
+Created by `fusion init`. Example:
+
+```json
+{
+  "env": "dev",
+  "config": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "debug": true,
+    "secret_key": "fusion-framework-…",
+    "swagger": { "enabled": true, "path": "/swagger" }
+  },
+  "commands": {
+    "run": "python main.py"
+  }
+}
+```
+
+| Block | Used by |
+| --- | --- |
+| `config` | App settings (`host`, `port`, your keys, Swagger) |
+| `commands` | `fusion command run` / `run:prod` |
+
+Switch environment:
+
+```bash
+FUSION_ENV=prod python main.py
+fusion command run:prod
+```
+
+## `configure` (in-code overrides)
+
+Useful for tests or one-off runs:
+
+```python
+from fusion_framework.config import configure
+
+configure(host="0.0.0.0", port=9000, debug=True)
+```
+
+## Mental model
+
+```text
+fusion.dev.json  →  config block  →  settings singleton
+core/settings.py →  UPPERCASE overlay (optional)
+get_settings()   →  FusionApp.listen(host, port)
+```
+
+JSON is the source of truth. Python settings is a convenient reader, not a second config system.
