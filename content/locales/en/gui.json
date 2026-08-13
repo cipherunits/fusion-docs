@@ -1,0 +1,18 @@
+{
+  "downloadTitle": "Download Fusion Desktop",
+  "downloadDescription": "Download Fusion Desktop for Windows and Linux. Installers for x64 and Arm, plus .deb, .rpm, and CLI builds to manage your Fusion backends.",
+  "windows": "Windows",
+  "windowsVersions": "Windows 10, 11",
+  "linux": "Linux",
+  "deb": ".deb",
+  "debDistros": "Debian, Ubuntu",
+  "rpm": ".rpm",
+  "rpmDistros": "Red Hat, Fedora, SUSE",
+  "userInstaller": "User Installer",
+  "systemInstaller": "System Installer",
+  "zip": ".zip",
+  "tarGz": ".tar.gz",
+  "snap": "Snap",
+  "snapStore": "Snap Store",
+  "cli": "CLI"
+}

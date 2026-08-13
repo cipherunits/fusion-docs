@@ -1,0 +1,18 @@
+{
+  "downloadTitle": "دانلود Fusion Desktop",
+  "downloadDescription": "Fusion Desktop را برای ویندوز و لینوکس دانلود کنید. نصب‌کننده‌های x64 و Arm به‌همراه بسته‌های .deb، .rpm و CLI برای مدیریت بک‌اندهای Fusion.",
+  "windows": "ویندوز",
+  "windowsVersions": "ویندوز ۱۰، ۱۱",
+  "linux": "لینوکس",
+  "deb": ".deb",
+  "debDistros": "دبیان، اوبونتو",
+  "rpm": ".rpm",
+  "rpmDistros": "رد هت، فدورا، سوزه",
+  "userInstaller": "نصب کاربر",
+  "systemInstaller": "نصب سیستم",
+  "zip": ".zip",
+  "tarGz": ".tar.gz",
+  "snap": "Snap",
+  "snapStore": "Snap Store",
+  "cli": "CLI"
+}

@@ -1,27 +1,7 @@
 {
-  "welcome": "فریم‌ورک برای بک‌اندها",
-  "description": "Fusion به شما امکان می‌دهد بک‌اندهای باکیفیت را با تجربه توسعه‌دهندگی یکپارچه در Node.js، Python و C# بسازید.",
-  "openDocs": "شروع کنید",
-  "openLearn": "یادگیری Fusion",
   "language": "زبان",
   "navDocs": "مستندات",
   "app": "دسکتاپ",
   "navDevelopers": "توسعه‌دهندگان",
-  "chooseVersion": "انتخاب نسخه",
-  "downloadTitle": "دانلود Fusion Desktop",
-  "downloadDescription": "Fusion Desktop را برای ویندوز و لینوکس دانلود کنید. نصب‌کننده‌های x64 و Arm به‌همراه بسته‌های .deb، .rpm و CLI برای مدیریت بک‌اندهای Fusion.",
-  "windows": "ویندوز",
-  "windowsVersions": "ویندوز ۱۰، ۱۱",
-  "linux": "لینوکس",
-  "deb": ".deb",
-  "debDistros": "دبیان، اوبونتو",
-  "rpm": ".rpm",
-  "rpmDistros": "رد هت، فدورا، سوزه",
-  "userInstaller": "نصب کاربر",
-  "systemInstaller": "نصب سیستم",
-  "zip": ".zip",
-  "tarGz": ".tar.gz",
-  "snap": "Snap",
-  "snapStore": "Snap Store",
-  "cli": "CLI"
+  "chooseVersion": "انتخاب نسخه"
 }

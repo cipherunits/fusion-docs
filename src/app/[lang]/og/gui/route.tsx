@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { generate as DefaultImage } from 'fumadocs-ui/og';
 import { i18n } from '@/lib/i18n';
-import { getCommon } from '@/lib/common-messages';
+import { getGui } from '@/lib/common-messages';
 import { siteConfig } from '@/lib/seo';
 
 export const revalidate = false;
@@ -23,15 +23,15 @@ export async function GET(
     ? lang
     : i18n.defaultLanguage;
 
-  const common = getCommon(locale);
-  const english = getCommon(i18n.defaultLanguage);
+  const gui = getGui(locale);
+  const english = getGui(i18n.defaultLanguage);
 
-  const title = needsLatinFallback(common.downloadTitle)
+  const title = needsLatinFallback(gui.downloadTitle)
     ? english.downloadTitle
-    : common.downloadTitle;
-  const description = needsLatinFallback(common.downloadDescription)
+    : gui.downloadTitle;
+  const description = needsLatinFallback(gui.downloadDescription)
     ? english.downloadDescription
-    : common.downloadDescription;
+    : gui.downloadDescription;
 
   return new ImageResponse(
     (

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DownloadPlatforms } from "@/components/gui/download-platforms";
 import { JsonLd } from "@/components/json-ld";
-import { getCommon } from "@/lib/common-messages";
+import { getCommon, getGui } from "@/lib/common-messages";
 import {
   absoluteUrl,
   buildPageMetadata,
@@ -27,13 +27,13 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang } = await params;
-  const common = getCommon(lang);
+  const gui = getGui(lang);
   const ogImage = absoluteUrl(getGuiOgImageUrl(lang));
 
   return {
     ...buildPageMetadata({
-      title: common.downloadTitle,
-      description: common.downloadDescription,
+      title: gui.downloadTitle,
+      description: gui.downloadDescription,
       locale: lang,
       path: `/${lang}/gui`,
       pathWithoutLocale: "/gui",
@@ -53,14 +53,15 @@ export default async function GuiPage({
 }) {
   const { lang } = await params;
   const common = getCommon(lang);
+  const gui = getGui(lang);
   const url = absoluteUrl(`/${lang}/gui`);
 
   return (
     <>
       <JsonLd
         data={downloadJsonLd({
-          title: common.downloadTitle,
-          description: common.downloadDescription,
+          title: gui.downloadTitle,
+          description: gui.downloadDescription,
           locale: lang,
           url,
           appName: `${siteConfig.name} Desktop`,
@@ -70,7 +71,7 @@ export default async function GuiPage({
           ],
         })}
       />
-      <DownloadPlatforms messages={common} />
+      <DownloadPlatforms messages={gui} />
     </>
   );
 }
