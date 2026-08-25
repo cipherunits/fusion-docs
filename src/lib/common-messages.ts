@@ -3,16 +3,18 @@ import { join } from 'node:path';
 import type enCommon from '@content/locales/en/common.json';
 import type enGui from '@content/locales/en/gui.json';
 import type enHome from '@content/locales/en/home.json';
+import type enSeo from '@content/locales/en/seo.json';
 import { defaultLocale, discoveredLocales } from '@/lib/locales-registry';
 
 export type CommonMessages = typeof enCommon;
 export type HomeMessages = typeof enHome;
 export type GuiMessages = typeof enGui;
+export type SeoMessages = typeof enSeo;
 
-function loadLocaleFile(
+function loadLocaleFile<T extends Record<string, unknown>>(
   locale: string,
   namespace: string,
-): Record<string, string> | null {
+): T | null {
   try {
     const filePath = join(
       process.cwd(),
@@ -20,13 +22,13 @@ function loadLocaleFile(
       locale,
       `${namespace}.json`,
     );
-    return JSON.parse(readFileSync(filePath, 'utf8')) as Record<string, string>;
+    return JSON.parse(readFileSync(filePath, 'utf8')) as T;
   } catch {
     return null;
   }
 }
 
-function getNamespaceMessages<T extends Record<string, string>>(
+function getNamespaceMessages<T extends Record<string, unknown>>(
   locale: string,
   namespace: string,
   fallback: T,
@@ -35,7 +37,7 @@ function getNamespaceMessages<T extends Record<string, string>>(
     return fallback;
   }
 
-  const messages = loadLocaleFile(locale, namespace);
+  const messages = loadLocaleFile<T>(locale, namespace);
   if (!messages) {
     return fallback;
   }
@@ -46,15 +48,16 @@ function getNamespaceMessages<T extends Record<string, string>>(
   };
 }
 
-function loadFallback<T extends Record<string, string>>(namespace: string): T {
-  return (loadLocaleFile(defaultLocale, namespace) ??
-    loadLocaleFile(discoveredLocales[0] ?? 'en', namespace) ??
+function loadFallback<T extends Record<string, unknown>>(namespace: string): T {
+  return (loadLocaleFile<T>(defaultLocale, namespace) ??
+    loadLocaleFile<T>(discoveredLocales[0] ?? 'en', namespace) ??
     {}) as T;
 }
 
 const commonFallback = loadFallback<CommonMessages>('common');
 const homeFallback = loadFallback<HomeMessages>('home');
 const guiFallback = loadFallback<GuiMessages>('gui');
+const seoFallback = loadFallback<SeoMessages>('seo');
 
 /** Shared chrome copy (nav, language switcher labels, etc.). */
 export function getCommon(locale: string): CommonMessages {
@@ -69,4 +72,9 @@ export function getHome(locale: string): HomeMessages {
 /** Desktop / GUI download page copy. */
 export function getGui(locale: string): GuiMessages {
   return getNamespaceMessages(locale, 'gui', guiFallback);
+}
+
+/** Localized SEO strings (descriptions, keywords, image alts). */
+export function getSeo(locale: string): SeoMessages {
+  return getNamespaceMessages(locale, 'seo', seoFallback);
 }

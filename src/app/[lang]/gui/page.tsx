@@ -1,25 +1,15 @@
 import type { Metadata } from "next";
 import { DownloadPlatforms } from "@/components/gui/download-platforms";
 import { JsonLd } from "@/components/json-ld";
-import { getCommon, getGui } from "@/lib/common-messages";
+import { getCommon, getGui, getSeo } from "@/lib/common-messages";
 import {
   absoluteUrl,
+  buildKeywords,
   buildPageMetadata,
   downloadJsonLd,
   getGuiOgImageUrl,
   siteConfig,
 } from "@/lib/seo";
-
-const DOWNLOAD_KEYWORDS = [
-  "Fusion Desktop",
-  "download Fusion",
-  "Fusion app",
-  "Fusion Windows",
-  "Fusion Linux",
-  "desktop client",
-  "backend desktop app",
-  "Cipher Unit",
-] as const;
 
 export async function generateMetadata({
   params,
@@ -28,6 +18,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const gui = getGui(lang);
+  const seo = getSeo(lang);
   const ogImage = absoluteUrl(getGuiOgImageUrl(lang));
 
   return {
@@ -38,9 +29,10 @@ export async function generateMetadata({
       path: `/${lang}/gui`,
       pathWithoutLocale: "/gui",
       image: ogImage,
+      imageAlt: `${gui.downloadTitle} — ${seo.logoAlt}`,
+      keywords: buildKeywords(lang, [], { download: true }),
       type: "website",
     }),
-    keywords: [...DOWNLOAD_KEYWORDS],
     category: "technology",
     applicationName: siteConfig.name,
   };
@@ -54,6 +46,7 @@ export default async function GuiPage({
   const { lang } = await params;
   const common = getCommon(lang);
   const gui = getGui(lang);
+  const seo = getSeo(lang);
   const url = absoluteUrl(`/${lang}/gui`);
 
   return (
@@ -72,6 +65,16 @@ export default async function GuiPage({
         })}
       />
       <DownloadPlatforms messages={gui} />
+      <p className="text-muted-foreground mx-auto mt-8 max-w-3xl px-4 pb-10 text-center text-sm">
+        <a
+          href={siteConfig.org.url}
+          className="underline-offset-4 hover:underline"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {seo.builtBy}
+        </a>
+      </p>
     </>
   );
 }
