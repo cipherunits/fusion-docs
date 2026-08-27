@@ -1,13 +1,19 @@
 ---
 title: Introduction
-description: Overview of Fusion Framework — cross-platform backend docs for Node.js, Python, and C# by Cipher Unit
+description: Overview of Fusion Framework, FMA, and cross-platform backend docs for Node.js, Python, and C# by Cipher Unit
 ---
 
 ## What is Fusion?
 
 **Fusion Framework** is a cross-platform backend framework built on a shared Rust core and **FMA (Fusion Module Architecture)**.
 
-You write class-based HTTP APIs in your preferred language. Routing, request parsing, parameter binding, and response serialization run in the Rust engine — language bindings stay thin and focused on developer experience.
+You write class-based HTTP APIs in your preferred language. Routing, request parsing, response serialization, settings, and header helpers run in the Rust engine — language bindings stay thin and focused on developer experience.
+
+Current framework package version in the open-source repository: **1.2.3**.
+
+## Why Fusion exists
+
+Teams often need the same HTTP semantics in more than one language. Fusion keeps **one core** for routing and serialization while exposing idiomatic APIs in Python, TypeScript/Node.js, and C#. Applications are composed from **route modules** and optional **reusable packages** instead of a single unstructured script.
 
 Fusion is developed by **[Cipher Unit](https://cipherunit.xyz)**.
 
@@ -16,10 +22,19 @@ Fusion is developed by **[Cipher Unit](https://cipherunit.xyz)**.
 | Language | Status |
 | --- | --- |
 | **Python** | Available — `pip install fusion-framework` |
-| **TypeScript / Node.js** | Available — `npm i fusion-framework` (see [Node guide](./typescript/v1)) |
-| **C#** | Available — managed package + `fusion-ffi` (see [C# guide](./csharp/v1)) |
+| **TypeScript / Node.js** | Available — `npm i fusion-framework` |
+| **C#** | Available — NuGet `FusionFramework` + `fusion-ffi` |
 
-Start with [Python](./python/v1), [TypeScript](./typescript/v1), or [C#](./csharp/v1).
+## Recommended learning path
+
+1. **[Architecture overview](./architecture/v1)** — mental model of the stack
+2. **[FMA](./architecture/v1/fma)** — how modules and packages fit together
+3. **[What Fusion is not](./architecture/v1/what-fusion-is-not)** — scope boundaries
+4. Scaffold with **[Fusion Tool](./cli/v1/getting-started)**
+5. Language guide: [Python](./python/v1/getting-started) · [TypeScript](./typescript/v1/getting-started) · [C#](./csharp/v1/getting-started)
+6. [Router](./python/v1/router) · [Middleware](./python/v1/middleware) · [Config](./python/v1/config)
+7. [Reusable packages](./cli/v1/modules)
+8. [Best practices](./architecture/v1/best-practices) · [Troubleshooting](./architecture/v1/troubleshooting)
 
 ## Tooling
 

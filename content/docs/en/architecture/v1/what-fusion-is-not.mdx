@@ -1,0 +1,19 @@
+---
+title: What Fusion is not
+description: Scope boundaries — features Fusion does not provide
+---
+
+Fusion is an HTTP application framework with a shared Rust core. To avoid false expectations, these capabilities are **not** provided by the framework packages today:
+
+| Not included | Notes |
+| --- | --- |
+| **ORM / database layer** | Use any DB library in your language; Fusion does not ship one |
+| **Dependency injection container** | Python has request **parameter binding** only; not IoC |
+| **Background job queues** | No built-in workers/queues |
+| **Plugin marketplace runtime** | Library packages are normal imports via CLI |
+| **OAuth / session auth suite** | Only optional Bearer JWT middleware helpers |
+| **WebSockets / GraphQL / gRPC** | HTTP request/response model |
+| **Templating / SSR** | API-oriented |
+| **In-repo CLI source** | Scaffolding lives in external **Fusion Tool** |
+
+If documentation elsewhere mentions a feature not listed in language guides or this architecture section, verify against the [fusion-framework](https://github.com/cipherunits/fusion-framework) source before relying on it.

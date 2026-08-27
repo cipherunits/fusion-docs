@@ -1,0 +1,44 @@
+---
+title: Anti-patterns
+description: Common mistakes when building Fusion applications
+---
+
+## Giant route modules
+
+**Bad:** One class with dozens of unrelated resources.  
+**Better:** Split into focused `*Module` classes and import each from `main`.
+
+## Calling listen inside route files
+
+**Bad:** Instantiating `FusionApp` and calling `listen()` at the bottom of every module file.  
+**Better:** Single entrypoint owns lifecycle.
+
+## Treating packages as auto-routes
+
+**Bad:** Expecting `fusion add` to expose HTTP endpoints automatically.  
+**Better:** Import the package and wire it explicitly from your route modules or middleware.
+
+## Circular route imports
+
+**Bad:** `users.py` imports `orders.py` which imports `users.py` for helpers.  
+**Better:** Move shared helpers to a library package or `src/shared/`.
+
+## Business logic only in handlers
+
+**Bad:** Hundreds of lines of domain logic inside `get`/`post`.  
+**Better:** Handlers map HTTP ↔ calls into helpers/services you own (plain functions/classes — Fusion has no DI container).
+
+## Relying on unverified JWT in production
+
+**Bad:** `app.use(bearer_jwt())` with default decode on a public API.  
+**Better:** Pass `verify=` that checks signature, expiry, and issuer.
+
+## Hard-coding resource path segments
+
+**Bad:** `@route("api/product/")` duplicated across renames.  
+**Better:** `@route("api/[module]/")` with `ProductModule`.
+
+## Oversharing internal module state
+
+**Bad:** Writing global mutable singletons imported everywhere.  
+**Better:** Per-request `state` for request-scoped data; explicit function parameters for everything else.

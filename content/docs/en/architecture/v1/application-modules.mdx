@@ -1,0 +1,113 @@
+---
+title: Application route modules
+description: Create FusionBaseApi route modules, register them, and structure handlers
+---
+
+## What
+
+An **application route module** is a class that extends `FusionBaseApi` and is registered with a path template. Convention HTTP methods and optional custom HTTP routes become mounted endpoints in `fusion-core`.
+
+## Why
+
+Grouping handlers on a class keeps one resource’s HTTP surface cohesive and lets `[module]` derive a stable path stem from the class name.
+
+## When
+
+Use a route module for each HTTP resource (or cohesive group of endpoints) your application exposes.
+
+## Create a route module (Python)
+
+```python
+# src/modules/users/users.py
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework.http_route import http_get
+from fusion_framework import status
+
+
+@route(
+    "api/[module]/",
+    tags=["users"],
+    desc="User resource",
+    version="v1",
+)
+class UserModule(FusionBaseApi):
+    def get(self):
+        return self.response({"users": []}, status=status.HTTP_SUCCESS)
+
+    @http_get("profile/[action]", title="Current profile action")
+    def ProfileAction(self):
+        return self.response({"profile": True}, status=status.HTTP_SUCCESS)
+```
+
+Register by importing from the entrypoint:
+
+```python
+# main.py
+import src.modules.users.users  # noqa: F401 — runs @route
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+def main() -> None:
+    load_settings_module("settings")
+    FusionApp(get_settings()).listen()
+
+if __name__ == "__main__":
+    main()
+```
+
+### Paths produced
+
+| Handler | Method | Path (with `version="v1"`) |
+| --- | --- | --- |
+| `get` | GET | `/v1/api/user/` |
+| `ProfileAction` | GET | `/v1/api/user/profile/profile` |
+
+`UserModule` → `[module]` = `user`. `ProfileAction` → `[action]` = `profile`.
+
+## Convention vs custom routes
+
+| Mode | Mechanism | Example |
+| --- | --- | --- |
+| Convention | Methods named `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | `GET /api/user/` |
+| Custom | `@http_get("…")` / `httpGet` / `[HttpGet]` | `GET /api/user/profile/profile` |
+
+Both can coexist on the same class. Details: [Python Router](../../python/v1/router).
+
+## Route options
+
+| Option | Purpose |
+| --- | --- |
+| `tags`, `title`, `desc` | OpenAPI metadata |
+| `version` | Path prefix + Swagger version navbar entry |
+| `deprecated` | Mark operations deprecated |
+| `middleware` | Route-scoped middleware list |
+| `roles` | Appends `require_roles(...)` middleware |
+
+## Registration checklist
+
+1. Create file under `src/modules/...`
+2. Subclass `FusionBaseApi`
+3. Apply `@route` / `route()` / `[Route]`
+4. Import the module from the entrypoint **before** `listen()`
+5. (C#) call `Route.Register<T>()` explicitly
+
+## TypeScript / C#
+
+Same semantics with different syntax — see language router pages:
+
+- [TypeScript](../../typescript/v1/router)
+- [C#](../../csharp/v1/router)
+
+## Best practices
+
+- One primary resource per class
+- Keep startup out of module files
+- Prefer `[module]` over hard-coding resource names
+- Use `version=` for breaking API changes
+
+## See also
+
+- [FMA](./fma)
+- [Reusable packages](./packages) — for code shared across apps

@@ -1,0 +1,25 @@
+---
+title: Glossary
+description: Fusion Framework terminology
+---
+
+| Term | Meaning |
+| --- | --- |
+| **Fusion Framework** | Class-based HTTP framework with a shared Rust core and language bindings |
+| **fusion-core** | Rust crate implementing server, router, settings, headers, naming |
+| **fusion-ffi** | C ABI used by the C# binding |
+| **Binding** | Python / Node / C# package that exposes Fusion APIs to that language |
+| **FMA** | Fusion Module Architecture — composition of route modules + library packages |
+| **Route module** | `FusionBaseApi` class registered with a path template |
+| **Library package / CLI module** | Publishable package with `fusion.module.toml`, installed via `fusion add` |
+| **FusionApp** | Application object that holds settings, middleware, and starts listening |
+| **FusionBaseApi** | Base class for route modules; provides request view + `response` |
+| **Convention route** | Handler named `get`/`post`/… mounted at the module base path |
+| **Custom HTTP route** | `@http_get` / `httpGet` / `[HttpGet]` with an explicit path template |
+| **`[module]`** | Path token expanded from the class name stem |
+| **`[action]`** | Path token expanded from the handler name stem (`*Action` stripped) |
+| **Middleware** | `(request, call_next)` function wrapping handlers |
+| **Settings** | Runtime config from `fusion.<env>.json` (+ optional Python overlay) |
+| **Fingerprint headers** | Identity headers such as `X-Powered-By` / `X-Framework` / `X-Fusion-Version` |
+| **Fusion Tool** | External CLI (`fusion`) for init, commands, and packages |
+| **OpenAPI / Swagger** | Built-in API docs UI and JSON specs mounted by the app |
