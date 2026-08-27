@@ -3,22 +3,32 @@ import Link from 'next/link';
 import { getT } from '@/lib/i18next';
 import { Button } from '@/components/ui/button';
 import { NasaParticles } from '@/components/home/nasa-particles';
-import { buildPageMetadata, siteConfig } from '@/lib/seo';
-import { getCommon } from '@/lib/common-messages';
+import { JsonLd } from '@/components/json-ld';
+import {
+  absoluteUrl,
+  buildKeywords,
+  buildPageMetadata,
+  homeJsonLd,
+  siteConfig,
+} from '@/lib/seo';
+import { getHome, getSeo } from '@/lib/common-messages';
 
 export async function generateMetadata({
   params,
 }: PageProps<'/[lang]'>): Promise<Metadata> {
   const { lang } = await params;
-  const common = getCommon(lang);
+  const home = getHome(lang);
+  const seo = getSeo(lang);
 
   return {
     ...buildPageMetadata({
       title: siteConfig.name,
-      description: common.description,
+      description: home.description,
       locale: lang,
       path: `/${lang}`,
       pathWithoutLocale: '/',
+      imageAlt: seo.logoAlt,
+      keywords: buildKeywords(lang),
       type: 'website',
     }),
     title: {
@@ -29,11 +39,22 @@ export async function generateMetadata({
 
 export default async function HomePage({ params }: PageProps<'/[lang]'>) {
   const { lang } = await params;
-  const { t } = await getT(lang, 'common');
+  const { t } = await getT(lang, 'home');
+  const home = getHome(lang);
+  const seo = getSeo(lang);
   const docsHref = `/${lang}/docs`;
+  const url = absoluteUrl(`/${lang}`);
 
   return (
     <>
+      <JsonLd
+        data={homeJsonLd({
+          title: siteConfig.name,
+          description: home.description,
+          locale: lang,
+          url,
+        })}
+      />
       <NasaParticles />
       <main className="relative z-10 mx-auto flex min-h-[70vh] w-full flex-col items-center justify-center gap-8 px-4 py-12 text-center sm:gap-10 sm:px-6 sm:py-16">
         <div className="flex flex-col items-center gap-6 mt-20 sm:gap-12">
@@ -63,6 +84,16 @@ export default async function HomePage({ params }: PageProps<'/[lang]'>) {
             {t('openLearn')}
           </Button>
         </div>
+        <p className="text-muted-foreground mt-8 text-sm">
+          <a
+            href={siteConfig.org.url}
+            className="underline-offset-4 hover:underline"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {seo.builtBy}
+          </a>
+        </p>
       </main>
     </>
   );

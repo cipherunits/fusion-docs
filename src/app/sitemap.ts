@@ -27,11 +27,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
         languages: languageAlternates('/gui'),
       },
     });
+
+    entries.push({
+      url: absoluteUrl(`/${lang}/docs`),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.95,
+      alternates: {
+        languages: languageAlternates('/docs'),
+      },
+    });
   }
 
   const pagesBySlug = new Map<string, { url: string }[]>();
 
   for (const page of source.getPages()) {
+    // Root docs index is already added above per locale.
+    if (page.slugs.length === 0) {
+      continue;
+    }
+
     const key = page.slugs.join('/');
     const group = pagesBySlug.get(key) ?? [];
     group.push({ url: page.url });
@@ -39,15 +54,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   for (const [slugKey, pages] of pagesBySlug) {
-    const pathWithoutLocale = `/docs${slugKey ? `/${slugKey}` : ''}`;
+    const pathWithoutLocale = `/docs/${slugKey}`;
     const languages = languageAlternates(pathWithoutLocale);
+    const isGettingStarted = slugKey.includes('getting-started');
+    const isProductIndex = slugKey.split('/').length <= 2;
 
     for (const page of pages) {
       entries.push({
         url: absoluteUrl(page.url),
         lastModified: now,
         changeFrequency: 'weekly',
-        priority: slugKey.includes('getting-started') ? 0.9 : 0.8,
+        priority: isGettingStarted ? 0.9 : isProductIndex ? 0.85 : 0.8,
         alternates: {
           languages,
         },

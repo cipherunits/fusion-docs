@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { CommonMessages } from "@/lib/common-messages";
+import type { GuiMessages } from "@/lib/common-messages";
 
 type DownloadPlatformsProps = {
-  messages: CommonMessages;
+  messages: GuiMessages;
 };
 
 function ArchChip({ label }: { label: string }) {

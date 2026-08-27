@@ -15,9 +15,10 @@ import {
   absoluteUrl,
   buildPageMetadata,
   docsJsonLd,
+  docsPageKeywords,
   siteConfig,
 } from '@/lib/seo';
-import { getCommon } from '@/lib/common-messages';
+import { getCommon, getSeo } from '@/lib/common-messages';
 
 export default async function Page(
   props: PageProps<'/[lang]/docs/[[...slug]]'>,
@@ -36,6 +37,7 @@ export default async function Page(
     includeRoot: { url: absoluteUrl(`/${params.lang}/docs`) },
     includePage: true,
   });
+  const ogImage = getPageImageUrl(page).url;
 
   const breadcrumbs = [
     { name: siteConfig.name, url: absoluteUrl(`/${params.lang}`) },
@@ -66,6 +68,7 @@ export default async function Page(
             : {}),
           locale: params.lang,
           url: absoluteUrl(page.url),
+          image: ogImage,
           breadcrumbs,
         })}
       />
@@ -100,6 +103,7 @@ export async function generateMetadata(
   const image = getPageImageUrl(page).url;
   const pathWithoutLocale =
     page.slugs.length === 0 ? '/docs' : `/docs/${page.slugs.join('/')}`;
+  const seo = getSeo(params.lang);
 
   return buildPageMetadata({
     title: page.data.title,
@@ -108,6 +112,13 @@ export async function generateMetadata(
     path: page.url,
     pathWithoutLocale,
     image,
+    imageAlt: `${page.data.title} — ${seo.logoAlt}`,
+    keywords: docsPageKeywords(
+      params.lang,
+      page.data.title,
+      page.data.description,
+      page.slugs,
+    ),
     type: 'article',
   });
 }

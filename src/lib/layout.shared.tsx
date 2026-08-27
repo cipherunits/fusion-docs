@@ -2,8 +2,9 @@ import Image from 'next/image';
 import { i18n } from '@/lib/i18n';
 import { uiTranslations } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { getCommon } from '@/lib/common-messages';
+import { getCommon, getSeo } from '@/lib/common-messages';
 import { fumadocsUiLocales } from '@/lib/fumadocs-ui-locales';
+import { siteConfig } from '@/lib/seo';
 
 export const translations = i18n
   .translations()
@@ -13,6 +14,7 @@ export const translations = i18n
 
 export function baseOptions(locale: string): BaseLayoutProps {
   const common = getCommon(locale);
+  const seo = getSeo(locale);
 
   return {
     i18n: true,
@@ -23,8 +25,9 @@ export function baseOptions(locale: string): BaseLayoutProps {
       title: (
         <>
           <Image
-            src="/images/logo-fusion.jpg"
-            alt="Fusion"
+            src={siteConfig.logoPath}
+            alt={seo.logoAlt}
+            title={seo.logoAlt}
             width={28}
             height={26}
             className="rounded-sm"
@@ -48,8 +51,9 @@ export function baseOptions(locale: string): BaseLayoutProps {
       },
       {
         text: common.navDevelopers,
-        url: 'https://cipherunit.xyz/team',
+        url: siteConfig.org.url,
         active: 'url',
+        external: true,
       },
     ],
   };

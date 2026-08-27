@@ -1,4 +1,11 @@
 {
   "title": "v1",
-  "pages": ["index", "getting-started", "router", "config", "middleware"]
+  "description": "1.1.3",
+  "pages": [
+    "index",
+    "getting-started",
+    "router",
+    "config",
+    "middleware"
+  ]
 }
