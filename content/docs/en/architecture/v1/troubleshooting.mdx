@@ -1,0 +1,53 @@
+---
+title: Troubleshooting
+description: Common Fusion setup and runtime problems
+---
+
+## Route returns 404
+
+| Cause | Fix |
+| --- | --- |
+| Module file never imported | Import it from `main` before `listen()` |
+| C# type not registered | Call `Route.Register<T>()` |
+| Wrong path / missing version prefix | Check `version=` and `[module]` expansion |
+| Custom route template mistake | Verify `@http_get` template and `[action]` |
+
+## Settings not loading
+
+| Cause | Fix |
+| --- | --- |
+| Wrong cwd | Run from project root (`fusion command run:dev`) |
+| Wrong env | Set `FUSION_ENV` or use `run:prod` / `--prod` |
+| Looking for flat keys but file nests under `config` | Framework merges `config` object — use `settings.get("port")` not `settings.get("config.port")` unless you stored it that way |
+
+## JWT middleware always 401
+
+- Missing `Authorization: Bearer …` header
+- Malformed token when using default decode
+- Custom `verify` returning `None`
+
+## Roles always 403
+
+- `bearer_jwt` not registered before `require_roles` / `roles=`
+- Payload missing `roles` claim (or custom claim name not configured)
+
+## Native / FFI errors (C#)
+
+- Build `fusion-ffi` or use the NuGet-packaged native binary
+- Set `FUSION_FFI_PATH` for local development if the loader cannot find the library
+
+## Swagger missing
+
+- `swagger.enabled` is false
+- `swagger.path` disabled
+- App failed before mount — check startup exceptions
+
+## Import errors after fusion add
+
+- Build step in `fusion.module.toml` failed
+- Wrong `entry` package name
+- Re-run `fusion add` and read CLI output
+
+## Port already in use
+
+Change `port` in `fusion.<env>.json` / nested `config.port`.

@@ -1,4 +1,14 @@
 {
   "title": "v1",
-  "pages": ["index", "getting-started", "router", "config", "middleware", "async"]
+  "pages": [
+    "index",
+    "getting-started",
+    "router",
+    "custom-http-routes",
+    "config",
+    "middleware",
+    "headers",
+    "swagger",
+    "async"
+  ]
 }

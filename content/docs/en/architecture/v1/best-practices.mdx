@@ -1,0 +1,46 @@
+---
+title: Best practices
+description: Recommended patterns for Fusion applications and packages
+---
+
+## Module boundaries
+
+- One route module class per primary resource
+- Import route modules from the entrypoint only for registration side effects
+- Extract shared logic into library packages instead of cross-importing route modules
+
+## Naming
+
+- Prefer `*Module` class names so `[module]` stems stay readable
+- Prefer `*Action` method names when using `[action]`
+- Follow CLI package naming recommendations (`fusion_<name>_mod` / `fusion-<name>-mod`)
+
+## Configuration
+
+- Keep secrets in environment variables referenced from JSON (ALL_CAPS placeholders) or a secret manager
+- Use separate `fusion.dev.json` / `fusion.prod.json` files
+- Disable Swagger in production when you do not need a public docs UI
+
+## Middleware
+
+- Put cross-cutting concerns (logging, auth parse) in global middleware
+- Put authorization scope (`roles=...`) on the routes that need it
+- Always supply a real `verify` callback for JWT in production — default decode is unverified
+
+## Routing
+
+- Use `version=` for breaking API changes and Swagger version navbar
+- Prefer tokens (`[module]`, `{id}`) over duplicated hard-coded paths
+- Keep handlers thin; call helpers/packages for business logic
+
+## Testing
+
+- Unit-test pure helpers in library packages
+- Use framework tests as references (`test_http_route.py`, `test_middleware.py` in the framework repo)
+- Smoke-test with Swagger UI or HTTP clients against `fusion command run:dev`
+
+## Security
+
+- Do not expose debug settings or Swagger with permissive auth in production unless intentional
+- Validate path/query/body inputs; Python coercion returns `400` on bad types
+- Sanitize filenames before `header.download(...)` / attachment helpers

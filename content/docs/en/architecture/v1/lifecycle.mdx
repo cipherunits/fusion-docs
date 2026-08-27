@@ -1,0 +1,54 @@
+---
+title: Application lifecycle
+description: What happens from process start to FusionApp.listen
+---
+
+## What
+
+The **application lifecycle** is the ordered sequence of steps from starting your process to serving HTTP traffic.
+
+## Startup sequence
+
+```mermaid
+flowchart TD
+  A[Process start] --> B[Import route modules]
+  B --> C[Route classes register with binding]
+  C --> D[load_settings_module / EnsureLoaded]
+  D --> E[FusionApp constructed]
+  E --> F[Optional app.use middleware]
+  F --> G[listen / Listen]
+  G --> H[Mount routes on Hyper]
+  H --> I[Mount Swagger if enabled]
+  I --> J[Accept connections]
+```
+
+### Step details
+
+| Step | What happens |
+| --- | --- |
+| Import / register | Python/Node: decorators run at import. C#: `Route.Register<T>()` |
+| Settings | Load `fusion.<env>.json` (`FUSION_ENV`, default `dev`). Python may merge UPPERCASE attrs from `settings` / `core.settings` |
+| `FusionApp` | Holds settings, middleware list, native engine handle |
+| Middleware | Global chain prepared (see binding notes on `framework_headers`) |
+| `listen` | Binding mounts registered routes, optional Swagger routes, binds host/port, blocks serving |
+
+## Settings flow
+
+```mermaid
+flowchart LR
+  Env[FUSION_ENV] --> File["fusion.<env>.json"]
+  File --> Core[fusion-core Settings]
+  Py[Python settings.py UPPERCASE] --> Core
+  Core --> App[FusionApp host/port/swagger/fingerprint]
+```
+
+If the JSON has a top-level `config` object (CLI scaffold style), that object is merged as settings. Otherwise top-level keys (except `env` / `commands`) are merged.
+
+## Shutdown
+
+`listen()` typically blocks until the process is terminated. There is no separate Fusion “graceful shutdown API” documented beyond normal process signals — treat OS signal handling as application responsibility unless your binding exposes dispose/`using` patterns (C# `FusionApp` is `IDisposable`).
+
+## Next
+
+- [Request lifecycle](./request-lifecycle)
+- [Config (Python)](../../python/v1/config)

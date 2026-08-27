@@ -1,0 +1,52 @@
+---
+title: Project structure
+description: Standard Fusion application layout created by fusion init
+---
+
+## Scaffold layout (Python)
+
+`fusion init --lang python` creates a layout similar to:
+
+```text
+my-app/
+├── main.py                 # Required entry — listen() lives here
+├── core/
+│   └── settings.py         # Optional UPPERCASE overlay
+├── src/
+│   └── modules/
+│       └── products/
+│           └── products.py # Sample route module
+├── fusion.dev.json         # Environment config + commands
+├── fusion.stage.json
+├── fusion.prod.json
+└── fusion-framework.toml   # App metadata + installed [[modules]]
+```
+
+Exact files can vary by Fusion Tool version — treat the CLI output as source of truth when scaffolding.
+
+## File roles
+
+| Path | Owner | Role |
+| --- | --- | --- |
+| `main.py` | You | Imports route modules, loads settings, registers middleware, calls `listen()` |
+| `src/modules/**` | You | Route modules (`FusionBaseApi` classes) |
+| `core/settings.py` | You | Python settings overlay (UPPERCASE names) |
+| `fusion.<env>.json` | You | Host/port/swagger/commands for that environment |
+| `fusion-framework.toml` | You + CLI | App identity; `[[modules]]` after `fusion add` |
+| `.fusion/modules/` | CLI | Vendored library packages (generated/managed) |
+
+## Required vs optional
+
+| Required to run | Optional |
+| --- | --- |
+| Entrypoint that constructs `FusionApp` and listens | Extra environments |
+| At least one registered route (or only Swagger/404 surface) | Library packages |
+| Discoverable settings (or defaults) | `core/settings.py` |
+
+## TypeScript / C#
+
+Scaffolding differs by language but follows the same ideas: one entrypoint, route modules, environment JSON. See language getting-started pages and [Fusion Tool](../../cli/v1).
+
+## Generated / vendored
+
+Do not hand-edit vendored package trees under `.fusion/modules/` as your source of truth — change the upstream package repo and re-add/update.

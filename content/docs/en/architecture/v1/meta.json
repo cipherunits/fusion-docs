@@ -1,0 +1,17 @@
+{
+  "title": "v1",
+  "pages": [
+    "index",
+    "fma",
+    "application-modules",
+    "packages",
+    "lifecycle",
+    "request-lifecycle",
+    "project-structure",
+    "glossary",
+    "best-practices",
+    "anti-patterns",
+    "troubleshooting",
+    "what-fusion-is-not"
+  ]
+}
