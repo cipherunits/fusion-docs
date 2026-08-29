@@ -1,0 +1,46 @@
+---
+title: بهترین شیوه‌ها
+description: الگوهای پیشنهادی برای اپلیکیشن‌ها و پکیج‌های Fusion
+---
+
+## مرزهای ماژول
+
+- یک کلاس ماژول route به‌ازای هر resource اصلی
+- ماژول‌های route را فقط به‌خاطر side-effect ثبت از entrypoint import کنید
+- منطق مشترک را به‌جای import متقابل ماژول‌های route به پکیج‌های کتابخانه‌ای بکشید
+
+## نام‌گذاری
+
+- نام کلاس‌های `*Module` را ترجیح دهید تا stemهای `[module]` خوانا بمانند
+- هنگام استفاده از `[action]` نام متدهای `*Action` را ترجیح دهید
+- توصیه‌های نام‌گذاری پکیج CLI را دنبال کنید (`fusion_<name>_mod` / `fusion-<name>-mod`)
+
+## پیکربندی
+
+- اسرار را در متغیرهای محیطی ارجاع‌شده از JSON (placeholderهای ALL_CAPS) یا secret manager نگه دارید
+- از فایل‌های جداگانهٔ `fusion.dev.json` / `fusion.prod.json` استفاده کنید
+- وقتی UI عمومی docs لازم نیست، Swagger را در production خاموش کنید
+
+## Middleware
+
+- نگرانی‌های عرضی (لاگ، پارس auth) را در middleware سراسری بگذارید
+- محدودهٔ authorization (`roles=...`) را روی routeهایی که لازم دارند بگذارید
+- در production همیشه یک callback واقعی `verify` برای JWT بدهید — decode پیش‌فرض بدون تأیید امضا است
+
+## مسیریابی
+
+- برای تغییرات شکستهٔ API و navbar نسخهٔ Swagger از `version=` استفاده کنید
+- توکن‌ها (`[module]`، `{id}`) را به مسیرهای hard-code تکراری ترجیح دهید
+- Handlerها را نازک نگه دارید؛ منطق کسب‌وکار را به helper/پکیج بسپارید
+
+## تست
+
+- helperهای خالص را در پکیج‌های کتابخانه‌ای unit-test کنید
+- تست‌های فریم‌ورک را به‌عنوان مرجع استفاده کنید (`test_http_route.py`، `test_middleware.py` در ریپوی فریم‌ورک)
+- با Swagger UI یا کلاینت HTTP روی `fusion command run:dev` smoke-test کنید
+
+## امنیت
+
+- تنظیمات debug یا Swagger با auth سهل‌گیر را در production عمداً باز نگذارید مگر عمدی باشد
+- ورودی‌های path/query/body را اعتبارسنجی کنید؛ coercion پایتون روی نوع بد `400` برمی‌گرداند
+- قبل از `header.download(...)` / attachment، نام فایل را sanitize کنید

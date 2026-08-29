@@ -1,0 +1,30 @@
+---
+title: واژه‌نامه
+description: اصطلاحات Fusion Framework
+---
+
+| اصطلاح | معنا |
+| --- | --- |
+| **Fusion Framework** | فریم‌ورک HTTP کلاس‌محور با هستهٔ مشترک Rust و باندینگ‌های زبانی |
+| **fusion-core** | crate راستی که سرور، router، settings، headerها و نام‌گذاری را پیاده می‌کند |
+| **fusion-ffi** | C ABI استفاده‌شده توسط باندینگ C# |
+| **Binding** | پکیج Python / Node / C# که APIهای Fusion را به آن زبان نشان می‌دهد |
+| **FMA** | Fusion Module Architecture — ترکیب ماژول‌های route + پکیج‌های کتابخانه‌ای |
+| **ماژول route** | کلاس `FusionBaseApi` ثبت‌شده با قالب مسیر |
+| **پکیج کتابخانه‌ای / ماژول CLI** | پکیج قابل انتشار با `fusion.module.toml`، نصب از طریق `fusion add` |
+| **FusionApp** | آبجکت اپلیکیشن که settings، middleware را نگه می‌دارد و listen را شروع می‌کند |
+| **FusionBaseApi** | کلاس پایهٔ ماژول‌های route؛ نمای request + `response` |
+| **Convention route** | Handler با نام `get`/`post`/… که روی مسیر پایهٔ ماژول mount می‌شود |
+| **مسیر HTTP سفارشی** | `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` با قالب مسیر صریح |
+| **`[module]`** | توکن مسیر که از stem نام کلاس گسترش می‌یابد |
+| **`[action]`** | توکن مسیر که از stem نام handler گسترش می‌یابد (`*Action` حذف می‌شود) |
+| **Middleware** | تابع `(request, call_next)` که handlerها را می‌پیچد |
+| **Settings** | config زمان اجرا از `fusion.<env>.json` (+ overlay اختیاری پایتون) |
+| **Headerهای fingerprint** | headerهای هویت مانند `X-Powered-By` / `X-Framework` / `X-Fusion-Version` |
+| **Fusion Tool** | CLI خارجی (`fusion`) برای init، دستورات و پکیج‌ها |
+| **OpenAPI / Swagger** | UI مستندات API و مشخصات JSON که توسط اپ mount می‌شوند |
+
+| **Pagination** | صفحه‌بندی مشترک لیست: `page` / `page_size` → `{ items, pagination }` |
+| **مسیر HTTP سفارشی** | `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` فراتر از متدهای convention |
+| **Fusion Desktop** | اپ گرافیکی همراه بک‌اندهای Fusion |
+| **Fusion Snippets** | اکستنشن snippet برای VS Code / Cursor |

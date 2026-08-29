@@ -1,0 +1,84 @@
+---
+title: Пользовательские HTTP-маршруты
+description: Маршруты на уровне метода — http_get … http_options (и алиасы HttpGet)
+---
+
+## Convention и пользовательские маршруты
+
+Каждый класс `FusionBaseApi` может объявлять маршруты двумя способами:
+
+| Режим | Как | Путь монтирования |
+| --- | --- | --- |
+| **Convention** | Методы `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | Базовый путь класса из `@route` |
+| **Пользовательский** | `@http_get` … `@http_options` (или `HttpGet` … `HttpOptions`) на любом методе | Базовый путь **склеивается** с шаблоном |
+
+Оба режима могут сосуществовать на одном классе.
+
+## Декораторы методов
+
+Импорт из `fusion_framework.http_route`. Первый аргумент — шаблон пути.
+
+| Декоратор | Алиас | HTTP-метод |
+| --- | --- | --- |
+| `http_get` | `HttpGet` | GET |
+| `http_post` | `HttpPost` | POST |
+| `http_put` | `HttpPut` | PUT |
+| `http_patch` | `HttpPatch` | PATCH |
+| `http_delete` | `HttpDelete` | DELETE |
+| `http_head` | `HttpHead` | HEAD |
+| `http_options` | `HttpOptions` | OPTIONS |
+
+## Общие параметры
+
+| Параметр | Поведение |
+| --- | --- |
+| `tags` | `None` наследует от `@route` класса; `[]` очищает; `[…]` переопределяет |
+| `desc` | Описание операции (OpenAPI) |
+| `title` | Заголовок / summary операции |
+| `deprecated` | Пометить операцию устаревшей (по умолчанию `False`) |
+
+## Склейка путей и токены
+
+- Относительные шаблоны (без ведущего `/`) присоединяются к базовому пути `@route`.
+- Абсолютные шаблоны с ведущим `/` **игнорируют** базовый путь класса и монтируются по указанному пути.
+- `[module]` раскрывается из имени класса (`UserModule` → `user`).
+- `[action]` — из имени обработчика: снимается суффикс `Action` / `ACTION`, затем lowercase (`UserAction` → `user`).
+
+## Пример (GET + POST)
+
+```python
+from fusion_framework import status
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.http_route import http_delete, http_get, http_post
+from fusion_framework.route import route
+
+
+@route("/api/[module]", tags=["users"])
+class UserModule(FusionBaseApi):
+    # Convention: GET /api/user
+    def get(self):
+        return self.response({"mode": "convention"}, status=status.HTTP_SUCCESS)
+
+    # Пользовательский: GET /api/user/test/user
+    @http_get("test/[action]", title="User action")
+    def UserAction(self):
+        return self.response({"mode": "custom", "action": "user"}, status=status.HTTP_SUCCESS)
+
+    # Пользовательский: POST /api/user/create/create
+    @http_post("create/[action]", title="Create user", tags=["users", "write"])
+    def CreateAction(self):
+        return self.response({"created": True}, status=status.HTTP_SUCCESS)
+
+    # Абсолютный: DELETE /admin/users/purge
+    @http_delete("/admin/users/purge", deprecated=True)
+    def Purge(self):
+        return self.response({"purged": True}, status=status.HTTP_SUCCESS)
+```
+
+Алиасы в PascalCase взаимозаменяемы (`@HttpGet(...)`, `@HttpPost(...)`, …).
+
+## Регистрация
+
+Импортируйте модуль из `main.py` (или точки входа) **до** `listen()`, чтобы сработала регистрация `@route`.
+
+Пример фреймворка: `examples/custom_http_routes.py`.

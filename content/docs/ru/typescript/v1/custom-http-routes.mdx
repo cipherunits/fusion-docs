@@ -1,0 +1,97 @@
+---
+title: Пользовательские HTTP-маршруты
+description: Маршруты на уровне метода — httpGet … httpOptions на FusionBaseApi
+---
+
+## Convention и пользовательские маршруты
+
+| Режим | Как | Путь монтирования |
+| --- | --- | --- |
+| **Convention** | Методы `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | Базовый путь класса из `route(...)` |
+| **Пользовательский** | `httpGet` … `httpOptions` на любом методе | Базовый путь **склеивается** с шаблоном |
+
+Оба режима могут сосуществовать на одном классе.
+
+## Хелперы методов
+
+Декораторов нет. Примените хелперы высшего порядка к методам prototype, затем оберните класс в `route(...)`.
+
+Импорт из `fusion-framework`:
+
+| Хелпер | HTTP-метод |
+| --- | --- |
+| `httpGet` | GET |
+| `httpPost` | POST |
+| `httpPut` | PUT |
+| `httpPatch` | PATCH |
+| `httpDelete` | DELETE |
+| `httpHead` | HEAD |
+| `httpOptions` | OPTIONS |
+
+Сигнатура: `httpGet(route, options?)(handler)` — то же для остальных хелперов.
+
+## Общие параметры
+
+Объект options — второй аргумент:
+
+| Параметр | Поведение |
+| --- | --- |
+| `tags` | Не указан — наследование от `route` класса; `[]` очищает; `[…]` переопределяет |
+| `desc` | Описание операции |
+| `title` | Заголовок / summary операции |
+| `deprecated` | Пометить операцию устаревшей |
+
+## Склейка путей и токены
+
+- Относительные шаблоны (без ведущего `/`) присоединяются к базовому пути `route(...)`.
+- Абсолютные шаблоны с ведущим `/` **игнорируют** базовый путь класса.
+- `[module]` раскрывается из имени класса (`UserModule` → `user`).
+- `[action]` — из имени обработчика со снятием суффикса `Action` / `ACTION` и lowercase (`UserAction` → `user`).
+
+## Пример (GET + POST)
+
+```ts
+import {
+  FusionBaseApi,
+  httpDelete,
+  httpGet,
+  httpPost,
+  route,
+  status,
+} from "fusion-framework";
+
+class UserModule extends FusionBaseApi {
+  get() {
+    return this.response({ mode: "convention" }, status.HTTP_SUCCESS);
+  }
+
+  UserAction() {
+    return this.response({ mode: "custom", action: "user" }, status.HTTP_SUCCESS);
+  }
+
+  CreateAction() {
+    return this.response({ created: true }, status.HTTP_SUCCESS);
+  }
+
+  Purge() {
+    return this.response({ purged: true }, status.HTTP_SUCCESS);
+  }
+}
+
+httpGet("test/[action]", { title: "User action" })(UserModule.prototype.UserAction);
+
+httpPost("create/[action]", {
+  title: "Create user",
+  tags: ["users", "write"],
+})(UserModule.prototype.CreateAction);
+
+httpDelete("/admin/users/purge", { deprecated: true })(UserModule.prototype.Purge);
+
+export const User = route("/api/[module]", { tags: ["users"] })(UserModule);
+```
+
+## Регистрация
+
+Импортируйте файл модуля (чтобы выполнился `route(...)`) **до** `app.listen()`.
+
+Пример: `examples/custom_http_routes.mjs`.

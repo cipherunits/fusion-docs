@@ -5,6 +5,7 @@
     "index",
     "getting-started",
     "router",
+    "custom-http-routes",
     "config",
     "middleware"
   ]

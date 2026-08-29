@@ -1,0 +1,52 @@
+---
+title: ساختار پروژه
+description: چیدمان استاندارد اپلیکیشن Fusion که fusion init می‌سازد
+---
+
+## چیدمان scaffold (پایتون)
+
+`fusion init --lang python` چیدمانی شبیه این می‌سازد:
+
+```text
+my-app/
+├── main.py                 # ورود اجباری — listen() اینجا است
+├── core/
+│   └── settings.py         # overlay اختیاری UPPERCASE
+├── src/
+│   └── modules/
+│       └── products/
+│           └── products.py # ماژول route نمونه
+├── fusion.dev.json         # تنظیمات محیط + commands
+├── fusion.stage.json
+├── fusion.prod.json
+└── fusion-framework.toml   # متادیتای اپ + [[modules]] نصب‌شده
+```
+
+فایل‌های دقیق می‌توانند با نسخهٔ Fusion Tool فرق کنند — هنگام scaffold، خروجی CLI را منبع حقیقت بدانید.
+
+## نقش فایل‌ها
+
+| مسیر | مالک | نقش |
+| --- | --- | --- |
+| `main.py` | شما | Import ماژول‌های route، بارگذاری settings، ثبت middleware، فراخوانی `listen()` |
+| `src/modules/**` | شما | ماژول‌های route (کلاس‌های `FusionBaseApi`) |
+| `core/settings.py` | شما | overlay تنظیمات پایتون (نام‌های UPPERCASE) |
+| `fusion.<env>.json` | شما | host/port/swagger/commands برای آن محیط — ببینید [تنظیمات](./settings) |
+| `fusion-framework.toml` | شما + CLI | هویت اپ؛ `[[modules]]` بعد از `fusion add` |
+| `.fusion/modules/` | CLI | پکیج‌های کتابخانه‌ای vendored (تولید/مدیریت‌شده) |
+
+## اجباری در برابر اختیاری
+
+| برای اجرا لازم است | اختیاری |
+| --- | --- |
+| Entrypoint که `FusionApp` می‌سازد و listen می‌کند | محیط‌های اضافه |
+| حداقل یک route ثبت‌شده (یا فقط سطح Swagger/404) | پکیج‌های کتابخانه‌ای |
+| تنظیمات قابل کشف (یا پیش‌فرض‌ها) | `core/settings.py` |
+
+## TypeScript / C#
+
+Scaffolding بر اساس زبان فرق می‌کند اما همان ایده‌ها را دنبال می‌کند: یک entrypoint، ماژول‌های route، JSON محیط. صفحات getting-started زبان و [Fusion Tool](../../cli/v1) را ببینید.
+
+## تولیدشده / vendored
+
+درخت پکیج‌های vendored زیر `.fusion/modules/` را به‌عنوان منبع حقیقت دست‌کاری نکنید — ریپوی بالادست را عوض کنید و دوباره add/update کنید.

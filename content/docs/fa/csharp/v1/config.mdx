@@ -1,11 +1,15 @@
 ---
 title: Config
-description: fusion.<env>.json and Settings in C#
+description: fusion.<env>.json و SettingsStore در C# (FusionFramework)
 ---
 
-## Overview
+## نمای کلی
 
-Settings load through FFI from the same `fusion.<env>.json` files as other languages (`FUSION_ENV`, default `dev`).
+تنظیمات از طریق FFI از همان فایل‌های `fusion.<env>.json` بارگذاری می‌شوند (`FUSION_ENV`، پیش‌فرض `dev`). تایپ‌ها در namespace **`FusionFramework`** هستند (پکیج NuGet: **`Fusion-Framework`**).
+
+کشف فایل، placeholderها، کلیدهای مصرف‌شده و schema کامل تولیدشدهٔ CLI:
+
+→ **[تنظیمات و پیکربندی](../../architecture/v1/settings)**
 
 ```csharp
 SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
@@ -14,23 +18,32 @@ var port = SettingsStore.Current.Port;
 var secret = SettingsStore.Current.Get("secret_key");
 ```
 
-## Startup
+## استارت
 
 ```csharp
 SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
 using var app = new FusionApp(SettingsStore.GetSettings());
-app.Listen(); // host/port from settings
+app.Listen(); // host/port از settings
 ```
+
+اپ‌های scaffold یک helper استاتیک `CoreSettings` هم دارند که از `SettingsStore` می‌خواند — جایگزین JSON نیست.
 
 ## API
 
-| API | Role |
+| API | نقش |
 | --- | --- |
-| `EnsureLoaded(extraRoots…)` | Discover JSON |
-| `LoadJson(path, env, roots…)` | Explicit load |
-| `Get(key, default?)` | JSON node / value |
-| `Merge(object)` | Overlay |
-| `Host` / `Port` / `Debug` / `Env` | Common fields |
-| `SettingsStore.Configure(values)` | Merge into singleton |
+| `EnsureLoaded(extraRoots…)` | کشف JSON |
+| `LoadJson(path, env, roots…)` | لود صریح |
+| `Get(key, default?)` | مقدار / JSON node |
+| `Merge(object)` | overlay |
+| `Host` / `Port` / `Debug` / `Env` | فیلدهای رایج |
+| `SettingsStore.Configure(values)` | merge روی singleton |
 
-`commands` in JSON are for Fusion Tool only.
+## تعویض محیط
+
+```bash
+FUSION_ENV=prod dotnet run
+fusion command run:prod
+```
+
+`commands` فقط برای Fusion Tool است.

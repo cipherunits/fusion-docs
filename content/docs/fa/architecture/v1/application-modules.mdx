@@ -1,0 +1,118 @@
+---
+title: ماژول‌های route اپلیکیشن
+description: ساخت ماژول‌های FusionBaseApi، ثبت آن‌ها و ساختاربندی handlerها
+---
+
+## چیست؟
+
+یک **ماژول route اپلیکیشن** کلاسی است که از `FusionBaseApi` ارث می‌برد و با یک قالب مسیر ثبت می‌شود. متدهای HTTP convention و مسیرهای HTTP سفارشی اختیاری به endpointهای mount‌شده در `fusion-core` تبدیل می‌شوند.
+
+## چرا؟
+
+گروه‌بندی handlerها روی یک کلاس، سطح HTTP یک resource را منسجم نگه می‌دارد و اجازه می‌دهد `[module]` یک stem پایدار مسیر از نام کلاس بسازد.
+
+## چه زمانی؟
+
+برای هر resource HTTP (یا گروه منسجم endpointها) که اپلیکیشن شما در معرض می‌گذارد، از یک ماژول route استفاده کنید.
+
+## ساخت ماژول route (پایتون)
+
+```python
+# src/modules/users/users.py
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework.http_route import http_get, http_post
+from fusion_framework import status
+
+
+@route(
+    "api/[module]/",
+    tags=["users"],
+    desc="User resource",
+    version="v1",
+)
+class UserModule(FusionBaseApi):
+    def get(self):
+        return self.response({"users": []}, status=status.HTTP_SUCCESS)
+
+    @http_get("profile/[action]", title="Current profile action")
+    def ProfileAction(self):
+        return self.response({"profile": True}, status=status.HTTP_SUCCESS)
+
+    @http_post("create/[action]", title="Create user")
+    def CreateAction(self):
+        return self.response({"created": True}, status=status.HTTP_SUCCESS)
+```
+
+ثبت با import از نقطهٔ ورود:
+
+```python
+# main.py
+import src.modules.users.users  # noqa: F401 — @route را اجرا می‌کند
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+def main() -> None:
+    load_settings_module("settings")
+    FusionApp(get_settings()).listen()
+
+if __name__ == "__main__":
+    main()
+```
+
+### مسیرهای تولیدشده
+
+| Handler | Method | مسیر (با `version="v1"`) |
+| --- | --- | --- |
+| `get` | GET | `/v1/api/user/` |
+| `ProfileAction` | GET | `/v1/api/user/profile/profile` |
+| `CreateAction` | POST | `/v1/api/user/create/create` |
+
+`UserModule` → `[module]` = `user`. `ProfileAction` → `[action]` = `profile`. `CreateAction` → `[action]` = `create`.
+
+## Convention در برابر مسیرهای سفارشی
+
+| حالت | سازوکار | مثال |
+| --- | --- | --- |
+| Convention | متدهای نام‌گذاری‌شده `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | `GET /api/user/` |
+| سفارشی | `@http_get` … `@http_options` / `httpGet` … `httpOptions` / `[HttpGet]` … `[HttpOptions]` | `GET /api/user/profile/profile`، `POST /api/user/create/create` |
+
+هر دو می‌توانند روی یک کلاس هم‌زیستی داشته باشند. جزئیات: [Router پایتون](../../python/v1/router) · [مسیرهای HTTP سفارشی](../../python/v1/custom-http-routes).
+
+## گزینه‌های route
+
+| گزینه | هدف |
+| --- | --- |
+| `tags`, `title`, `desc` | متادیتای OpenAPI |
+| `version` | پیشوند مسیر + ورودی navbar نسخهٔ Swagger |
+| `deprecated` | علامت‌گذاری عملیات‌های منسوخ |
+| `middleware` | لیست middleware محدود به route |
+| `roles` | middleware `require_roles(...)` را اضافه می‌کند |
+
+## چک‌لیست ثبت
+
+1. فایل را زیر `src/modules/...` بسازید
+2. از `FusionBaseApi` زیرکلاس بگیرید
+3. `@route` / `route()` / `[Route]` را اعمال کنید
+4. ماژول را از entrypoint **قبل از** `listen()` import کنید
+5. (C#) صریحاً `Route.Register<T>()` را صدا بزنید
+
+## TypeScript / C#
+
+همان معنا با syntax متفاوت — صفحات router زبان:
+
+- [TypeScript](../../typescript/v1/router)
+- [C#](../../csharp/v1/router)
+
+## بهترین شیوه‌ها
+
+- یک resource اصلی به‌ازای هر کلاس
+- Startup را بیرون از فایل‌های ماژول نگه دارید
+- `[module]` را به hard-code کردن نام resource ترجیح دهید
+- برای تغییرات شکستهٔ API از `version=` استفاده کنید
+
+## همچنین ببینید
+
+- [FMA](./fma)
+- [پکیج‌های قابل استفادهٔ مجدد](./packages) — برای کد مشترک بین اپ‌ها

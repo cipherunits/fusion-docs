@@ -1,18 +1,235 @@
 ---
 title: شروع کار
-description: نصب و راه‌اندازی Python SDK
+description: نصب Fusion Framework برای پایتون و نوشتن اولین API
 ---
 
 ## نصب
 
 ```bash
-pip install cipherunits-fusion
+pip install fusion-framework
 ```
 
-## شروع سریع
+با [Fusion Tool](../../cli/v1/getting-started) پروژه را scaffold کنید تا چیدمان استاندارد (`main.py`، `core/settings.py`، ماژول نمونهٔ `products` و فایل‌های محیط) را بگیرید:
+
+```bash
+fusion init --lang python --name my-app --description "My Fusion API"
+cd my-app
+pip install fusion-framework
+```
+
+## چیدمان پروژه (خروجی `fusion init`)
+
+```text
+├── main.py                          # نقطهٔ ورود — همیشه اپ را از اینجا شروع کنید
+├── core/
+│   └── settings.py
+└── src/
+    └── modules/
+        └── products/
+            └── products.py          # ماژول نمونه — این الگو را ویرایش / کپی کنید
+```
+
+### `main.py`
+
+نقطهٔ ورود ماژول‌ها را import می‌کند (تا کلاس‌های `@route` ثبت شوند)، settings را بار می‌کند، middleware اختیاری را ثبت می‌کند، سپس سرور را شروع می‌کند. منطق startup را اینجا نگه دارید — `listen()` را داخل فایل‌های ماژول نگذارید:
 
 ```python
-from fusion import Fusion
+"""Entry point: register routes, middleware, and start the server."""
 
-client = Fusion(api_key="...")
+import src.modules.products.products  # registers @route classes
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+# Global middleware (optional). Framework ships with none by default.
+MIDDLEWARE: list = []
+
+
+def main() -> None:
+    load_settings_module("settings")
+    app = FusionApp(get_settings())
+    for middleware in MIDDLEWARE:
+        app.use(middleware)
+    app.listen()
+
+
+if __name__ == "__main__":
+    main()
 ```
+
+وقتی ماژول دیگری اضافه می‌کنید، همان‌طور در `main.py` import کنید. ببینید: [Middleware](./middleware) و [Config](./config).
+
+### ماژول نمونهٔ `products`
+
+`fusion init` یک API کوچک **products** می‌آورد. Handlerها را روی زیرکلاس `FusionBaseApi` می‌نویسید و متادیتای Swagger را روی `@route` می‌گذارید:
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route(
+    "api/[module]/",
+    tags=["swagger"],
+    desc="Fusion Framework Api",
+    version="v1",
+    deprecated=False,
+)
+class ProductModule(FusionBaseApi):
+    """Product management module."""
+
+    def get(self):
+        return self.response({"products_id": 12}, status=status.HTTP_SUCCESS)
+
+    def post(self):
+        return self.response({"products_id": 12}, status=status.HTTP_201_CREATED)
+
+    def delete(self):
+        return self.response({"products_id": 12}, status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self):
+        return self.response({"products_id": 12}, status=status.HTTP_SUCCESS)
+```
+
+`[module]` از نام کلاس حل می‌شود (`ProductModule` → `product`)، پس این route می‌شود `/api/product/`.
+
+گزینه‌های Swagger به‌ازای route روی `@route`:
+
+| آرگومان | هدف |
+| --- | --- |
+| `tags` | تگ‌های OpenAPI (گروه‌بندی در Swagger UI) |
+| `desc` | توضیحات عملیات / API |
+| `title` | عنوان اختیاری |
+| `version` | متادیتای نسخهٔ API |
+| `deprecated` | علامت منسوخ در OpenAPI |
+
+تنظیمات سراسری Swagger UI (مسیر، طرح‌های auth، گزینه‌های UI) در `fusion.<env>.json` است — ببینید [دستورات و محیط‌ها](../../cli/v1/command).
+
+## اجرا
+
+```bash
+fusion command run:dev
+```
+
+سپس باز کنید:
+
+- **API:** [http://127.0.0.1:8080](http://127.0.0.1:8080)
+- **Swagger UI:** [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger)
+
+Swagger به‌طور خودکار از ماژول‌های `@route` ساخته می‌شود. با UI endpointهای نمونهٔ products را کاوش و صدا بزنید.
+
+## کدهای وضعیت
+
+به‌جای عدد خام از ماژول `status` استفاده کنید:
+
+```python
+from fusion_framework import status
+
+status.HTTP_SUCCESS        # 200
+status.HTTP_201_CREATED    # 201
+status.HTTP_204_NO_CONTENT # 204
+status.HTTP_404_NOT_FOUND  # 404
+```
+
+```python
+return self.response({"ok": True}, status=status.HTTP_SUCCESS)
+```
+
+## Handlerها
+
+متدهای HTTP را مثل همیشه پیاده کنید: `get`, `post`, `put`, `patch`, `delete`.
+
+### بایندینگ پارامتر
+
+آرگومان‌ها از امضای متد گرفته می‌شوند. منبع به نام پارامتر بستگی دارد:
+
+1. اگر نام با پارامتر **path** یکی باشد → path
+2. وگرنه اگر متد `POST` / `PUT` / `PATCH` باشد و نام در JSON **body** باشد → body
+3. وگرنه اگر نام در **query** string باشد → query
+4. پارامترهای اختیاری گم‌شده (default یا annotation) به‌صورت `None` می‌آیند
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.http import HTTPException
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/{id}", tags=["items"], desc="Items by id")
+class Items(FusionBaseApi):
+    def get(self, id: int):
+        return self.response({"id": id}, status=status.HTTP_SUCCESS)
+
+    def post(self, id: int, title: str = "untitled"):
+        # id ← path, title ← JSON body (optional via default)
+        return self.response(
+            {"id": id, "title": title},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+@route("api/[module]/", tags=["products"], desc="Products list")
+class Products(FusionBaseApi):
+    def get(self, id: int):
+        # GET /api/products/?id=12
+        if not id:
+            raise HTTPException(400, {"message": "id is required"})
+        return self.response({"products_id": id}, status=status.HTTP_SUCCESS)
+```
+
+یادتان باشد: ماژول‌های جدید را زیر `src/modules/...` بگذارید و **از `main.py` import کنید**. Startup اپ (`load_settings_module` / `FusionApp` / `listen`) فقط در `main.py` بماند.
+
+جزئیات: [Router](./router).
+
+### پاسخ‌ها
+
+از `self.response(body, status=status.HTTP_SUCCESS, **headers)` برای envelope پاسخ استفاده کنید. Dict و list توسط هسته به‌صورت JSON سریال می‌شوند.
+
+### خطاها
+
+```python
+from fusion_framework.http import HTTPException
+
+raise HTTPException(404, {"detail": "not found"})
+```
+
+### Handlerهای async
+
+```python
+@route("/")
+class Root(FusionBaseApi):
+    def get(self):
+        return self.response({"status": "ok"}, status=status.HTTP_SUCCESS)
+
+    async def post(self):
+        return self.response({"status": "async ok"}, status=status.HTTP_SUCCESS)
+```
+
+راهنمای کامل: [Async](./async).
+
+## پیکربندی
+
+تنظیمات runtime از `fusion.<env>.json` می‌آید (`FUSION_ENV`، پیش‌فرض `dev`). در `main.py` با `load_settings_module` / `get_settings` بارشان کنید.
+
+راهنمای کامل: [Config](./config). همچنین [دستورات و محیط‌ها](../../cli/v1/command).
+
+## Middleware
+
+به‌طور پیش‌فرض هیچ middleware اجرا نمی‌شود. خودتان در `main.py` ثبت کنید (`MIDDLEWARE` + `app.use`) یا روی `@route(..., middleware=..., roles=...)`.
+
+راهنمای کامل: [Middleware](./middleware).
+
+## APIهای اصلی
+
+| نماد | نقش |
+| --- | --- |
+| `FusionBaseApi` | نمای request (`method`, `path`, `body`, `headers`, `params`, `query`, `state`) و `response(...)` |
+| `route(...)` | ثبت ماژول؛ متادیتای Swagger + اختیاری `middleware` / `roles` |
+| `router(path)` | Alias برای `route(path)` بدون متادیتای Swagger |
+| `status` | ثابت‌های وضعیت HTTP (`HTTP_SUCCESS` → 200، …) |
+| `FusionApp` / `app.use` / `listen` | اپ + middleware سراسری — از `main.py` صدا بزنید |
+| `load_settings_module` / `get_settings` | بارگذاری `fusion.<env>.json` + `core/settings.py` |
+| `HTTPException` | پرتاب پاسخ خطای HTTP |
+
+در زیرساخت، PyO3 به `fusion-core` برای مسیریابی، بایندینگ و سریالایز پل می‌زند.

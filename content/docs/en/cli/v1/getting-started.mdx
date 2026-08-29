@@ -41,7 +41,7 @@ fusion --version
 Example output:
 
 ```text
-fusion 1.0.9
+fusion 1.2.6
 ```
 
 ## Create a project
@@ -110,6 +110,14 @@ For a Python project, `fusion init` creates a small starter app — including a 
 - **`core/settings.py`** — loads the `config` block from `fusion.<env>.json` (`FUSION_ENV`, default `dev`)
 
 TypeScript projects use the same layout with `main.ts`, `core/settings.ts`, and a sample module under `src/modules/…`. C# (`csharp` / `asp-core`) scaffolds a .NET-style entrypoint and modules with `[Route]` instead of `@route`.
+
+Default environment values from the CLI scaffold:
+
+| File | Port | Host | Debug | Swagger |
+| --- | --- | --- | --- | --- |
+| `fusion.dev.json` | `8080` | `127.0.0.1` | `true` | on |
+| `fusion.stage.json` | `8081` | from `HOST` env | `false` | off |
+| `fusion.prod.json` | `9090` | from `HOST` env | `false` | off |
 
 ## Run the project
 

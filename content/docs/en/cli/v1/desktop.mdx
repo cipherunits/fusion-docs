@@ -1,0 +1,34 @@
+---
+title: Fusion Desktop
+description: Graphical companion app for managing Fusion Framework backends
+---
+
+## What it is
+
+**Fusion Desktop** is the official GUI companion for Fusion Framework (built by [Cipher Unit](https://cipherunit.xyz)). It complements the `fusion` CLI for developers who prefer a visual workflow on the desktop.
+
+Primary download page: [Fusion Desktop](/en/gui).
+
+## Platforms
+
+| Platform | Notes |
+| --- | --- |
+| **Windows** | Windows 10 / 11 — user installer, system installer, `.zip`, CLI builds — **x64** and **Arm64** |
+| **Linux** | `.deb` (Debian/Ubuntu), `.rpm` (RHEL/Fedora/SUSE), Snap, `.tar.gz`, CLI — **x64** and **Arm64** |
+
+See the live download UI for the exact artifact matrix: [/en/gui](/en/gui).
+
+## How it relates to the CLI
+
+| Task | CLI | Desktop |
+| --- | --- | --- |
+| Scaffold project | `fusion init` | Guided UI (same project layout) |
+| Run env commands | `fusion command` | UI actions over the same `fusion.<env>.json` `commands` |
+| Install modules | `fusion add` | Module workflows where exposed in the app |
+| Self-update CLI | `fusion update` | App updates via its own installers |
+
+Project on-disk format stays the same (`fusion-framework.toml`, `fusion.<env>.json`, route modules). You can mix CLI and Desktop on one project.
+
+## Screenshot
+
+![Fusion Desktop](./fusion_desktop.jpeg)

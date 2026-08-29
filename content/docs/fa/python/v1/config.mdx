@@ -5,9 +5,13 @@ description: بارگذاری fusion.<env>.json و core/settings.py با fusion_
 
 ## نمای کلی
 
-`fusion_framework.config` لایهٔ پایتون روی تنظیمات مشترک `fusion-core` است.
+`fusion_framework.config` لایهٔ پایتون روی تنظیمات مشترک **fusion-core** است.
 
-مقادیر runtime در **`fusion.<env>.json`** هستند (شبیه `.env` به‌ازای هر محیط). لایهٔ اختیاری پایتون در **`core/settings.py`** است. محیط فعال از **`FUSION_ENV`** می‌آید (پیش‌فرض: `dev`).
+مقادیر runtime در **`fusion.<env>.json`** هستند. لایهٔ اختیاری پایتون در **`core/settings.py`** است. محیط فعال از **`FUSION_ENV`** می‌آید (پیش‌فرض: `dev`).
+
+قواعد کشف فایل، envelope در برابر JSON تخت، placeholderها و schema کامل `fusion.dev.json` / stage / prod:
+
+→ **[تنظیمات و پیکربندی](../../architecture/v1/settings)**
 
 ```python
 from fusion_framework.config import load_settings_module, get_settings
@@ -64,43 +68,7 @@ SECRET_KEY = settings.get("secret_key")
 DEBUG = settings.get("debug", default=False)
 ```
 
-## `get_settings`
-
-همان singleton را می‌دهد. اگر JSON هنوز لود نشده، `ensure_loaded` صدا زده می‌شود.
-
-```python
-s = get_settings()
-s.host   # str
-s.port   # int
-s.debug  # bool
-s.env    # "dev" | "prod" | …
-```
-
-## شیء `settings`
-
-| API | کاربرد |
-| --- | --- |
-| `settings.get("key", default=...)` | خواندن کلید |
-| `settings["key"]` | مثل get، با `KeyError` |
-| `"key" in settings` | وجود کلید |
-| `settings.host` / `.port` / `.debug` / `.env` | فیلدهای رایج |
-| `settings.config` | کل map |
-| `settings.merge({...})` | overlay دیکت |
-| `settings.configure(**kwargs)` | overlay با kwargs |
-| `settings.load_json(...)` | لود صریح JSON |
-| `settings.ensure_loaded()` | لود تنبل |
-| `settings.clear()` | پاک‌سازی |
-
-### placeholder محیطی
-
-اگر مقدار رشته در JSON تمام‌بزرگ باشد (مثل `"HOST"`)، در زمان خواندن از env سیستم resolve می‌شود.
-
-## شکل `fusion.<env>.json`
-
-| بلوک | مصرف‌کننده |
-| --- | --- |
-| `config` | تنظیمات اپ (`host`, `port`, کلیدهای شما، Swagger) |
-| `commands` | `fusion command run` |
+## تعویض محیط
 
 ```bash
 FUSION_ENV=prod python main.py
@@ -115,4 +83,4 @@ core/settings.py →  overlay اختیاری UPPERCASE
 get_settings()   →  FusionApp.listen(host, port)
 ```
 
-منبع حقیقت JSON است؛ `settings.py` فقط خواندن راحت در کد است.
+منبع حقیقت JSON است. جزئیات کلیدها و فایل‌های تولیدشدهٔ CLI: **[تنظیمات](../../architecture/v1/settings)**.

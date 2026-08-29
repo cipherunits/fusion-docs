@@ -1,0 +1,18 @@
+---
+description: >-
+  Tri-lingual Fusion docs (en/fa/ru). Read .agents/skills/fusion-docs before
+  editing content/docs or content/locales.
+globs: content/**/*
+alwaysApply: true
+---
+
+# Fusion docs content
+
+Before adding or changing documentation or UI copy:
+
+1. Read and follow `.agents/skills/fusion-docs/SKILL.md` (same skill at `.cursor/skills/fusion-docs/`).
+2. Apply the same MDX / `meta.json` change under `content/docs/en`, `content/docs/fa`, and `content/docs/ru`.
+3. Keep `meta.json` `pages` lists identical across those locales.
+4. Update `content/locales/{en,fa,ru}/` together when changing UI strings.
+5. Do not invent APIs or package names — verify against `fusion-framework` and `fusion-tool`. Use `fusion-framework` (PyPI/npm), NuGet `Fusion-Framework`, import `fusion_framework` / `FusionFramework`.
+6. Include `v1` in product doc links.

@@ -1,0 +1,84 @@
+---
+title: مسیرهای HTTP سفارشی
+description: مسیرهای سطح‌متد با http_get تا http_options (و aliasهای HttpGet)
+---
+
+## Convention در برابر سفارشی
+
+هر کلاس `FusionBaseApi` می‌تواند مسیرها را به دو شکل در معرض بگذارد:
+
+| حالت | چگونه | مسیر mount |
+| --- | --- | --- |
+| **Convention** | متدهای `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | مسیر پایهٔ کلاس از `@route` |
+| **سفارشی** | `@http_get` … `@http_options` (یا `HttpGet` … `HttpOptions`) روی هر متد | مسیر پایه **به‌هم‌چسبیده** با قالب |
+
+هر دو روی یک کلاس مجازند.
+
+## Decoratorهای متد
+
+از `fusion_framework.http_route` import کنید. آرگومان اول هر decorator قالب مسیر است.
+
+| Decorator | Alias | متد HTTP |
+| --- | --- | --- |
+| `http_get` | `HttpGet` | GET |
+| `http_post` | `HttpPost` | POST |
+| `http_put` | `HttpPut` | PUT |
+| `http_patch` | `HttpPatch` | PATCH |
+| `http_delete` | `HttpDelete` | DELETE |
+| `http_head` | `HttpHead` | HEAD |
+| `http_options` | `HttpOptions` | OPTIONS |
+
+## گزینه‌های مشترک
+
+| گزینه | رفتار |
+| --- | --- |
+| `tags` | `None` از `@route` کلاس ارث می‌برد؛ `[]` پاک می‌کند؛ `[…]` جایگزین می‌کند |
+| `desc` | توضیح عملیات (OpenAPI) |
+| `title` | عنوان / summary عملیات |
+| `deprecated` | علامت deprecated (`False` به‌صورت پیش‌فرض) |
+
+## به‌هم‌چسبیدن مسیر و توکن‌ها
+
+- قالب نسبی (بدون `/` ابتدایی) به مسیر پایهٔ `@route` کلاس می‌چسبد.
+- قالب مطلق که با `/` شروع شود پایهٔ کلاس را **نادیده** می‌گیرد و همان‌جا mount می‌شود.
+- `[module]` از نام کلاس ساخته می‌شود (`UserModule` → `user`).
+- `[action]` از نام handler، با حذف پسوند `Action` / `ACTION` و سپس lowercase (`UserAction` → `user`).
+
+## مثال (GET + POST)
+
+```python
+from fusion_framework import status
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.http_route import http_delete, http_get, http_post
+from fusion_framework.route import route
+
+
+@route("/api/[module]", tags=["users"])
+class UserModule(FusionBaseApi):
+    # Convention: GET /api/user
+    def get(self):
+        return self.response({"mode": "convention"}, status=status.HTTP_SUCCESS)
+
+    # سفارشی: GET /api/user/test/user
+    @http_get("test/[action]", title="User action")
+    def UserAction(self):
+        return self.response({"mode": "custom", "action": "user"}, status=status.HTTP_SUCCESS)
+
+    # سفارشی: POST /api/user/create/create
+    @http_post("create/[action]", title="Create user", tags=["users", "write"])
+    def CreateAction(self):
+        return self.response({"created": True}, status=status.HTTP_SUCCESS)
+
+    # مطلق: DELETE /admin/users/purge
+    @http_delete("/admin/users/purge", deprecated=True)
+    def Purge(self):
+        return self.response({"purged": True}, status=status.HTTP_SUCCESS)
+```
+
+aliasهای PascalCase هم قابل‌استفاده‌اند (`@HttpGet(...)`, `@HttpPost(...)`, …).
+
+## ثبت
+
+ماژول را از `main.py` (یا entrypoint) **قبل از** `listen()` import کنید تا ثبت `@route` اجرا شود.
+
+نمونهٔ فریم‌ورک: `examples/custom_http_routes.py`.

@@ -1,0 +1,318 @@
+---
+title: Settings and configuration
+description: How Fusion loads fusion.<env>.json, FUSION_ENV, overlays, and keys consumed at runtime
+---
+
+## What
+
+Fusion loads runtime configuration from **`fusion.<env>.json`** files in the project tree. Discovery, environment placeholders, and key lookup live in **fusion-core** (Rust). Language bindings only add thin overlays (Python `settings.py`, optional Node module path, C# `SettingsStore`).
+
+JSON is the source of truth. Language-specific settings files are conveniences for reading or overlaying values — not a second config system.
+
+## Quick start
+
+```bash
+# Default environment is "dev" → fusion.dev.json
+python main.py
+npx tsx main.ts
+dotnet run
+
+# Explicit environment
+FUSION_ENV=prod python main.py
+fusion command run:prod   # sets FUSION_ENV=prod for the child process
+```
+
+→ Language APIs: [Python Config](../../python/v1/config) · [TypeScript Config](../../typescript/v1/config) · [C# Config](../../csharp/v1/config)
+
+## How discovery works
+
+1. Resolve the environment name:
+   - From `FUSION_ENV` if set
+   - Otherwise **`dev`**
+2. Look for a file named **`fusion.<env>.json`** (for example `fusion.dev.json`).
+3. Search roots, in order:
+   - Process **current working directory**
+   - Then each **parent directory** (ancestors of cwd)
+   - Then any **extra roots** the binding passes (Python: directory of `__main__`; Node/C#: often `process.cwd()` / project directory)
+4. If the exact file is missing, Fusion falls back to the first `fusion.*.json` found in those roots (sorted by name). Prefer keeping the exact name so environments stay predictable.
+5. If nothing is found, settings stay empty and typed helpers use defaults (`host` `127.0.0.1`, `port` `3000`, `debug` `false`). Scaffolded apps still generate JSON so you normally do not hit bare defaults.
+
+`fusion init` always writes three files at the project root: `fusion.dev.json`, `fusion.stage.json`, `fusion.prod.json`.
+
+## Envelope vs flat JSON
+
+Two shapes are valid:
+
+### Envelope (CLI scaffold style)
+
+```json
+{
+  "env": "dev",
+  "config": { "host": "127.0.0.1", "port": 8080 },
+  "commands": { "run": "python main.py" }
+}
+```
+
+| Top-level key | Role |
+| --- | --- |
+| `env` | Logical environment name (also updates the loaded `env` string) |
+| `config` | Object merged into the runtime settings map |
+| `commands` | Shell commands for [`fusion command`](../../cli/v1/command) — not used by the HTTP listener itself |
+
+When `config` is present, **only that object** is merged as settings (plus `commands` stored under the `commands` key).
+
+### Flat object
+
+If there is no `config` object, every top-level key **except** `env` and `commands` is merged as settings. Useful for hand-written or minimal files.
+
+## Environment placeholders (`ALL_CAPS`)
+
+When a **string** value in JSON matches this pattern, it is resolved from the **process environment** at read time:
+
+- Length greater than 1
+- Only ASCII uppercase letters and underscores
+- First character is a letter or `_`
+
+Examples from the CLI scaffold:
+
+| JSON value | Meaning |
+| --- | --- |
+| `"HOST"` | Replace with `os.environ["HOST"]` / `process.env.HOST` when read; if unset, keep the literal `"HOST"` |
+| `"SECRET_KEY"` | Same rule — common for secrets |
+
+Numbers, booleans, objects, and mixed-case strings are **not** treated as placeholders.
+
+Stage and prod scaffolds set `"host": "HOST"` so the bind address comes from the `HOST` env var in deployment. Dev uses the literal `"127.0.0.1"`.
+
+## Keys Fusion actually consumes
+
+These are the keys the shared core / bindings read for HTTP and docs behavior. You may add any other keys for your app; they are available via `settings.get(...)`.
+
+| Key | Type | Default if missing | Used for |
+| --- | --- | --- | --- |
+| `host` | string | `127.0.0.1` | Bind address for `listen` |
+| `port` | number / string | `3000` | Bind port (`fusion init` uses 8080 / 8081 / 9090 instead) |
+| `debug` | bool / string | `false` | Debug flag (Node may log listen URL when true) |
+| `secret_key` | string | — | App secret; scaffolded as `fusion-framework-<uuid>`. Prefer placeholders in prod |
+| `fingerprint.enabled` | bool | `true` | When true, core injects framework identity headers on the wire (`X-Powered-By`, `X-Framework`, `X-Fusion-Version`) |
+| `swagger.*` | object | see below | Swagger UI + OpenAPI mounting |
+| `commands` | object | — | Declared for Tool; also stored in the settings map if present in JSON |
+
+Key lookup is case-insensitive and treats `-` and `_` the same (`secret-key` ≡ `secret_key`). Dotted paths work: `settings.get("swagger.enabled")`, `settings.get("fingerprint.enabled")`.
+
+### Swagger keys read at runtime
+
+Bindings read nested keys such as:
+
+| Key | Typical default |
+| --- | --- |
+| `swagger.enabled` | `true` (scaffold: `true` in dev, `false` in stage/prod) |
+| `swagger.path` | `/swagger` |
+| `swagger.title` | falls back to `swagger.info.title` or `"Fusion API Docs"` |
+| `swagger.info` | OpenAPI `info` object |
+| `swagger.servers` | OpenAPI servers list |
+| `swagger.auth` | schemes, `global`, `oauth`, `persistAuthorization` |
+| `swagger.navbar` | Topbar / version navbar options |
+| `swagger.ui` | Swagger UI configuration object |
+
+→ Language detail: [Python Swagger](../../python/v1/swagger)
+
+## Annotated `fusion.dev.json` (what `fusion init` generates)
+
+`fusion init` builds the same structure for every language; only the `commands.run` string changes (`python main.py` / `npx tsx main.ts` / `dotnet run`).
+
+```json
+{
+  "env": "dev",
+  "config": {
+    "port": 8080,
+    "secret_key": "fusion-framework-<uuid>",
+    "host": "127.0.0.1",
+    "debug": true,
+    "fingerprint": {
+      "enabled": true
+    },
+    "swagger": {
+      "enabled": true,
+      "path": "/swagger",
+      "title": "Fusion API Docs",
+      "info": {
+        "title": "Fusion API",
+        "version": "1.0.0",
+        "description": "API documentation generated by fusion-framework",
+        "contact": {
+          "name": "API Support",
+          "email": "support@example.com"
+        },
+        "license": {
+          "name": "MIT"
+        }
+      },
+      "servers": [
+        { "url": "/", "description": "Current host" }
+      ],
+      "auth": {
+        "persistAuthorization": true,
+        "schemes": {
+          "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+          },
+          "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key"
+          }
+        },
+        "global": [],
+        "oauth": {
+          "clientId": "",
+          "appName": "Fusion API",
+          "scopes": "",
+          "usePkceWithAuthorizationCodeGrant": true
+        }
+      },
+      "navbar": {
+        "enabled": true,
+        "showUrlInput": false
+      },
+      "ui": {
+        "deepLinking": true,
+        "displayOperationId": false,
+        "defaultModelsExpandDepth": 1,
+        "defaultModelExpandDepth": 1,
+        "defaultModelRendering": "example",
+        "docExpansion": "list",
+        "filter": true,
+        "tryItOutEnabled": true,
+        "displayRequestDuration": true,
+        "showExtensions": false,
+        "showCommonExtensions": false,
+        "withCredentials": false,
+        "syntaxHighlight": {
+          "activated": true,
+          "theme": "agate"
+        }
+      }
+    }
+  },
+  "commands": {
+    "run": "python main.py"
+  }
+}
+```
+
+| Field | Why it is there |
+| --- | --- |
+| `env` | Labels this file as the `dev` environment |
+| `config.port` | Explicit **8080** (not the core bare default 3000) |
+| `config.secret_key` | Fresh UUID per init — do not reuse across environments casually |
+| `config.host` | Loopback for local development |
+| `config.debug` | `true` only in the generated **dev** file |
+| `config.fingerprint` | Framework identity headers on responses |
+| `config.swagger` | Full Swagger UI / OpenAPI block; **enabled** in dev |
+| `commands.run` | What `fusion command run` executes |
+
+## Stage and prod differences
+
+Same schema; values differ:
+
+| Field | `fusion.dev.json` | `fusion.stage.json` | `fusion.prod.json` |
+| --- | --- | --- | --- |
+| `env` | `dev` | `stage` | `prod` |
+| `config.port` | `8080` | `8081` | `9090` |
+| `config.host` | `"127.0.0.1"` | `"HOST"` (env placeholder) | `"HOST"` |
+| `config.debug` | `true` | `false` | `false` |
+| `config.swagger.enabled` | `true` | `false` | `false` |
+| `config.fingerprint.enabled` | `true` | `true` | `true` |
+| `config.secret_key` | new UUID each | new UUID each | new UUID each |
+| `commands.run` | language-specific | same | same |
+
+You can add more environments by creating `fusion.<name>.json` (for example `fusion.test.json`) and selecting them with `FUSION_ENV=test` or `fusion command run:test`.
+
+## Relation to `fusion command`
+
+[`fusion command`](../../cli/v1/command) reads the `commands` block from the chosen environment file and runs the shell string in the project root with:
+
+```text
+FUSION_ENV=<chosen env>
+```
+
+Resolution order for the environment name:
+
+1. Inline suffix: `run:stage`
+2. Flag: `--stage` / `--prod` / `--env <name>`
+3. Existing `FUSION_ENV`
+4. Default `dev`
+
+That is how `fusion command run:prod` makes the process load `fusion.prod.json` without exporting `FUSION_ENV` yourself.
+
+## Language overlays
+
+### Python — `load_settings_module` / `core/settings.py`
+
+```python
+from fusion_framework.config import load_settings_module, get_settings
+
+load_settings_module("settings")  # also tries core.settings
+app_settings = get_settings()
+```
+
+Flow:
+
+1. Load `fusion.<env>.json` via Rust (extra root: `__main__` directory)
+2. Import `settings` or `core.settings`
+3. Merge only **UPPERCASE** module attributes onto the settings singleton (both `SECRET_KEY` and `secret_key`)
+
+Scaffolded `core/settings.py` typically reads JSON back into uppercase names for app code — it does not replace JSON as the source of truth.
+
+Package: **`fusion_framework.config`** (not a separate PyPI “config” package).
+
+### TypeScript / Node — `settings.ensureLoaded`
+
+```ts
+import { settings, getSettings, FusionApp } from "fusion-framework";
+
+settings.ensureLoaded([process.cwd()]);
+const app = new FusionApp(getSettings());
+```
+
+Scaffolded `core/settings.ts` exports values for your code; it is **not** auto-merged on every start. The optional `run({ settingsModule })` helper merges only exported `HOST`, `PORT`, and `DEBUG` if present.
+
+Package: **`fusion-framework`**.
+
+### C# — `SettingsStore`
+
+```csharp
+SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
+using var app = new FusionApp(SettingsStore.GetSettings());
+```
+
+`CoreSettings` in the scaffold is a static convenience wrapper around `SettingsStore`. Namespace: **`FusionFramework`**. NuGet package: **`Fusion-Framework`**.
+
+## Mental model
+
+```text
+FUSION_ENV (default: dev)
+        │
+        ▼
+fusion.<env>.json  ──►  fusion-core Settings
+        │                      │
+   config / flat               ├── host / port / debug
+   ALL_CAPS → env              ├── fingerprint.enabled
+   commands (Tool)             └── swagger.*
+        │
+        ▼ (optional)
+Python UPPERCASE overlay  /  Node HOST|PORT|DEBUG via run()  /  C# Merge
+        │
+        ▼
+FusionApp.listen(…)
+```
+
+## Next
+
+- [Application lifecycle](./lifecycle) — where settings load sits in startup
+- [Project structure](./project-structure) — files `fusion init` creates
+- [Commands & environments](../../cli/v1/command) — `commands` block and `:env` syntax
+- Language Config: [Python](../../python/v1/config) · [TypeScript](../../typescript/v1/config) · [C#](../../csharp/v1/config)

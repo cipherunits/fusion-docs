@@ -5,14 +5,18 @@ description: Overview of the Fusion command-line interface
 
 # What is Fusion Tool?
 
-**Fusion Tool** is the official CLI for **Fusion Framework**.
+**Fusion Tool** is the official CLI for **Fusion Framework**. The binary name is `fusion` (crate `fusion-tool`).
 
-Use it to scaffold projects, manage environment configs, and run the commands you declare in each environment — from one binary on Linux, macOS, and Windows.
+Use it to scaffold projects, manage environment configs, run project-declared commands, create and install library packages, and self-update — from one binary on Linux, macOS, and Windows.
+
+Current CLI version: **1.2.6**. Scaffolded apps pin the framework package to the version embedded in the CLI (currently **1.2.3** in generated dependency files).
 
 With Fusion Tool you can:
 
 - Create new Fusion Framework projects (`fusion init`)
 - Run project commands per environment (`fusion command`)
+- Scaffold publishable library packages (`fusion module init`)
+- Install modules from GitHub into an app (`fusion add`)
 - Upgrade the CLI in place (`fusion update`)
 
 ## Commands at a glance
@@ -21,14 +25,16 @@ With Fusion Tool you can:
 | --- | --- |
 | `fusion init` | Scaffold a new project |
 | `fusion command <name>` | Run a command from `fusion.<env>.json` |
+| `fusion module init` | Create a publishable library package |
+| `fusion add --github …` | Install a module into the current project |
 | `fusion update` | Upgrade to the latest release |
 | `fusion --version` | Print the installed CLI version |
 
-See [Getting Started](./getting-started) for install and project setup, and [Commands](./command) for environments and `fusion command`.
+See [Getting Started](./getting-started), [Commands](./command), [Modules](./modules) (per-language scaffolds), [Fusion Desktop](./desktop), and [VS Code snippets](./vscode).
 
 ## Fusion Desktop
 
-Fusion Tool is also available as a graphical app through [**Fusion Desktop**](/en/gui).
+Deep dive: [**Fusion Desktop docs**](./desktop). Download builds from [**/en/gui**](/en/gui).
 
 ![Fusion Desktop app screenshot — Cipher Unit](./fusion_desktop.jpeg)
 

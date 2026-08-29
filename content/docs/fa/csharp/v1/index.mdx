@@ -9,7 +9,7 @@ description: Fusion Framework برای C# از طریق fusion-ffi
 
 نسخهٔ v1 روی یک **API HTTP قابل اجرا** تمرکز دارد. برابری کامل OpenAPI/Swagger با پایتون هنوز نیست.
 
-پکیج مدیریت‌شده: `bindings/csharp/FusionFramework` (NuGet وقتی منتشر شود).
+پکیج مدیریت‌شده: NuGet [`Fusion-Framework`](https://www.nuget.org/packages/Fusion-Framework) (namespace سی‌شارپ: `FusionFramework`). کتابخانهٔ native از `fusion-ffi` می‌آید (در بیلدهای منتشرشده همراه پکیج NuGet).
 
 ## راهنماهای این بخش
 
@@ -17,8 +17,13 @@ description: Fusion Framework برای C# از طریق fusion-ffi
 | --- | --- |
 | [شروع کار](./getting-started) | ساخت FFI، پکیج، اولین سرور |
 | [Router](./router) | `[Route]`، توکن مسیر، پاسخ‌ها |
+| [مسیرهای HTTP سفارشی](./custom-http-routes) | `[HttpGet]` … `[HttpOptions]` |
+| [Pagination](./pagination) | `PageParams` / `Paginated` |
 | [Config](./config) | `fusion.<env>.json` از طریق FFI |
 | [Middleware](./middleware) | middleware سراسری + روی route |
+| [کدهای وضعیت](./status) | `Status.HTTP_*` |
+| [Headerها](./headers) | helperهای `Header` |
+
 
 ## مفاهیم مشترک
 

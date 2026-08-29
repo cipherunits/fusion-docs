@@ -9,7 +9,7 @@ C# bindings call the Rust core through **`fusion-ffi`** (C ABI). DX mirrors Pyth
 
 v1 focuses on a **runnable HTTP API**. Full OpenAPI/Swagger parity with Python is not included yet.
 
-Managed package: `bindings/csharp/FusionFramework` (NuGet when published).
+Managed package: NuGet [`Fusion-Framework`](https://www.nuget.org/packages/Fusion-Framework) (C# namespace `FusionFramework`). Native library comes from `fusion-ffi` (bundled with the NuGet package for published builds).
 
 ## Guides in this section
 
@@ -17,8 +17,13 @@ Managed package: `bindings/csharp/FusionFramework` (NuGet when published).
 | --- | --- |
 | [Getting started](./getting-started) | Build FFI, package, first server |
 | [Router](./router) | `[Route]`, path tokens, responses |
+| [Custom HTTP routes](./custom-http-routes) | `[HttpGet]` … `[HttpOptions]` attributes |
+| [Pagination](./pagination) | `PageParams` / `Paginated` |
 | [Config](./config) | `fusion.<env>.json` via FFI |
 | [Middleware](./middleware) | Global + route middleware |
+| [Status codes](./status) | `Status.HTTP_*` |
+| [Headers](./headers) | `Header` helpers |
+
 
 ## Shared concepts
 

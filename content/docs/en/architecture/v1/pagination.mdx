@@ -1,0 +1,117 @@
+---
+title: Pagination
+description: Shared list pagination — query params, PageParams, and paginated response body
+---
+
+## What it is
+
+Fusion ships a **shared pagination model** in `fusion-core`, mirrored in every binding:
+
+- Parse query parameters into normalized `PageParams`
+- Build a standard JSON body: `{ items, pagination: { … } }`
+- Optionally slice in-memory collections
+
+Defaults: **`page_size = 20`**, **`max_page_size = 100`**, **`page` is 1-based**.
+
+## Query parameters
+
+| Query key | Meaning |
+| --- | --- |
+| `page` | 1-based page index (default `1`; `0` → HTTP 400) |
+| `page_size` | Page size (clamped to max) |
+| `per_page` | Alias for `page_size` |
+| `limit` | Alias for `page_size` |
+| `offset` | Optional 0-based item offset (overrides `(page - 1) * page_size`) |
+
+Invalid `page` / `page_size` of `0` returns **400**.
+
+## Response shape
+
+```json
+{
+  "items": [ /* page of items */ ],
+  "pagination": {
+    "page": 2,
+    "page_size": 10,
+    "offset": 10,
+    "limit": 10,
+    "total": 25,
+    "total_pages": 3,
+    "has_next": true,
+    "has_prev": true
+  }
+}
+```
+
+`limit` equals `page_size`. `total` / `total_pages` / `has_next` / `has_prev` are computed from the `total` you pass in.
+
+## Python
+
+```python
+from fusion_framework import status
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+
+ALL = [{"id": i} for i in range(1, 51)]
+
+@route("/api/[module]", tags=["products"], version="v1")
+class ProductModule(FusionBaseApi):
+    def get(self, page: int = 1, page_size: int = 20):
+        # GET /v1/api/product/?page=2&page_size=10
+        params = self.pagination(page=page, page_size=page_size)
+        start = int(params.offset)
+        end = start + int(params.limit)
+        items = ALL[start:end]
+        return self.paginated(items, total=len(ALL), params=params, status=status.HTTP_SUCCESS)
+```
+
+Low-level:
+
+```python
+from fusion_framework import parse_pagination, paginated_body
+
+params = parse_pagination(request_query)  # dict[str, str]
+body = paginated_body(items, total, params)
+```
+
+`FusionBaseApi.pagination(...)` reads `self.query`; explicit `page=` / `page_size=` / `offset=` override query values. `paginated(...)` wraps `paginated_body` in `self.response(...)`.
+
+## TypeScript / Node.js
+
+```ts
+get() {
+  const params = this.pagination({
+    page: Number(this.query.page || 1),
+    pageSize: Number(this.query.page_size || this.query.per_page || this.query.limit || 20),
+  });
+  const items = ALL.slice(params.offset, params.offset + params.page_size);
+  return this.paginated(items, ALL.length, params, { status: status.HTTP_SUCCESS });
+}
+```
+
+Also: `parsePagination(query)` and `paginatedBody(items, total, params)` from `fusion-framework`.
+
+## C#
+
+```csharp
+public object Get()
+{
+    var p = PageParams(page: 2, pageSize: 10);
+    var items = FetchItems((int)p.Offset, (int)p.Limit);
+    return Paginated(items, total: 100, p);
+}
+```
+
+Static helpers: `Pagination.Parse(...)` / `Pagination.Body(...)`. Same query keys as other languages.
+
+## Core types (Rust)
+
+| Type / fn | Role |
+| --- | --- |
+| `PageConfig {{ default_page_size, max_page_size }}` | Defaults (20 / 100) |
+| `PageParams {{ page, page_size, offset }}` | Normalized state; `limit()` → `page_size` |
+| `parse_page_params(query, &config)` | Parse + validate |
+| `paginated_body(items, total, &params)` | JSON envelope |
+| `paginate_slice(&[T], &params)` | In-memory slice helper |
+
+Example in the framework repo: `examples/pagination.py` / `.mjs` / `.cs`.

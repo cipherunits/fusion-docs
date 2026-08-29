@@ -7,7 +7,7 @@ description: How Fusion Framework is structured — Rust core, language bindings
 
 **Fusion Framework** is a class-based HTTP framework. You define API modules as classes (`FusionBaseApi` subclasses), register them with a route decorator or attribute, and start a `FusionApp`. A shared **Rust core** (`fusion-core`) owns HTTP serving, routing, settings, header helpers, and response serialization. Language bindings (Python, TypeScript/Node.js, C#) stay thin and focus on developer experience.
 
-Current published version of the framework packages: **1.2.3** (see the [fusion-framework](https://github.com/cipherunits/fusion-framework) repository).
+Current published version of the framework packages: **1.2.6** (see the [fusion-framework](https://github.com/cipherunits/fusion-framework) repository).
 
 ## Design philosophy
 
@@ -29,7 +29,7 @@ flowchart TB
     Libs[Installed library packages]
   end
   subgraph binding [Language binding]
-    Decorators[route / http_get / attributes]
+    Decorators[route / http_* / attributes]
     MW[Middleware chain]
     App[FusionApp]
   end
@@ -73,12 +73,14 @@ FMA is Fusion’s modularity model: applications are composed of **route modules
 ## Learning path
 
 1. [What Fusion is not](./what-fusion-is-not) — scope boundaries (no ORM, no DI container, …)
-2. [Project structure](./project-structure) — what `fusion init` creates
-3. Language getting started: [Python](../../python/v1/getting-started) · [TypeScript](../../typescript/v1/getting-started) · [C#](../../csharp/v1/getting-started)
-4. [Application route modules](./application-modules)
-5. [Reusable packages](./packages) · [CLI Modules](../../cli/v1/modules)
-6. [Application lifecycle](./lifecycle) · [Request lifecycle](./request-lifecycle)
-7. [Best practices](./best-practices) · [Anti-patterns](./anti-patterns)
+2. [Workspace and crates](./workspace) — where core vs bindings live
+3. [Project structure](./project-structure) — what `fusion init` creates
+4. **[Fusion Tool](../../cli/v1)** — scaffold apps and environments
+5. Language getting started: [Python](../../python/v1/getting-started) · [TypeScript](../../typescript/v1/getting-started) · [C#](../../csharp/v1/getting-started)
+6. [Application route modules](./application-modules)
+7. [Reusable packages](./packages) · [CLI Modules](../../cli/v1/modules)
+8. [Application lifecycle](./lifecycle) · [Settings and configuration](./settings) · [Request lifecycle](./request-lifecycle)
+9. [Best practices](./best-practices) · [Anti-patterns](./anti-patterns)
 
 ## Related tooling
 

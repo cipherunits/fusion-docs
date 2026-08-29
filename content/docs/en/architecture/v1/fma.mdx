@@ -50,7 +50,7 @@ Route modules register when their defining module is imported (Python/Node decor
 
 ### 2. Resource ownership
 
-A route module typically owns one resource path stem via `[module]` (e.g. `ProductModule` → `product`). Convention handlers (`get` / `post` / …) and optional custom HTTP routes (`@http_get`, …) live on that class.
+A route module typically owns one resource path stem via `[module]` (e.g. `ProductModule` → `product`). Convention handlers (`get` / `post` / …) and optional custom HTTP routes (`@http_get` … `@http_options`, …) live on that class.
 
 ### 3. Packages are libraries
 
@@ -78,7 +78,7 @@ Keep HTTP concerns (status codes, response envelopes, path params) in route modu
 
 ### Route module — belongs inside
 
-- HTTP handlers (`get`, `post`, `@http_get`, …)
+- HTTP handlers (`get`, `post`, `@http_get` … `@http_options`, …)
 - Request/response mapping for that resource
 - Route-scoped middleware / roles for that resource
 - Swagger metadata for those operations
@@ -161,7 +161,7 @@ See [Application route modules](./application-modules) and language guides:
 | --- | --- |
 | HTTP API versions | `@route(..., version="v1")` → path prefix + separate OpenAPI specs |
 | Library packages | Semver in `fusion.module.toml` / package manifests; install with `@v1.0.0` refs via CLI |
-| Framework packages | Published as `fusion-framework` / `FusionFramework` (currently **1.2.3** in the framework repo) |
+| Framework packages | PyPI/npm `fusion-framework`, NuGet `Fusion-Framework` (currently **1.2.6** in the framework repo) |
 
 ## Circular dependencies
 

@@ -1,11 +1,15 @@
 ---
 title: Config
-description: fusion.<env>.json and settings in Node.js
+description: fusion.<env>.json و تنظیمات در Node.js (پکیج fusion-framework)
 ---
 
-## Overview
+## نمای کلی
 
-Runtime config is shared with Python: JSON files named `fusion.<env>.json`, selected by `FUSION_ENV` (default `dev`).
+پیکربندی runtime بین زبان‌ها مشترک است: فایل‌های `fusion.<env>.json` که با `FUSION_ENV` انتخاب می‌شوند (پیش‌فرض `dev`). پیاده‌سازی در **fusion-core** است؛ پکیج npm: **`fusion-framework`**.
+
+قواعد کشف، placeholderها، کلیدها و schema کامل فایل‌های محیط:
+
+→ **[تنظیمات و پیکربندی](../../architecture/v1/settings)**
 
 ```ts
 import { settings, getSettings, configure } from "fusion-framework";
@@ -15,44 +19,36 @@ const host = settings.host;
 const debug = settings.get("debug", false);
 ```
 
-## Startup pattern
+## الگوی استارت
 
 ```ts
+import { FusionApp, getSettings, settings } from "fusion-framework";
+
 settings.ensureLoaded([process.cwd()]);
 const app = new FusionApp(getSettings());
 await app.listen();
 ```
 
-`FusionApp` listens on `host` / `port` from settings unless you pass overrides to `listen(host, port)`.
+`FusionApp` روی `host` / `port` تنظیمات گوش می‌دهد مگر override به `listen` بدهید. در scaffold، پورت **8080** است (پیش‌فرض خالی هسته بدون JSON برابر 3000 است).
 
 ## API
 
-| API | Role |
+| API | نقش |
 | --- | --- |
-| `settings.ensureLoaded(extraRoots?)` | Discover and load `fusion.<env>.json` |
-| `settings.loadJson(path?, env?, extraRoots?)` | Explicit path / env |
-| `settings.get(key, default?)` | Nested key lookup |
-| `settings.merge(object)` | Overlay values |
-| `configure(object)` | Merge into the singleton |
-| `getSettings()` | `{ host, port, debug, env }` snapshot for `FusionApp` |
+| `settings.ensureLoaded(extraRoots?)` | کشف و لود `fusion.<env>.json` |
+| `settings.loadJson(path?, env?, extraRoots?)` | لود صریح |
+| `settings.get(key, default?)` | خواندن کلید تو در تو |
+| `settings.merge(object)` | overlay |
+| `configure(object)` | merge روی singleton |
+| `getSettings()` | اسنپ‌شات `{ host, port, debug, env }` برای `FusionApp` |
 
-Env placeholders in JSON (UPPERCASE strings) resolve from process environment — same rules as Python.
+`core/settings.ts` scaffold مقادیر را برای کد شما export می‌کند. `run({ settingsModule })` اختیاری فقط `HOST`، `PORT` و `DEBUG` را merge می‌کند — برخلاف پایتون همهٔ نام‌های uppercase را merge نمی‌کند.
 
-## File shape
+## تعویض محیط
 
-```json
-{
-  "env": "dev",
-  "config": {
-    "host": "127.0.0.1",
-    "port": 3000,
-    "debug": true,
-    "secret_key": "SECRET_KEY"
-  },
-  "commands": {
-    "run": "npx tsx main.ts"
-  }
-}
+```bash
+FUSION_ENV=prod npx tsx main.ts
+fusion command run:prod
 ```
 
-`commands` are for [Fusion Tool](../../cli/v1/command), not the HTTP runtime.
+`commands` برای [Fusion Tool](../../cli/v1/command) است، نه listener HTTP.

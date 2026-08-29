@@ -9,6 +9,8 @@ description: Load fusion.<env>.json and core/settings.py with fusion_framework.c
 
 Runtime values live in **`fusion.<env>.json`** (like a typed `.env` per environment). Optional Python overlay lives in **`core/settings.py`**. The active environment comes from **`FUSION_ENV`** (default: `dev`).
 
+→ **[Настройки и конфигурация](../../architecture/v1/settings)**
+
 ```python
 from fusion_framework.config import load_settings_module, get_settings
 

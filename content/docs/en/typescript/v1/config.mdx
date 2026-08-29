@@ -1,11 +1,15 @@
 ---
 title: Config
-description: fusion.<env>.json and settings in Node.js
+description: fusion.<env>.json and settings in Node.js (fusion-framework)
 ---
 
 ## Overview
 
-Runtime config is shared with Python: JSON files named `fusion.<env>.json`, selected by `FUSION_ENV` (default `dev`).
+Runtime config is shared across languages: JSON files named `fusion.<env>.json`, selected by `FUSION_ENV` (default `dev`). Implementation lives in **fusion-core**; this package is **`fusion-framework`** (npm).
+
+Full discovery rules, env placeholders, keys (`host`, `port`, `fingerprint`, `swagger`, …), and annotated `fusion.dev.json` / stage / prod:
+
+→ **[Settings and configuration](../../architecture/v1/settings)**
 
 ```ts
 import { settings, getSettings, configure } from "fusion-framework";
@@ -18,12 +22,14 @@ const debug = settings.get("debug", false);
 ## Startup pattern
 
 ```ts
+import { FusionApp, getSettings, settings } from "fusion-framework";
+
 settings.ensureLoaded([process.cwd()]);
 const app = new FusionApp(getSettings());
 await app.listen();
 ```
 
-`FusionApp` listens on `host` / `port` from settings unless you pass overrides to `listen(host, port)`.
+`FusionApp` listens on `host` / `port` from settings unless you pass overrides to `listen(host, port)`. Scaffolded `fusion.dev.json` uses port **8080** (core bare default is 3000 if no JSON is found).
 
 ## API
 
@@ -36,23 +42,13 @@ await app.listen();
 | `configure(object)` | Merge into the singleton |
 | `getSettings()` | `{ host, port, debug, env }` snapshot for `FusionApp` |
 
-Env placeholders in JSON (UPPERCASE strings) resolve from process environment — same rules as Python.
+Scaffolded `core/settings.ts` exports values for your code. Optional `run({ settingsModule })` merges only exported `HOST`, `PORT`, and `DEBUG` if present — it does not merge every uppercase name the way Python does.
 
-## File shape
+## Switch environment
 
-```json
-{
-  "env": "dev",
-  "config": {
-    "host": "127.0.0.1",
-    "port": 3000,
-    "debug": true,
-    "secret_key": "SECRET_KEY"
-  },
-  "commands": {
-    "run": "npx tsx main.ts"
-  }
-}
+```bash
+FUSION_ENV=prod npx tsx main.ts
+fusion command run:prod
 ```
 
-`commands` are for [Fusion Tool](../../cli/v1/command), not the HTTP runtime.
+`commands` in JSON are for [Fusion Tool](../../cli/v1/command), not the HTTP runtime.

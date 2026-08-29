@@ -1,0 +1,37 @@
+---
+title: VS Code / Cursor snippets
+description: Fusion Snippets extension for faster Fusion Framework coding
+---
+
+## What it is
+
+**Fusion Snippets** is the Cipher Unit editor extension that provides code snippets for **Fusion Framework** in **Python**, **TypeScript / Node.js**, and **C#**.
+
+It speeds up common patterns: route modules, `@route` / `route()` / `[Route]`, custom HTTP routes (`@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]`), middleware wiring, responses with `status` / `header`, and pagination helpers.
+
+## Install
+
+1. Open **VS Code** or **Cursor**
+2. Go to Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+3. Search for **Fusion Snippets** (publisher: Cipher Unit / cipherunits)
+4. Install, then open a `.py` / `.ts` / `.cs` file in a Fusion project and trigger snippets via IntelliSense prefix
+
+> If the Marketplace listing name differs slightly on your channel, search `Fusion` + `Cipher` and pick the snippets extension for **Fusion Framework** (not Blackmagic DaVinci “Fusion” VFX tools).
+
+## Typical snippet targets
+
+| Area | Examples |
+| --- | --- |
+| App entry | `FusionApp`, `listen`, settings load |
+| Route module | `FusionBaseApi` + `@route` / `route` / `[Route]` |
+| Custom routes | `http_get`…`http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` |
+| Responses | `status.HTTP_*`, `header.download` |
+| Lists | `pagination` / `paginated` / `PageParams` |
+
+Snippets insert starter code — you still register modules from `main` and run via `fusion command` or Desktop.
+
+## Related
+
+- [Custom HTTP routes (Python)](../../python/v1/custom-http-routes)
+- [Pagination](../../architecture/v1/pagination)
+- [Fusion Desktop](./desktop)

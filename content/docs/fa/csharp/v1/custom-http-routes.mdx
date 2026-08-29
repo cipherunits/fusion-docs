@@ -1,0 +1,76 @@
+---
+title: مسیرهای HTTP سفارشی
+description: "مسیرهای سطح‌متد با [HttpGet] تا [HttpOptions] در C#"
+---
+
+## Convention در برابر سفارشی
+
+| حالت | چگونه | مسیر mount |
+| --- | --- | --- |
+| **Convention** | متدهای `Get`, `Post`, `Put`, `Patch`, `Delete`, `Head`, `Options` (بدون حساسیت به حروف) | مسیر پایهٔ کلاس از `[Route]` |
+| **سفارشی** | `[HttpGet]` … `[HttpOptions]` روی هر متد | مسیر پایه **به‌هم‌چسبیده** با قالب |
+
+هر دو روی یک کلاس مجازند.
+
+## Attributeهای متد
+
+در `FusionFramework` تعریف شده‌اند (`HttpMethodAttributes.cs`). هر کدام قالب مسیر را در سازنده می‌گیرند:
+
+| Attribute | متد HTTP |
+| --- | --- |
+| `[HttpGet]` | GET |
+| `[HttpPost]` | POST |
+| `[HttpPut]` | PUT |
+| `[HttpPatch]` | PATCH |
+| `[HttpDelete]` | DELETE |
+| `[HttpHead]` | HEAD |
+| `[HttpOptions]` | OPTIONS |
+
+ویژگی‌های نام‌دار روی همه: `Tags`, `Desc`, `Title`, `Deprecated`.
+
+## گزینه‌های مشترک
+
+| ویژگی | رفتار |
+| --- | --- |
+| `Tags` | `null` از `[Route]` ارث می‌برد؛ مقدار غیرnull (حتی آرایهٔ خالی) جایگزین می‌کند |
+| `Desc` | توضیح عملیات |
+| `Title` | عنوان / summary عملیات |
+| `Deprecated` | علامت deprecated |
+
+## به‌هم‌چسبیدن مسیر و توکن‌ها
+
+- قالب نسبی (بدون `/` ابتدایی) به مسیر پایهٔ `[Route]` می‌چسبد.
+- قالب مطلق که با `/` شروع شود پایهٔ کلاس را **نادیده** می‌گیرد.
+- `[module]` از نام کلاس (`UserModule` → `user`).
+- `[action]` از نام handler با حذف پسوند `Action` / `ACTION` و lowercase (`UserAction` → `user`).
+
+## مثال (GET + POST)
+
+```csharp
+using FusionFramework;
+
+[Route("/api/[module]", Tags = new[] { "users" })]
+public class UserModule : FusionBaseApi
+{
+    public object Get() =>
+        Response(new { mode = "convention" }, Status.HTTP_SUCCESS);
+
+    [HttpGet("test/[action]", Title = "User action")]
+    public object UserAction() =>
+        Response(new { mode = "custom", action = "user" }, Status.HTTP_SUCCESS);
+
+    [HttpPost("create/[action]", Title = "Create user", Tags = new[] { "users", "write" })]
+    public object CreateAction() =>
+        Response(new { created = true }, Status.HTTP_SUCCESS);
+
+    [HttpDelete("/admin/users/purge", Deprecated = true)]
+    public object Purge() =>
+        Response(new { purged = true }, Status.HTTP_SUCCESS);
+}
+```
+
+## ثبت
+
+`Route.Register<UserModule>()` را (یا ثبت از bootstrap میزبان) **قبل از** `Listen()` فراخوانی کنید.
+
+نمونه: `examples/custom_http_routes.cs`.

@@ -36,15 +36,16 @@ fusion module init
 
 در حالت تعاملی این‌ها پرسیده می‌شود:
 
-1. زبان پیاده‌سازی — **Python**، **TypeScript** یا **Rust**
+1. زبان پیاده‌سازی — **Python**، **TypeScript**، **C#** یا **Rust**
 2. نام ماژول (id)
 3. توضیحات
-4. پوشهٔ خروجی (پیش‌فرض `fusion-<id>-mod`)
+4. پوشهٔ خروجی (پیش‌فرض تعاملی `fusion-{id}-mod`)
 
 غیرتعاملی:
 
 ```bash
 fusion module init --lang python --name example --description "اولین ماژول من"
+fusion module init --lang csharp --name helpers --description "کمک‌کننده‌های مشترک"
 fusion module init --lang rust --name auth --description "ابزار احراز هویت" ./fusion-auth-mod
 ```
 
@@ -54,9 +55,10 @@ fusion module init --lang rust --name auth --description "ابزار احراز 
 | --- | --- |
 | **Python** | پکیج خالص پایتون در `python/fusion_<name>_mod/` |
 | **TypeScript** | پکیج npm با `js/` و `src/` |
-| **Rust** | هستهٔ Rust مشترک + بایندینگ اختیاری **PyO3** و **N-API** برای هدف‌گیری همزمان Python و TypeScript |
+| **C#** | کتابخانهٔ .NET (سبک نام `Fusion<Name>Mod`) |
+| **Rust** | هستهٔ Rust مشترک + هدف‌های اختیاری **PyO3**، **N-API** و **C#** |
 
-Rust وقتی مفید است که یک هستهٔ native برای همهٔ hostها بخواهید.
+Rust وقتی مفید است که یک هستهٔ native برای چند host بخواهید. `--lang rust` غیرتعاملی هر سه هدف host را روشن می‌کند؛ حالت تعاملی اجازهٔ multi-select می‌دهد.
 
 ### ساختار اسکفولد (Python)
 
@@ -146,3 +148,73 @@ console.log(hello("world"));
 ```
 
 توابع را از routeها، سرویس‌ها یا هر جای دیگر اپ صدا بزنید — ماژول‌ها کتابخانهٔ معمولی هستند.
+
+
+## هر زبان چه چیزی scaffold می‌کند؟
+
+### Python (`--lang python`)
+
+پکیج **خالص پایتون** قابل نصب:
+
+```text
+fusion-<id>-mod/
+├── fusion.module.toml
+├── pyproject.toml
+└── python/fusion_<id>_mod/
+    ├── __init__.py
+    └── hello.py
+```
+
+- نام پکیج: `fusion_<id>_mod`
+- Build هنگام `fusion add`: `pip install -e .`
+- فقط برای اپ‌های پایتون
+
+### TypeScript (`--lang typescript`)
+
+پکیج **npm** با سورس TypeScript → خروجی `js/`:
+
+```text
+fusion-<id>-mod/
+├── package.json / tsconfig.json
+├── src/index.ts
+└── js/index.js + index.d.ts
+```
+
+- نام: `fusion-<id>-mod`
+- Build: `npm install && npm run build`
+- بعد از add، لینک `file:.fusion/modules/<id>` در `package.json` اپ
+
+### C# (`--lang csharp`)
+
+کتابخانهٔ **.NET** (`net10.0`):
+
+```text
+Fusion<Name>Mod/
+├── Fusion<Name>Mod.csproj
+└── Module.cs    # Module.Hello()
+```
+
+- Build: `dotnet build -c Release …`
+- بعد از add: `dotnet add reference`
+
+### Rust (`--lang rust`)
+
+**Cargo workspace** با هستهٔ مشترک و باندینگ‌های اختیاری:
+
+```text
+crates/core/           # کتابخانهٔ Rust
+bindings/python/       # PyO3 (اختیاری)
+bindings/node/         # N-API (اختیاری)
+bindings/csharp/       # P/Invoke (اختیاری)
+```
+
+- تعاملی: multi-select هدف‌های host
+- غیرتعاملی: هر سه host به‌طور پیش‌فرض روشن
+- وقتی یک پیاده‌سازی native باید به چند زبان سرو بدهد
+
+## جریان بعد از scaffold
+
+1. API خود را پیاده کنید
+2. به GitHub پوش و تگ بزنید
+3. در اپ: `fusion add --github OWNER/REPO@v1.0.0`
+4. Import کنید — **route خودکار mount نمی‌شود**

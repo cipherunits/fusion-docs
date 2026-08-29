@@ -1,0 +1,55 @@
+---
+title: چرخهٔ عمر اپلیکیشن
+description: از شروع فرآیند تا FusionApp.listen چه اتفاقی می‌افتد
+---
+
+## چیست؟
+
+**چرخهٔ عمر اپلیکیشن** ترتیب گام‌ها از شروع فرآیند تا سرو ترافیک HTTP است.
+
+## توالی startup
+
+```mermaid
+flowchart TD
+  A[شروع فرآیند] --> B[Import ماژول‌های route]
+  B --> C[ثبت کلاس‌های route در باندینگ]
+  C --> D[load_settings_module / EnsureLoaded]
+  D --> E[ساخت FusionApp]
+  E --> F[اختیاری: app.use middleware]
+  F --> G[listen / Listen]
+  G --> H[Mount مسیرها روی Hyper]
+  H --> I[Mount Swagger در صورت فعال بودن]
+  I --> J[پذیرش اتصال‌ها]
+```
+
+### جزئیات گام‌ها
+
+| گام | چه اتفاقی می‌افتد |
+| --- | --- |
+| Import / register | Python/Node: decoratorها هنگام import اجرا می‌شوند. C#: `Route.Register<T>()` |
+| Settings | بارگذاری `fusion.<env>.json` (`FUSION_ENV`، پیش‌فرض `dev`). پایتون ممکن است attrs با حروف بزرگ از `settings` / `core.settings` را merge کند |
+| `FusionApp` | settings، لیست middleware و handle موتور native را نگه می‌دارد |
+| Middleware | زنجیرهٔ سراسری آماده می‌شود |
+| `listen` | باندینگ مسیرهای ثبت‌شده، مسیرهای اختیاری Swagger، bind روی host/port، و سرو blocking |
+
+## جریان تنظیمات
+
+```mermaid
+flowchart LR
+  Env[FUSION_ENV] --> File["fusion.<env>.json"]
+  File --> Core[Settings در fusion-core]
+  Py[UPPERCASE در settings.py پایتون] --> Core
+  Core --> App[FusionApp: host/port/swagger/fingerprint]
+```
+
+اگر JSON یک آبجکت سطح‌بالای `config` داشته باشد (سبک scaffold CLI)، آن آبجکت به‌عنوان settings merge می‌شود. وگرنه کلیدهای سطح‌بالا (به‌جز `env` / `commands`) merge می‌شوند.
+
+## Shutdown
+
+`listen()` معمولاً تا پایان فرآیند block می‌کند. API جداگانه‌ای برای «graceful shutdown» فراتر از سیگنال‌های عادی OS مستند نشده — مدیریت سیگنال را مسئولیت اپلیکیشن بدانید مگر باندینگ شما dispose/`using` داشته باشد (`FusionApp` در C# از `IDisposable` است).
+
+## بعدی
+
+- [تنظیمات و پیکربندی](./settings) — `fusion.<env>.json`، `FUSION_ENV`، overlayها
+- [چرخهٔ عمر درخواست](./request-lifecycle)
+- Config زبان: [پایتون](../../python/v1/config) · [تایپ‌اسکریپت](../../typescript/v1/config) · [سی‌شارپ](../../csharp/v1/config)

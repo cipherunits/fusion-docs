@@ -9,7 +9,7 @@ description: Overview of Fusion Framework, FMA, and cross-platform backend docs 
 
 You write class-based HTTP APIs in your preferred language. Routing, request parsing, response serialization, settings, and header helpers run in the Rust engine — language bindings stay thin and focused on developer experience.
 
-Current framework package version in the open-source repository: **1.2.3**.
+Current framework package version in the open-source repository: **1.2.6**.
 
 ## Why Fusion exists
 
@@ -23,18 +23,22 @@ Fusion is developed by **[Cipher Unit](https://cipherunit.xyz)**.
 | --- | --- |
 | **Python** | Available — `pip install fusion-framework` |
 | **TypeScript / Node.js** | Available — `npm i fusion-framework` |
-| **C#** | Available — NuGet `FusionFramework` + `fusion-ffi` |
+| **C#** | Available — NuGet `Fusion-Framework` (namespace `FusionFramework`) + `fusion-ffi` |
 
 ## Recommended learning path
 
+Read in this order — architecture first, then the CLI, then your language:
+
 1. **[Architecture overview](./architecture/v1)** — mental model of the stack
-2. **[FMA](./architecture/v1/fma)** — how modules and packages fit together
-3. **[What Fusion is not](./architecture/v1/what-fusion-is-not)** — scope boundaries
-4. Scaffold with **[Fusion Tool](./cli/v1/getting-started)**
-5. Language guide: [Python](./python/v1/getting-started) · [TypeScript](./typescript/v1/getting-started) · [C#](./csharp/v1/getting-started)
-6. [Router](./python/v1/router) · [Middleware](./python/v1/middleware) · [Config](./python/v1/config)
-7. [Reusable packages](./cli/v1/modules)
-8. [Best practices](./architecture/v1/best-practices) · [Troubleshooting](./architecture/v1/troubleshooting)
+2. **[Workspace and crates](./architecture/v1/workspace)** — core vs bindings
+3. **[FMA](./architecture/v1/fma)** — how modules and packages fit together
+4. **[What Fusion is not](./architecture/v1/what-fusion-is-not)** — scope boundaries
+5. **[Fusion Tool](./cli/v1)** — scaffold projects and manage environments
+6. Language guide: [Python](./python/v1/getting-started) · [TypeScript](./typescript/v1/getting-started) · [C#](./csharp/v1/getting-started)
+7. [Settings and configuration](./architecture/v1/settings) — `fusion.<env>.json`, `FUSION_ENV`, overlays
+8. [Router](./python/v1/router) · [Middleware](./python/v1/middleware) · language [Config](./python/v1/config)
+9. [Reusable packages](./cli/v1/modules)
+10. [Best practices](./architecture/v1/best-practices) · [Troubleshooting](./architecture/v1/troubleshooting)
 
 ## Tooling
 

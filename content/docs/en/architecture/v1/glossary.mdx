@@ -15,7 +15,7 @@ description: Fusion Framework terminology
 | **FusionApp** | Application object that holds settings, middleware, and starts listening |
 | **FusionBaseApi** | Base class for route modules; provides request view + `response` |
 | **Convention route** | Handler named `get`/`post`/… mounted at the module base path |
-| **Custom HTTP route** | `@http_get` / `httpGet` / `[HttpGet]` with an explicit path template |
+| **Custom HTTP route** | `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` with an explicit path template |
 | **`[module]`** | Path token expanded from the class name stem |
 | **`[action]`** | Path token expanded from the handler name stem (`*Action` stripped) |
 | **Middleware** | `(request, call_next)` function wrapping handlers |
@@ -23,3 +23,8 @@ description: Fusion Framework terminology
 | **Fingerprint headers** | Identity headers such as `X-Powered-By` / `X-Framework` / `X-Fusion-Version` |
 | **Fusion Tool** | External CLI (`fusion`) for init, commands, and packages |
 | **OpenAPI / Swagger** | Built-in API docs UI and JSON specs mounted by the app |
+
+| **Pagination** | Shared list paging: `page` / `page_size` → `{ items, pagination }` |
+| **Custom HTTP route** | `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` beyond convention verbs |
+| **Fusion Desktop** | GUI companion for Fusion backends |
+| **Fusion Snippets** | VS Code / Cursor snippet extension for Fusion APIs |

@@ -1,18 +1,154 @@
 ---
 title: شروع کار
-description: نصب و استفاده از Fusion CLI
+description: نصب Fusion Tool و ساخت پروژه
 ---
 
-## Installation
+## نصب
 
-```bash
-npm install -g @cipherunits/fusion-cli
+سیستم‌عامل خود را انتخاب کنید:
+
+```bash tab="Linux"
+curl -fsSL https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.sh | bash
 ```
 
-## Quick start
+```powershell tab="Windows"
+irm https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.ps1 | iex
+```
+
+```bash tab="macOS"
+curl -fsSL https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.sh | bash
+```
+
+در Windows، نصب‌کننده `fusion.exe` را زیر `%LOCALAPPDATA%\Programs\fusion` می‌گذارد و `PATH` کاربر را به‌روز می‌کند. بعد یک ترمینال **جدید** باز کنید و تأیید کنید:
+
+```bash
+fusion --help
+```
+
+از سورس با Rust هم می‌توانید نصب کنید:
+
+```bash
+git clone https://github.com/cipherunits/fusion-tool.git
+cd fusion-tool && cargo install --path .
+```
+
+پیش‌نیازها: Rust **1.70+** و Cargo.
+
+## بررسی نسخه
+
+```bash
+fusion --version
+```
+
+نمونه خروجی:
+
+```text
+fusion 1.2.6
+```
+
+## ساخت پروژه
+
+### تعاملی
+
+```bash
+fusion init
+```
+
+یا ساخت داخل یک پوشه:
 
 ```bash
 fusion init my-app
-cd my-app
-fusion start
 ```
+
+از شما پرسیده می‌شود:
+
+1. زبان — Python، TypeScript، یا C# (`asp-core` / `csharp`)
+2. نام پروژه
+3. توضیحات پروژه
+
+اگر `DIRECTORY` از قبل وجود داشته باشد، CLI خطا می‌دهد. اگر `fusion-framework.toml` از قبل باشد، پیکربندی موجود را چاپ می‌کند و بازنویسی نمی‌کند.
+
+### غیرتعاملی
+
+```bash
+fusion init --lang python --name fusion-test --description "A Fusion Framework project"
+```
+
+| آرگومان | توضیح |
+| --- | --- |
+| `[DIRECTORY]` | پوشهٔ هدف (اگر نباشد ساخته می‌شود؛ پیش‌فرض: پوشهٔ جاری) |
+| `--lang` | `python`، `typescript`، `csharp` یا `asp-core` (aliasهای C#) |
+| `--name` | نام پروژه |
+| `--description` | توضیحات پروژه |
+
+گزینه‌هایی که ندهید همچنان به‌صورت تعاملی پرسیده می‌شوند.
+
+نمونه‌ها:
+
+```bash
+fusion init --lang python --name my-app
+fusion init ./apps/demo --lang python --name demo
+fusion init --lang typescript --name my-app
+fusion init --lang asp-core --name my-app
+```
+
+Aliasهای `--lang`:
+
+| مقدار ذخیره‌شده | Aliasها |
+| --- | --- |
+| `python` | `python`, `py` |
+| `typescript` | `typescript`, `ts`, `node`, `nodejs` |
+| `asp-core` | `csharp`, `cs`, `asp-core`, `aspnet`, `aspnetcore`, … |
+
+## چیدمان تولیدشده
+
+برای پروژهٔ پایتون، `fusion init` یک اپ شروع‌کننده کوچک می‌سازد — شامل ماژول نمونهٔ **products**:
+
+```text
+├── core/
+│   └── settings.py
+├── src/
+│   └── modules/
+│       └── products/
+│           └── products.py
+├── main.py
+├── fusion-framework.toml
+├── fusion.dev.json
+├── fusion.prod.json
+├── fusion.stage.json
+└── .gitignore
+```
+
+- **`main.py`** — نقطهٔ ورود: ماژول‌ها را import می‌کند (تا کلاس‌های `@route` ثبت شوند)، اختیاری `MIDDLEWARE` را وصل می‌کند، `FusionApp` را از settings می‌سازد، سپس listen می‌کند
+- **`src/modules/products/products.py`** — ماژول API نمونه؛ می‌توانید متادیتای Swagger به‌ازای route (`tags`, `desc`, `version`, …) بگذارید
+- **`core/settings.py`** — بلوک `config` را از `fusion.<env>.json` بار می‌کند (`FUSION_ENV`، پیش‌فرض `dev`)
+
+پروژه‌های TypeScript همان چیدمان را با `main.ts`، `core/settings.ts` و ماژول نمونه دارند. C# (`csharp` / `asp-core`) entrypoint و ماژول‌ها را با `[Route]` scaffold می‌کند.
+
+مقادیر پیش‌فرض محیط‌ها:
+
+| فایل | پورت | host | debug | swagger |
+| --- | --- | --- | --- | --- |
+| `fusion.dev.json` | `8080` | `127.0.0.1` | `true` | روشن |
+| `fusion.stage.json` | `8081` | از env `HOST` | `false` | خاموش |
+| `fusion.prod.json` | `9090` | از env `HOST` | `false` | خاموش |
+
+## اجرای پروژه
+
+فریم‌ورک را نصب کنید، سپس دستور پیش‌فرض `run` در محیط `dev` را اجرا کنید:
+
+```bash
+pip install fusion-framework
+fusion command run:dev
+```
+
+با `fusion.dev.json` پیش‌فرض (`host` برابر `127.0.0.1`، `port` برابر `8080`، Swagger فعال):
+
+| چه | URL |
+| --- | --- |
+| API | [http://127.0.0.1:8080](http://127.0.0.1:8080) |
+| Swagger UI | [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger) |
+
+Swagger / OpenAPI **به‌طور خودکار** از ماژول‌های `@route` ساخته می‌شود. برای امتحان endpointها بدون کلاینت جدا، Swagger UI را باز کنید.
+
+بعدی: [دستورات و محیط‌ها](./command) برای envهای سفارشی، دستورات، و config سراسری Swagger.

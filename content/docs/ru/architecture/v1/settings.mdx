@@ -1,0 +1,318 @@
+---
+title: Настройки и конфигурация
+description: Как Fusion загружает fusion.<env>.json, FUSION_ENV, overlays и ключи, используемые в runtime
+---
+
+## Что это
+
+Fusion загружает runtime-конфигурацию из файлов **`fusion.<env>.json`** в дереве проекта. Обнаружение файлов, плейсхолдеры окружения и поиск ключей реализованы в **fusion-core** (Rust). Языковые биндинги добавляют только тонкие overlays (Python `settings.py`, опциональный путь к модулю Node, C# `SettingsStore`).
+
+JSON — источник истины. Языковые файлы настроек удобны для чтения или наложения значений — это не вторая система конфигурации.
+
+## Быстрый старт
+
+```bash
+# Среда по умолчанию — "dev" → fusion.dev.json
+python main.py
+npx tsx main.ts
+dotnet run
+
+# Явная среда
+FUSION_ENV=prod python main.py
+fusion command run:prod   # задаёт FUSION_ENV=prod для дочернего процесса
+```
+
+→ API по языкам: [Config Python](../../python/v1/config) · [Config TypeScript](../../typescript/v1/config) · [Config C#](../../csharp/v1/config)
+
+## Как работает обнаружение
+
+1. Определяется имя среды:
+   - Из `FUSION_ENV`, если задано
+   - Иначе **`dev`**
+2. Ищется файл с именем **`fusion.<env>.json`** (например `fusion.dev.json`).
+3. Корни поиска по порядку:
+   - **Текущая рабочая директория** процесса (cwd)
+   - Затем каждый **родительский каталог** (предки cwd)
+   - Затем любые **дополнительные корни**, которые передаёт биндинг (Python: каталог `__main__`; Node/C#: обычно `process.cwd()` / каталог проекта)
+4. Если точный файл отсутствует, Fusion берёт первый найденный `fusion.*.json` в этих корнях (отсортированный по имени). Лучше сохранять точное имя, чтобы среды оставались предсказуемыми.
+5. Если ничего не найдено, настройки остаются пустыми, а типизированные хелперы используют значения по умолчанию (`host` — `127.0.0.1`, `port` — `3000`, `debug` — `false`). Сгенерированные scaffold-приложения всё равно создают JSON, поэтому обычно до «голых» дефолтов вы не доходите.
+
+`fusion init` всегда записывает три файла в корень проекта: `fusion.dev.json`, `fusion.stage.json`, `fusion.prod.json`.
+
+## Envelope и плоский JSON
+
+Допустимы две формы:
+
+### Envelope (стиль scaffold CLI)
+
+```json
+{
+  "env": "dev",
+  "config": { "host": "127.0.0.1", "port": 8080 },
+  "commands": { "run": "python main.py" }
+}
+```
+
+| Ключ верхнего уровня | Роль |
+| --- | --- |
+| `env` | Логическое имя среды (также обновляет загруженную строку `env`) |
+| `config` | Объект, объединяемый в runtime-карту настроек |
+| `commands` | Shell-команды для [`fusion command`](../../cli/v1/command) — сам HTTP-слушатель их не использует |
+
+Когда присутствует `config`, **только этот объект** сливается как настройки (плюс `commands` сохраняется под ключом `commands`).
+
+### Плоский объект
+
+Если объекта `config` нет, каждый ключ верхнего уровня **кроме** `env` и `commands` сливается как настройки. Удобно для рукописных или минимальных файлов.
+
+## Плейсхолдеры окружения (`ALL_CAPS`)
+
+Когда **строковое** значение в JSON совпадает с этим шаблоном, оно разрешается из **окружения процесса** в момент чтения:
+
+- Длина больше 1
+- Только ASCII-буквы в верхнем регистре и подчёркивания
+- Первый символ — буква или `_`
+
+Примеры из scaffold CLI:
+
+| Значение JSON | Смысл |
+| --- | --- |
+| `"HOST"` | Заменяется на `os.environ["HOST"]` / `process.env.HOST` при чтении; если не задано, остаётся литерал `"HOST"` |
+| `"SECRET_KEY"` | То же правило — типично для секретов |
+
+Числа, булевы значения, объекты и строки со смешанным регистром **не** считаются плейсхолдерами.
+
+В scaffold для stage и prod задаётся `"host": "HOST"`, чтобы адрес привязки брался из переменной окружения `HOST` при деплое. В dev используется литерал `"127.0.0.1"`.
+
+## Ключи, которые реально потребляет Fusion
+
+Это ключи, которые общий core / биндинги читают для HTTP и документации. Вы можете добавить любые другие ключи для приложения; они доступны через `settings.get(...)`.
+
+| Ключ | Тип | По умолчанию, если нет | Для чего |
+| --- | --- | --- | --- |
+| `host` | string | `127.0.0.1` | Адрес привязки для `listen` |
+| `port` | number / string | `3000` | Порт привязки (`fusion init` вместо этого использует 8080 / 8081 / 9090) |
+| `debug` | bool / string | `false` | Флаг отладки (Node может логировать URL listen, когда `true`) |
+| `secret_key` | string | — | Секрет приложения; в scaffold — `fusion-framework-<uuid>`. В prod предпочтительны плейсхолдеры |
+| `fingerprint.enabled` | bool | `true` | Если `true`, core добавляет заголовки идентичности фреймворка (`X-Powered-By`, `X-Framework`, `X-Fusion-Version`) |
+| `swagger.*` | object | см. ниже | Монтирование Swagger UI + OpenAPI |
+| `commands` | object | — | Объявлено для Tool; также сохраняется в карте настроек, если есть в JSON |
+
+Поиск ключей нечувствителен к регистру и считает `-` и `_` одинаковыми (`secret-key` ≡ `secret_key`). Работают пути с точками: `settings.get("swagger.enabled")`, `settings.get("fingerprint.enabled")`.
+
+### Ключи Swagger, читаемые в runtime
+
+Биндинги читают вложенные ключи, например:
+
+| Ключ | Типичное значение по умолчанию |
+| --- | --- |
+| `swagger.enabled` | `true` (scaffold: `true` в dev, `false` в stage/prod) |
+| `swagger.path` | `/swagger` |
+| `swagger.title` | fallback на `swagger.info.title` или `"Fusion API Docs"` |
+| `swagger.info` | объект OpenAPI `info` |
+| `swagger.servers` | список servers OpenAPI |
+| `swagger.auth` | схемы, `global`, `oauth`, `persistAuthorization` |
+| `swagger.navbar` | опции верхней панели / версии |
+| `swagger.ui` | объект конфигурации Swagger UI |
+
+→ Детали по языку: [Python Swagger](../../python/v1/swagger)
+
+## Аннотированный `fusion.dev.json` (что генерирует `fusion init`)
+
+`fusion init` строит одну и ту же структуру для каждого языка; меняется только строка `commands.run` (`python main.py` / `npx tsx main.ts` / `dotnet run`).
+
+```json
+{
+  "env": "dev",
+  "config": {
+    "port": 8080,
+    "secret_key": "fusion-framework-<uuid>",
+    "host": "127.0.0.1",
+    "debug": true,
+    "fingerprint": {
+      "enabled": true
+    },
+    "swagger": {
+      "enabled": true,
+      "path": "/swagger",
+      "title": "Fusion API Docs",
+      "info": {
+        "title": "Fusion API",
+        "version": "1.0.0",
+        "description": "API documentation generated by fusion-framework",
+        "contact": {
+          "name": "API Support",
+          "email": "support@example.com"
+        },
+        "license": {
+          "name": "MIT"
+        }
+      },
+      "servers": [
+        { "url": "/", "description": "Current host" }
+      ],
+      "auth": {
+        "persistAuthorization": true,
+        "schemes": {
+          "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+          },
+          "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key"
+          }
+        },
+        "global": [],
+        "oauth": {
+          "clientId": "",
+          "appName": "Fusion API",
+          "scopes": "",
+          "usePkceWithAuthorizationCodeGrant": true
+        }
+      },
+      "navbar": {
+        "enabled": true,
+        "showUrlInput": false
+      },
+      "ui": {
+        "deepLinking": true,
+        "displayOperationId": false,
+        "defaultModelsExpandDepth": 1,
+        "defaultModelExpandDepth": 1,
+        "defaultModelRendering": "example",
+        "docExpansion": "list",
+        "filter": true,
+        "tryItOutEnabled": true,
+        "displayRequestDuration": true,
+        "showExtensions": false,
+        "showCommonExtensions": false,
+        "withCredentials": false,
+        "syntaxHighlight": {
+          "activated": true,
+          "theme": "agate"
+        }
+      }
+    }
+  },
+  "commands": {
+    "run": "python main.py"
+  }
+}
+```
+
+| Поле | Зачем оно здесь |
+| --- | --- |
+| `env` | Помечает файл как среду `dev` |
+| `config.port` | Явный **8080** (не «голый» дефолт core — 3000) |
+| `config.secret_key` | Свежий UUID на каждый init — не переиспользуйте его между средами без необходимости |
+| `config.host` | Loopback для локальной разработки |
+| `config.debug` | `true` только в сгенерированном файле **dev** |
+| `config.fingerprint` | Заголовки идентичности фреймворка в ответах |
+| `config.swagger` | Полный блок Swagger UI / OpenAPI; **enabled** в dev |
+| `commands.run` | Что выполняет `fusion command run` |
+
+## Отличия stage и prod
+
+Та же схема; значения отличаются:
+
+| Поле | `fusion.dev.json` | `fusion.stage.json` | `fusion.prod.json` |
+| --- | --- | --- | --- |
+| `env` | `dev` | `stage` | `prod` |
+| `config.port` | `8080` | `8081` | `9090` |
+| `config.host` | `"127.0.0.1"` | `"HOST"` (плейсхолдер env) | `"HOST"` |
+| `config.debug` | `true` | `false` | `false` |
+| `config.swagger.enabled` | `true` | `false` | `false` |
+| `config.fingerprint.enabled` | `true` | `true` | `true` |
+| `config.secret_key` | новый UUID каждый раз | новый UUID каждый раз | новый UUID каждый раз |
+| `commands.run` | зависит от языка | то же | то же |
+
+Дополнительные среды можно добавить, создав `fusion.<name>.json` (например `fusion.test.json`) и выбрав их через `FUSION_ENV=test` или `fusion command run:test`.
+
+## Связь с `fusion command`
+
+[`fusion command`](../../cli/v1/command) читает блок `commands` из выбранного файла среды и запускает shell-строку в корне проекта с:
+
+```text
+FUSION_ENV=<chosen env>
+```
+
+Порядок разрешения имени среды:
+
+1. Суффикс в строке: `run:stage`
+2. Флаг: `--stage` / `--prod` / `--env <name>`
+3. Уже заданный `FUSION_ENV`
+4. По умолчанию `dev`
+
+Так `fusion command run:prod` заставляет процесс загрузить `fusion.prod.json` без ручного экспорта `FUSION_ENV`.
+
+## Языковые overlays
+
+### Python — `load_settings_module` / `core/settings.py`
+
+```python
+from fusion_framework.config import load_settings_module, get_settings
+
+load_settings_module("settings")  # also tries core.settings
+app_settings = get_settings()
+```
+
+Поток:
+
+1. Загрузка `fusion.<env>.json` через Rust (доп. корень: каталог `__main__`)
+2. Импорт `settings` или `core.settings`
+3. Слияние только **UPPERCASE**-атрибутов модуля в singleton настроек (и `SECRET_KEY`, и `secret_key`)
+
+Сгенерированный `core/settings.py` обычно читает JSON обратно в uppercase-имена для кода приложения — он не заменяет JSON как источник истины.
+
+Пакет: **`fusion_framework.config`** (не отдельный PyPI-пакет «config»).
+
+### TypeScript / Node — `settings.ensureLoaded`
+
+```ts
+import { settings, getSettings, FusionApp } from "fusion-framework";
+
+settings.ensureLoaded([process.cwd()]);
+const app = new FusionApp(getSettings());
+```
+
+Сгенерированный `core/settings.ts` экспортирует значения для вашего кода; он **не** автоматически сливается при каждом старте. Опциональный хелпер `run({ settingsModule })` сливает только экспортированные `HOST`, `PORT` и `DEBUG`, если они есть.
+
+Пакет: **`fusion-framework`**.
+
+### C# — `SettingsStore`
+
+```csharp
+SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
+using var app = new FusionApp(SettingsStore.GetSettings());
+```
+
+`CoreSettings` в scaffold — статический удобный wrapper вокруг `SettingsStore`. Пространство имён: **`FusionFramework`**. NuGet-пакет: **`Fusion-Framework`**.
+
+## Ментальная модель
+
+```text
+FUSION_ENV (default: dev)
+        │
+        ▼
+fusion.<env>.json  ──►  fusion-core Settings
+        │                      │
+   config / flat               ├── host / port / debug
+   ALL_CAPS → env              ├── fingerprint.enabled
+   commands (Tool)             └── swagger.*
+        │
+        ▼ (optional)
+Python UPPERCASE overlay  /  Node HOST|PORT|DEBUG via run()  /  C# Merge
+        │
+        ▼
+FusionApp.listen(…)
+```
+
+## Далее
+
+- [Жизненный цикл приложения](./lifecycle) — где загрузка настроек стоит в startup
+- [Структура проекта](./project-structure) — файлы, которые создаёт `fusion init`
+- [Команды и среды](../../cli/v1/command) — блок `commands` и синтаксис `:env`
+- Config по языкам: [Python](../../python/v1/config) · [TypeScript](../../typescript/v1/config) · [C#](../../csharp/v1/config)

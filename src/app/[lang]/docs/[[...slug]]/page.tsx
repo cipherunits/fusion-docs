@@ -5,7 +5,7 @@ import {
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/layouts/docs/page';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
@@ -19,6 +19,47 @@ import {
   siteConfig,
 } from '@/lib/seo';
 import { getCommon, getSeo } from '@/lib/common-messages';
+import {
+  getLatestVersion,
+  getProductVersions,
+  isDocProductId,
+} from '@/lib/docs';
+
+/** `/docs/{product}/page` → `/docs/{product}/{latest}/page` when version is omitted. */
+function redirectMissingVersion(lang: string, slug: string[]): string | null {
+  if (slug.length === 0) {
+    return null;
+  }
+
+  const [product, second, ...rest] = slug;
+  if (!product || !isDocProductId(product, lang)) {
+    return null;
+  }
+
+  const versions = getProductVersions(product, lang);
+  const latest = getLatestVersion(product, lang);
+  if (!latest) {
+    return null;
+  }
+
+  // `/docs/architecture` → `/docs/architecture/v1`
+  if (!second) {
+    return `/${lang}/docs/${product}/${latest}`;
+  }
+
+  // Already versioned
+  if (versions.includes(second)) {
+    return null;
+  }
+
+  // `/docs/architecture/what-fusion-is-not` → `/docs/architecture/v1/what-fusion-is-not`
+  const candidate = [product, latest, second, ...rest];
+  if (source.getPage(candidate, lang)) {
+    return `/${lang}/docs/${candidate.join('/')}`;
+  }
+
+  return null;
+}
 
 export default async function Page(
   props: PageProps<'/[lang]/docs/[[...slug]]'>,
@@ -27,6 +68,10 @@ export default async function Page(
   const slug = params.slug ?? [];
   const page = source.getPage(slug, params.lang);
   if (!page) {
+    const target = redirectMissingVersion(params.lang, slug);
+    if (target) {
+      redirect(target);
+    }
     notFound();
   }
 
@@ -97,6 +142,10 @@ export async function generateMetadata(
   const page = source.getPage(slug, params.lang);
 
   if (!page) {
+    const target = redirectMissingVersion(params.lang, slug);
+    if (target) {
+      redirect(target);
+    }
     notFound();
   }
 

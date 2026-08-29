@@ -7,6 +7,8 @@ description: fusion.<env>.json and Settings in C#
 
 Settings load through FFI from the same `fusion.<env>.json` files as other languages (`FUSION_ENV`, default `dev`).
 
+→ **[Настройки и конфигурация](../../architecture/v1/settings)**
+
 ```csharp
 SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
 var host = SettingsStore.Current.Host;

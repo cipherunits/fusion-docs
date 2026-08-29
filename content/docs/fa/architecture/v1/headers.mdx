@@ -1,0 +1,138 @@
+---
+title: Headerها
+description: ثابت‌های نام header، media typeها، fingerprint و helperها
+---
+
+## نمای کلی
+
+کمک‌کننده‌های header در **`fusion-core`** هستند و این‌گونه در دسترس‌اند:
+
+| زبان | ماژول |
+| --- | --- |
+| Python | `from fusion_framework import header` |
+| TypeScript / Node | `import { header } from "fusion-framework"` |
+| C# | helperها / ثابت‌های `Header` در `FusionFramework` |
+
+```python
+return self.response(
+    body,
+    status=status.HTTP_SUCCESS,
+    headers=header.download("report.csv", header.TEXT_CSV),
+)
+```
+
+## Headerهای fingerprint
+
+وقتی fingerprint فعال باشد (`fingerprint.enabled`، پیش‌فرض `true`)، پاسخ‌ها می‌توانند شامل این‌ها باشند:
+
+| ثابت | مقدار معمول |
+| --- | --- |
+| `X_POWERED_BY` | `Fusion Framework` (`FRAMEWORK_POWERED_BY`) |
+| `X_FRAMEWORK` | `Fusion` (`FRAMEWORK_ID`) |
+| `X_FUSION_VERSION` | رشتهٔ نسخهٔ فعلی فریم‌ورک |
+
+## سازنده‌های helper
+
+| Helper | نتیجه |
+| --- | --- |
+| `attachment(filename)` | `Content-Disposition: attachment; filename=…` |
+| `inline(filename?)` | `Content-Disposition: inline…` |
+| `content_type(media_type, charset?)` | نقشهٔ `Content-Type` |
+| `location(url)` | نقشهٔ `Location` |
+| `cache_control(value)` | نقشهٔ `Cache-Control` |
+| `download(filename, media_type?)` | attachment + `Content-Type` (پیش‌فرض `application/octet-stream`) |
+
+نام فایل basename می‌شود و escape می‌شود تا تزریق header رخ ندهد.
+
+## ثابت‌های نام header
+
+| Constant | Header name |
+| --- | --- |
+| `ACCEPT` | `Accept` |
+| `ACCEPT_ENCODING` | `Accept-Encoding` |
+| `ACCEPT_LANGUAGE` | `Accept-Language` |
+| `AUTHORIZATION` | `Authorization` |
+| `CACHE_CONTROL` | `Cache-Control` |
+| `CONNECTION` | `Connection` |
+| `CONTENT_DISPOSITION` | `Content-Disposition` |
+| `CONTENT_ENCODING` | `Content-Encoding` |
+| `CONTENT_LENGTH` | `Content-Length` |
+| `CONTENT_RANGE` | `Content-Range` |
+| `CONTENT_TYPE` | `Content-Type` |
+| `COOKIE` | `Cookie` |
+| `DATE` | `Date` |
+| `ETAG` | `ETag` |
+| `EXPECT` | `Expect` |
+| `EXPIRES` | `Expires` |
+| `HOST` | `Host` |
+| `IF_MATCH` | `If-Match` |
+| `IF_MODIFIED_SINCE` | `If-Modified-Since` |
+| `IF_NONE_MATCH` | `If-None-Match` |
+| `IF_RANGE` | `If-Range` |
+| `IF_UNMODIFIED_SINCE` | `If-Unmodified-Since` |
+| `LAST_MODIFIED` | `Last-Modified` |
+| `LOCATION` | `Location` |
+| `ORIGIN` | `Origin` |
+| `PRAGMA` | `Pragma` |
+| `RANGE` | `Range` |
+| `REFERER` | `Referer` |
+| `RETRY_AFTER` | `Retry-After` |
+| `SERVER` | `Server` |
+| `SET_COOKIE` | `Set-Cookie` |
+| `TE` | `TE` |
+| `TRAILER` | `Trailer` |
+| `TRANSFER_ENCODING` | `Transfer-Encoding` |
+| `UPGRADE` | `Upgrade` |
+| `USER_AGENT` | `User-Agent` |
+| `VARY` | `Vary` |
+| `VIA` | `Via` |
+| `WARNING` | `Warning` |
+| `WWW_AUTHENTICATE` | `WWW-Authenticate` |
+| `X_CONTENT_TYPE_OPTIONS` | `X-Content-Type-Options` |
+| `X_FRAME_OPTIONS` | `X-Frame-Options` |
+| `X_REQUESTED_WITH` | `X-Requested-With` |
+| `X_FORWARDED_FOR` | `X-Forwarded-For` |
+| `X_FORWARDED_PROTO` | `X-Forwarded-Proto` |
+| `X_REAL_IP` | `X-Real-IP` |
+| `ACCESS_CONTROL_ALLOW_ORIGIN` | `Access-Control-Allow-Origin` |
+| `ACCESS_CONTROL_ALLOW_METHODS` | `Access-Control-Allow-Methods` |
+| `ACCESS_CONTROL_ALLOW_HEADERS` | `Access-Control-Allow-Headers` |
+| `ACCESS_CONTROL_ALLOW_CREDENTIALS` | `Access-Control-Allow-Credentials` |
+| `ACCESS_CONTROL_EXPOSE_HEADERS` | `Access-Control-Expose-Headers` |
+| `ACCESS_CONTROL_MAX_AGE` | `Access-Control-Max-Age` |
+| `ACCESS_CONTROL_REQUEST_METHOD` | `Access-Control-Request-Method` |
+| `ACCESS_CONTROL_REQUEST_HEADERS` | `Access-Control-Request-Headers` |
+| `X_POWERED_BY` | `X-Powered-By` |
+| `X_FRAMEWORK` | `X-Framework` |
+| `X_FUSION_VERSION` | `X-Fusion-Version` |
+
+## ثابت‌های media-type / مقدار
+
+| Constant | مقدار |
+| --- | --- |
+| `APPLICATION_JSON` | `application/json` |
+| `APPLICATION_JSON_UTF8` | `application/json; charset=utf-8` |
+| `APPLICATION_OCTET_STREAM` | `application/octet-stream` |
+| `APPLICATION_PDF` | `application/pdf` |
+| `APPLICATION_XML` | `application/xml` |
+| `APPLICATION_FORM_URLENCODED` | `application/x-www-form-urlencoded` |
+| `MULTIPART_FORM_DATA` | `multipart/form-data` |
+| `TEXT_PLAIN` | `text/plain` |
+| `TEXT_PLAIN_UTF8` | `text/plain; charset=utf-8` |
+| `TEXT_HTML` | `text/html` |
+| `TEXT_HTML_UTF8` | `text/html; charset=utf-8` |
+| `TEXT_CSS` | `text/css` |
+| `TEXT_CSV` | `text/csv` |
+| `TEXT_JAVASCRIPT` | `text/javascript` |
+| `IMAGE_PNG` | `image/png` |
+| `IMAGE_JPEG` | `image/jpeg` |
+| `IMAGE_GIF` | `image/gif` |
+| `IMAGE_WEBP` | `image/webp` |
+| `IMAGE_SVG` | `image/svg+xml` |
+
+| ثابت | مقدار |
+| --- | --- |
+| `FRAMEWORK_POWERED_BY` | `Fusion Framework` |
+| `FRAMEWORK_ID` | `Fusion` |
+
+منبع: `crates/fusion-core/src/headers.rs`.

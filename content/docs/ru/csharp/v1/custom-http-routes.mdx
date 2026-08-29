@@ -1,0 +1,76 @@
+---
+title: Пользовательские HTTP-маршруты
+description: "Маршруты на уровне метода — [HttpGet] … [HttpOptions] в C#"
+---
+
+## Convention и пользовательские маршруты
+
+| Режим | Как | Путь монтирования |
+| --- | --- | --- |
+| **Convention** | Методы `Get`, `Post`, `Put`, `Patch`, `Delete`, `Head`, `Options` (без учёта регистра) | Базовый путь класса из `[Route]` |
+| **Пользовательский** | `[HttpGet]` … `[HttpOptions]` на любом методе | Базовый путь **склеивается** с шаблоном |
+
+Оба режима могут сосуществовать на одном классе.
+
+## Атрибуты методов
+
+Определены в `FusionFramework` (`HttpMethodAttributes.cs`). Каждый принимает шаблон пути в конструкторе:
+
+| Атрибут | HTTP-метод |
+| --- | --- |
+| `[HttpGet]` | GET |
+| `[HttpPost]` | POST |
+| `[HttpPut]` | PUT |
+| `[HttpPatch]` | PATCH |
+| `[HttpDelete]` | DELETE |
+| `[HttpHead]` | HEAD |
+| `[HttpOptions]` | OPTIONS |
+
+Именованные свойства у всех: `Tags`, `Desc`, `Title`, `Deprecated`.
+
+## Общие параметры
+
+| Свойство | Поведение |
+| --- | --- |
+| `Tags` | `null` наследует от `[Route]`; любое не-`null` значение (включая пустой массив) переопределяет |
+| `Desc` | Описание операции |
+| `Title` | Заголовок / summary операции |
+| `Deprecated` | Пометить операцию устаревшей |
+
+## Склейка путей и токены
+
+- Относительные шаблоны (без ведущего `/`) присоединяются к базовому пути `[Route]`.
+- Абсолютные шаблоны с ведущим `/` **игнорируют** базовый путь класса.
+- `[module]` раскрывается из имени класса (`UserModule` → `user`).
+- `[action]` — из имени обработчика со снятием суффикса `Action` / `ACTION` и lowercase (`UserAction` → `user`).
+
+## Пример (GET + POST)
+
+```csharp
+using FusionFramework;
+
+[Route("/api/[module]", Tags = new[] { "users" })]
+public class UserModule : FusionBaseApi
+{
+    public object Get() =>
+        Response(new { mode = "convention" }, Status.HTTP_SUCCESS);
+
+    [HttpGet("test/[action]", Title = "User action")]
+    public object UserAction() =>
+        Response(new { mode = "custom", action = "user" }, Status.HTTP_SUCCESS);
+
+    [HttpPost("create/[action]", Title = "Create user", Tags = new[] { "users", "write" })]
+    public object CreateAction() =>
+        Response(new { created = true }, Status.HTTP_SUCCESS);
+
+    [HttpDelete("/admin/users/purge", Deprecated = true)]
+    public object Purge() =>
+        Response(new { purged = true }, Status.HTTP_SUCCESS);
+}
+```
+
+## Регистрация
+
+Вызовите `Route.Register<UserModule>()` (или зарегистрируйте в bootstrap хоста) **до** `Listen()`.
+
+Пример: `examples/custom_http_routes.cs`.

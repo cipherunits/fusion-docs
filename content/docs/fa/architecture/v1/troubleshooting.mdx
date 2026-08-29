@@ -1,0 +1,53 @@
+---
+title: عیب‌یابی
+description: مشکلات رایج راه‌اندازی و runtime در Fusion
+---
+
+## Route مقدار ۴۰۴ برمی‌گرداند
+
+| علت | رفع |
+| --- | --- |
+| فایل ماژول هرگز import نشده | قبل از `listen()` از `main` import کنید |
+| نوع C# ثبت نشده | `Route.Register<T>()` را صدا بزنید |
+| مسیر اشتباه / پیشوند نسخهٔ گم‌شده | `version=` و گسترش `[module]` را چک کنید |
+| اشتباه در قالب مسیر سفارشی | قالب `@http_get` / `@http_post` / … و `[action]` را بررسی کنید |
+
+## Settings بارگذاری نمی‌شود
+
+| علت | رفع |
+| --- | --- |
+| cwd اشتباه | از ریشهٔ پروژه اجرا کنید (`fusion command run:dev`) |
+| محیط اشتباه | `FUSION_ENV` را تنظیم کنید یا `run:prod` / `--prod` |
+| دنبال کلید flat هستید ولی فایل زیر `config` تو در تو است | فریم‌ورک آبجکت `config` را merge می‌کند — از `settings.get("port")` استفاده کنید نه `settings.get("config.port")` مگر خودتان آن‌طور ذخیره کرده باشید |
+
+## Middleware JWT همیشه ۴۰۱
+
+- نبودن header `Authorization: Bearer …`
+- توکن ناقص هنگام decode پیش‌فرض
+- `verify` سفارشی که `None` برمی‌گرداند
+
+## Roles همیشه ۴۰۳
+
+- `bearer_jwt` قبل از `require_roles` / `roles=` ثبت نشده
+- Payload فاقد claim `roles` است (یا نام claim سفارشی پیکربندی نشده)
+
+## خطاهای Native / FFI (C#)
+
+- `fusion-ffi` را بسازید یا از باینری native بسته‌شده در NuGet استفاده کنید
+- در توسعهٔ محلی اگر loader کتابخانه را پیدا نکرد، `FUSION_FFI_PATH` را تنظیم کنید
+
+## Swagger نیست
+
+- `swagger.enabled` برابر false است
+- `swagger.path` غیرفعال است
+- اپ قبل از mount شکست خورده — استثناهای startup را چک کنید
+
+## خطای import بعد از fusion add
+
+- مرحلهٔ build در `fusion.module.toml` شکست خورده
+- نام پکیج `entry` اشتباه است
+- دوباره `fusion add` را اجرا کنید و خروجی CLI را بخوانید
+
+## پورت در حال استفاده است
+
+`port` را در `fusion.<env>.json` / `config.port` تو در تو عوض کنید.

@@ -36,15 +36,16 @@ fusion module init
 
 Interactive prompts ask for:
 
-1. Implementation language — **Python**, **TypeScript**, or **Rust**
+1. Implementation language — **Python**, **TypeScript**, **C#**, or **Rust**
 2. Module name (id)
 3. Description
-4. Output directory (default `fusion-<id>-mod`)
+4. Output directory (interactive default `fusion-{id}-mod`)
 
 Non-interactive:
 
 ```bash
 fusion module init --lang python --name example --description "My first module"
+fusion module init --lang csharp --name helpers --description "Shared helpers"
 fusion module init --lang rust --name auth --description "Auth helpers" ./fusion-auth-mod
 ```
 
@@ -54,9 +55,10 @@ fusion module init --lang rust --name auth --description "Auth helpers" ./fusion
 | --- | --- |
 | **Python** | Pure Python package under `python/fusion_<name>_mod/` |
 | **TypeScript** | npm package with `js/` + `src/` |
-| **Rust** | Shared Rust core + optional **PyO3** and **N-API** bindings so one module can target Python and TypeScript hosts |
+| **C#** | .NET library package (`Fusion<Name>Mod` style) |
+| **Rust** | Shared Rust core + optional **PyO3**, **N-API**, and **C#** host targets |
 
-Rust is useful when you want one native core for every host language.
+Rust is useful when you want one native core for multiple host languages. Non-interactive `--lang rust` enables all three host targets; interactive mode lets you multi-select.
 
 ### Scaffold layout (Python)
 
@@ -72,6 +74,110 @@ fusion-example-mod/
 ```
 
 The scaffold includes a small `hello()` example. Replace it with your own API.
+
+
+
+## What each language scaffold creates
+
+### Python (`--lang python`)
+
+Creates a **pure Python** installable package:
+
+```text
+fusion-<id>-mod/
+├── fusion.module.toml
+├── pyproject.toml          # setuptools, package under python/
+├── README.md
+├── .gitignore
+└── python/
+    └── fusion_<id>_mod/
+        ├── __init__.py     # exports hello()
+        └── hello.py
+```
+
+- Package name: `fusion_<id>_mod` (underscores)
+- Build on `fusion add`: `pip install -e .`
+- Host target: Python apps only
+- You replace `hello()` with your public API; apps `from fusion_<id>_mod import …`
+
+### TypeScript (`--lang typescript`)
+
+Creates an **npm** package with TypeScript source compiled to `js/`:
+
+```text
+fusion-<id>-mod/
+├── fusion.module.toml
+├── package.json            # name: fusion-<id>-mod, build: tsc
+├── tsconfig.json
+├── src/index.ts            # hello()
+├── js/index.js + index.d.ts
+├── README.md
+└── .gitignore
+```
+
+- Package name: `fusion-<id>-mod`
+- Build: `npm install && npm run build`
+- Host target: TypeScript/Node Fusion apps
+- After `fusion add`, CLI links `file:.fusion/modules/<id>` into the app `package.json`
+
+### C# (`--lang csharp`)
+
+Creates a **.NET class library** (`net10.0`):
+
+```text
+fusion-<id>-mod/
+├── fusion.module.toml
+├── Fusion<Name>Mod/
+│   ├── Fusion<Name>Mod.csproj
+│   └── Module.cs           # Module.Hello()
+├── README.md
+└── .gitignore
+```
+
+- Package / assembly: `Fusion<Name>Mod` (PascalCase from id)
+- Build: `dotnet build -c Release …`
+- Host target: C# Fusion apps
+- After `fusion add`, CLI runs `dotnet add reference` to the vendored `.csproj`
+
+### Rust (`--lang rust`)
+
+Creates a **Cargo workspace** with a shared Rust core and optional host bindings:
+
+```text
+fusion-<id>-mod/
+├── fusion.module.toml
+├── Cargo.toml              # workspace
+├── crates/core/            # shared Rust library (hello)
+├── bindings/python/        # optional PyO3 (if Python target selected)
+├── bindings/node/          # optional N-API (if TypeScript target selected)
+├── bindings/csharp/        # optional P/Invoke wrapper (if C# target selected)
+├── README.md
+└── .gitignore
+```
+
+- Interactive mode: multi-select which hosts to enable (Python / TypeScript / C#)
+- Non-interactive `--lang rust`: **all three** hosts enabled by default
+- Build: `cargo build --release` plus per-host steps (`maturin`, `npm run build`, `dotnet build`) declared in `fusion.module.toml`
+- Use Rust when one native implementation must serve multiple language hosts
+
+## After scaffold — publish & install flow
+
+1. Implement your API (replace `hello` / `Module.Hello`)
+2. Push to GitHub and tag versions (`v1.0.0`)
+3. In a Fusion **app** directory: `fusion add --github OWNER/REPO@v1.0.0`
+4. Import the package in route modules / middleware — **routes are not auto-mounted**
+
+## `fusion.module.toml` fields that matter
+
+| Section | Purpose |
+| --- | --- |
+| `[module]` | `id`, `name`, `version`, `description` |
+| `[module.impl]` | `language` = `python` \| `typescript` \| `csharp` \| `rust` |
+| `[module.targets]` | Which host apps can install this module |
+| `[module.entry]` | Import / package names per host |
+| `[module.build]` | Shell commands `fusion add` runs after vendor |
+
+ID rules: lowercase letters, digits, hyphens; must start with a letter.
 
 ## Manifest
 

@@ -1,12 +1,43 @@
 ---
-title: CLI
+title: Fusion Tool
 description: نمای کلی رابط خط فرمان Fusion
 ---
 
-## Overview
+# Fusion Tool چیست؟
 
-مستندات CLI ابزار خط فرمان Fusion را برای ساخت، مدیریت و اجرای بک‌اند از ترمینال پوشش می‌دهد.
+**Fusion Tool** CLI رسمی **Fusion Framework** است. نام باینری `fusion` است (crate: `fusion-tool`).
 
-شما در حال مشاهده **v1** هستید. نسخه‌های جدید در انتخاب‌گر نسخه ظاهر می‌شوند.
+با آن پروژه scaffold می‌کنید، فایل‌های محیط را مدیریت می‌کنید، دستورات اعلام‌شده در پروژه را اجرا می‌کنید، پکیج‌های کتابخانه‌ای می‌سازید و نصب می‌کنید، و خود CLI را به‌روز می‌کنید — از یک باینری روی Linux، macOS و Windows.
 
-توسعه‌یافته توسط [Cipher Unit](https://cipherunit.xyz). برای رابط گرافیکی، [Fusion Desktop](/fa/gui) را ببینید.
+نسخهٔ فعلی CLI: **1.2.6**. اپ‌های scaffold‌شده پکیج فریم‌ورک را روی نسخهٔ embed‌شده در CLI پین می‌کنند (فعلاً **1.2.3** در فایل‌های dependency تولیدشده).
+
+با Fusion Tool می‌توانید:
+
+- پروژهٔ جدید Fusion Framework بسازید (`fusion init`)
+- دستورات پروژه را به‌ازای هر محیط اجرا کنید (`fusion command`)
+- پکیج کتابخانه‌ای قابل انتشار scaffold کنید (`fusion module init`)
+- ماژول را از GitHub داخل اپ نصب کنید (`fusion add`)
+- CLI را درجا ارتقا دهید (`fusion update`)
+
+## دستورات در یک نگاه
+
+| دستور | هدف |
+| --- | --- |
+| `fusion init` | Scaffold پروژهٔ جدید |
+| `fusion command <name>` | اجرای دستور از `fusion.<env>.json` |
+| `fusion module init` | ساخت پکیج کتابخانه‌ای قابل انتشار |
+| `fusion add --github …` | نصب ماژول داخل پروژهٔ جاری |
+| `fusion update` | ارتقا به آخرین release |
+| `fusion --version` | چاپ نسخهٔ نصب‌شدهٔ CLI |
+
+[شروع کار](./getting-started)، [دستورات](./command)، [ماژول‌ها](./modules) (scaffold به‌ازای زبان)، [Fusion Desktop](./desktop)، و [Snippetهای VS Code](./vscode).
+
+## Fusion Desktop
+
+Fusion Tool به‌صورت اپ گرافیکی هم از طریق [**Fusion Desktop**](/fa/gui) در دسترس است.
+
+![اسکرین شات اپ Fusion Desktop — Cipher Unit](./fusion_desktop.jpeg)
+
+Fusion Desktop برای **Windows و Linux** موجود است. ساختهٔ [Cipher Unit](https://cipherunit.xyz).
+
+[دانلود Fusion Desktop](/fa/gui)

@@ -1,11 +1,15 @@
 ---
 title: Config
-description: fusion.<env>.json and Settings in C#
+description: fusion.<env>.json and SettingsStore in C# (FusionFramework)
 ---
 
 ## Overview
 
-Settings load through FFI from the same `fusion.<env>.json` files as other languages (`FUSION_ENV`, default `dev`).
+Settings load through FFI from the same `fusion.<env>.json` files as other languages (`FUSION_ENV`, default `dev`). Types live in the **`FusionFramework`** namespace (NuGet package **`Fusion-Framework`**).
+
+Shared discovery, placeholders, consumed keys, and full CLI-generated schemas:
+
+→ **[Settings and configuration](../../architecture/v1/settings)**
 
 ```csharp
 SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
@@ -22,6 +26,8 @@ using var app = new FusionApp(SettingsStore.GetSettings());
 app.Listen(); // host/port from settings
 ```
 
+Scaffolded apps also get a static `CoreSettings` helper that reads from `SettingsStore` — it does not replace JSON.
+
 ## API
 
 | API | Role |
@@ -32,5 +38,12 @@ app.Listen(); // host/port from settings
 | `Merge(object)` | Overlay |
 | `Host` / `Port` / `Debug` / `Env` | Common fields |
 | `SettingsStore.Configure(values)` | Merge into singleton |
+
+## Switch environment
+
+```bash
+FUSION_ENV=prod dotnet run
+fusion command run:prod
+```
 
 `commands` in JSON are for Fusion Tool only.

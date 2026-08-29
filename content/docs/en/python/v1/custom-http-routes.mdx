@@ -1,0 +1,86 @@
+---
+title: Custom HTTP routes
+description: Method-level HTTP routes with http_get through http_options (and HttpGet aliases)
+---
+
+## Convention vs custom
+
+Every `FusionBaseApi` class can expose routes in two ways:
+
+| Mode | How | Mount path |
+| --- | --- | --- |
+| **Convention** | Methods named `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | Class base path from `@route` |
+| **Custom** | `@http_get` … `@http_options` (or `HttpGet` … `HttpOptions`) on any method | Base path **joined** with the template |
+
+Both can live on the same class.
+
+## Method decorators
+
+Import from `fusion_framework.http_route`. Each decorator takes a route template as the first argument.
+
+| Decorator | Alias | HTTP method |
+| --- | --- | --- |
+| `http_get` | `HttpGet` | GET |
+| `http_post` | `HttpPost` | POST |
+| `http_put` | `HttpPut` | PUT |
+| `http_patch` | `HttpPatch` | PATCH |
+| `http_delete` | `HttpDelete` | DELETE |
+| `http_head` | `HttpHead` | HEAD |
+| `http_options` | `HttpOptions` | OPTIONS |
+
+## Shared options
+
+Keyword options (same idea as `@route` metadata):
+
+| Option | Behavior |
+| --- | --- |
+| `tags` | `None` inherits from class `@route`; `[]` clears; `[…]` overrides |
+| `desc` | Operation description (OpenAPI) |
+| `title` | Operation summary / title |
+| `deprecated` | Mark the operation deprecated (`False` by default) |
+
+## Path joining and tokens
+
+- Relative templates (no leading `/`) are joined to the class `@route` base path.
+- Absolute templates starting with `/` **ignore** the class base and mount at that path.
+- `[module]` expands from the class name (`UserModule` → `user`).
+- `[action]` expands from the handler name, stripping a trailing `Action` / `ACTION` then lowercasing (`UserAction` → `user`, `CreateAction` → `create`).
+
+## Example (GET + POST)
+
+```python
+from fusion_framework import status
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.http_route import http_delete, http_get, http_post
+from fusion_framework.route import route
+
+
+@route("/api/[module]", tags=["users"])
+class UserModule(FusionBaseApi):
+    # Convention: GET /api/user
+    def get(self):
+        return self.response({"mode": "convention"}, status=status.HTTP_SUCCESS)
+
+    # Custom: GET /api/user/test/user  ([action] → user)
+    @http_get("test/[action]", title="User action")
+    def UserAction(self):
+        return self.response({"mode": "custom", "action": "user"}, status=status.HTTP_SUCCESS)
+
+    # Custom: POST /api/user/create/create
+    @http_post("create/[action]", title="Create user", tags=["users", "write"])
+    def CreateAction(self):
+        return self.response({"created": True}, status=status.HTTP_SUCCESS)
+
+    # Absolute template: DELETE /admin/users/purge  (class base ignored)
+    @http_delete("/admin/users/purge", deprecated=True)
+    def Purge(self):
+        return self.response({"purged": True}, status=status.HTTP_SUCCESS)
+```
+
+You can use the PascalCase aliases interchangeably (`@HttpGet(...)`, `@HttpPost(...)`, …).
+
+## Registration
+
+Import the module from `main.py` (or your entrypoint) **before** `listen()` so `@route` registration runs.
+
+Framework sample: `examples/custom_http_routes.py`.

@@ -1,0 +1,44 @@
+---
+title: ضدالگوها
+description: اشتباهات رایج هنگام ساخت اپلیکیشن‌های Fusion
+---
+
+## ماژول‌های route غول‌پیکر
+
+**بد:** یک کلاس با ده‌ها resource نامرتبط.  
+**بهتر:** به کلاس‌های متمرکز `*Module` بشکنید و هر کدام را از `main` import کنید.
+
+## فراخوانی listen داخل فایل‌های route
+
+**بد:** نمونه‌سازی `FusionApp` و `listen()` در پایین هر فایل ماژول.  
+**بهتر:** یک entrypoint مالک چرخهٔ عمر باشد.
+
+## رفتار با پکیج‌ها به‌عنوان route خودکار
+
+**بد:** انتظار اینکه `fusion add` خودش endpoint HTTP بسازد.  
+**بهتر:** پکیج را import کنید و صریحاً از ماژول‌های route یا middleware وصل کنید.
+
+## import دایره‌ای routeها
+
+**بد:** `users.py` که `orders.py` را import می‌کند و برعکس برای helper.  
+**بهتر:** helper مشترک را به پکیج کتابخانه‌ای یا `src/shared/` منتقل کنید.
+
+## منطق کسب‌وکار فقط داخل handler
+
+**بد:** صدها خط منطق دامنه داخل `get`/`post`.  
+**بهتر:** Handlerها HTTP را به فراخوانی helper/سرویس‌های خودتان نگاشت کنند (توابع/کلاس‌های ساده — Fusion DI container ندارد).
+
+## تکیه بر JWT بدون تأیید در production
+
+**بد:** `app.use(bearer_jwt())` با decode پیش‌فرض روی API عمومی.  
+**بهتر:** `verify=` بدهید که امضا، انقضا و issuer را چک کند.
+
+## Hard-code کردن بخش‌های مسیر resource
+
+**بد:** `@route("api/product/")` تکراری هنگام rename.  
+**بهتر:** `@route("api/[module]/")` با `ProductModule`.
+
+## اشتراک بیش از حد state داخلی ماژول
+
+**بد:** singletonهای mutable سراسری که همه‌جا import می‌شوند.  
+**بهتر:** `state` به‌ازای درخواست برای دادهٔ request-scoped؛ پارامترهای تابع صریح برای بقیه.

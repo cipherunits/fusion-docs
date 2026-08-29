@@ -1,0 +1,97 @@
+---
+title: مسیرهای HTTP سفارشی
+description: مسیرهای سطح‌متد با httpGet تا httpOptions روی FusionBaseApi
+---
+
+## Convention در برابر سفارشی
+
+| حالت | چگونه | مسیر mount |
+| --- | --- | --- |
+| **Convention** | متدهای `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | مسیر پایهٔ کلاس از `route(...)` |
+| **سفارشی** | `httpGet` … `httpOptions` روی هر متد | مسیر پایه **به‌هم‌چسبیده** با قالب |
+
+هر دو روی یک کلاس مجازند.
+
+## Helperهای متد
+
+Decorator وجود ندارد. helperهای مرتبهٔ بالاتر را روی متدهای prototype بزنید، سپس کلاس را با `route(...)` بپیچید.
+
+از `fusion-framework` import کنید:
+
+| Helper | متد HTTP |
+| --- | --- |
+| `httpGet` | GET |
+| `httpPost` | POST |
+| `httpPut` | PUT |
+| `httpPatch` | PATCH |
+| `httpDelete` | DELETE |
+| `httpHead` | HEAD |
+| `httpOptions` | OPTIONS |
+
+امضا: `httpGet(route, options?)(handler)` — برای بقیهٔ helperها هم همین‌طور.
+
+## گزینه‌های مشترک
+
+آبجکت options آرگومان دوم:
+
+| گزینه | رفتار |
+| --- | --- |
+| `tags` | حذف = ارث از `route` کلاس؛ `[]` پاک می‌کند؛ `[…]` جایگزین می‌کند |
+| `desc` | توضیح عملیات |
+| `title` | عنوان / summary عملیات |
+| `deprecated` | علامت deprecated |
+
+## به‌هم‌چسبیدن مسیر و توکن‌ها
+
+- قالب نسبی (بدون `/` ابتدایی) به مسیر پایهٔ `route(...)` می‌چسبد.
+- قالب مطلق که با `/` شروع شود پایهٔ کلاس را **نادیده** می‌گیرد.
+- `[module]` از نام کلاس (`UserModule` → `user`).
+- `[action]` از نام handler با حذف پسوند `Action` / `ACTION` و lowercase (`UserAction` → `user`).
+
+## مثال (GET + POST)
+
+```ts
+import {
+  FusionBaseApi,
+  httpDelete,
+  httpGet,
+  httpPost,
+  route,
+  status,
+} from "fusion-framework";
+
+class UserModule extends FusionBaseApi {
+  get() {
+    return this.response({ mode: "convention" }, status.HTTP_SUCCESS);
+  }
+
+  UserAction() {
+    return this.response({ mode: "custom", action: "user" }, status.HTTP_SUCCESS);
+  }
+
+  CreateAction() {
+    return this.response({ created: true }, status.HTTP_SUCCESS);
+  }
+
+  Purge() {
+    return this.response({ purged: true }, status.HTTP_SUCCESS);
+  }
+}
+
+httpGet("test/[action]", { title: "User action" })(UserModule.prototype.UserAction);
+
+httpPost("create/[action]", {
+  title: "Create user",
+  tags: ["users", "write"],
+})(UserModule.prototype.CreateAction);
+
+httpDelete("/admin/users/purge", { deprecated: true })(UserModule.prototype.Purge);
+
+export const User = route("/api/[module]", { tags: ["users"] })(UserModule);
+```
+
+## ثبت
+
+فایل ماژول را import کنید (تا `route(...)` اجرا شود) **قبل از** `app.listen()`.
+
+نمونه: `examples/custom_http_routes.mjs`.

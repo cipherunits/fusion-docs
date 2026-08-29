@@ -31,7 +31,7 @@ Exact files can vary by Fusion Tool version — treat the CLI output as source o
 | `main.py` | You | Imports route modules, loads settings, registers middleware, calls `listen()` |
 | `src/modules/**` | You | Route modules (`FusionBaseApi` classes) |
 | `core/settings.py` | You | Python settings overlay (UPPERCASE names) |
-| `fusion.<env>.json` | You | Host/port/swagger/commands for that environment |
+| `fusion.<env>.json` | You | Host/port/swagger/commands for that environment — see [Settings](./settings) |
 | `fusion-framework.toml` | You + CLI | App identity; `[[modules]]` after `fusion add` |
 | `.fusion/modules/` | CLI | Vendored library packages (generated/managed) |
 

@@ -1,0 +1,314 @@
+---
+title: تنظیمات و پیکربندی
+description: نحوهٔ بارگذاری fusion.<env>.json، FUSION_ENV، overlayها و کلیدهایی که در runtime مصرف می‌شوند
+---
+
+## چیست؟
+
+Fusion پیکربندی runtime را از فایل‌های **`fusion.<env>.json`** در درخت پروژه بارگذاری می‌کند. کشف فایل، placeholderهای محیطی و جستجوی کلید در **fusion-core** (Rust) پیاده شده‌اند. باندینگ‌های زبانی فقط overlay نازک اضافه می‌کنند (پایتون `settings.py`، مسیر اختیاری ماژول Node، سی‌شارپ `SettingsStore`).
+
+منبع حقیقت JSON است. فایل‌های تنظیمات زبانی فقط برای خواندن یا overlay هستند — نه یک سیستم پیکربندی دوم.
+
+## شروع سریع
+
+```bash
+# محیط پیش‌فرض "dev" → fusion.dev.json
+python main.py
+npx tsx main.ts
+dotnet run
+
+# محیط صریح
+FUSION_ENV=prod python main.py
+fusion command run:prod   # برای فرایند فرزند FUSION_ENV=prod را ست می‌کند
+```
+
+→ API زبان‌ها: [Config پایتون](../../python/v1/config) · [Config تایپ‌اسکریپت](../../typescript/v1/config) · [Config سی‌شارپ](../../csharp/v1/config)
+
+## کشف فایل چگونه کار می‌کند
+
+1. نام محیط را مشخص می‌کند:
+   - از `FUSION_ENV` اگر ست شده باشد
+   - در غیر این صورت **`dev`**
+2. به‌دنبال فایلی به نام **`fusion.<env>.json`** می‌گردد (مثلاً `fusion.dev.json`).
+3. ریشه‌های جستجو به‌ترتیب:
+   - **دایرکتوری جاری** فرایند (cwd)
+   - سپس هر **والد** (نیاکان cwd)
+   - سپس **extra roots** که باندینگ پاس می‌دهد (پایتون: پوشهٔ `__main__`؛ Node/C#: معمولاً `process.cwd()` / پوشهٔ پروژه)
+4. اگر فایل دقیق پیدا نشود، اولین `fusion.*.json` در همان ریشه‌ها (مرتب‌شده بر اساس نام) به‌عنوان fallback انتخاب می‌شود. برای پیش‌بینی‌پذیری، نام دقیق را نگه دارید.
+5. اگر هیچ فایلی نباشد، تنظیمات خالی می‌ماند و helperهای تایپ‌شده از پیش‌فرض‌ها استفاده می‌کنند (`host` برابر `127.0.0.1`، `port` برابر `3000`، `debug` برابر `false`). پروژه‌های scaffold معمولاً JSON دارند و به این حالت نمی‌رسند.
+
+`fusion init` همیشه سه فایل در ریشهٔ پروژه می‌نویسد: `fusion.dev.json`، `fusion.stage.json`، `fusion.prod.json`.
+
+## Envelope در برابر JSON تخت
+
+دو شکل معتبر است:
+
+### Envelope (سبک scaffold CLI)
+
+```json
+{
+  "env": "dev",
+  "config": { "host": "127.0.0.1", "port": 8080 },
+  "commands": { "run": "python main.py" }
+}
+```
+
+| کلید سطح بالا | نقش |
+| --- | --- |
+| `env` | نام منطقی محیط (رشتهٔ `env` لودشده را هم به‌روز می‌کند) |
+| `config` | آبجکتی که به map تنظیمات runtime merge می‌شود |
+| `commands` | دستورات شل برای [`fusion command`](../../cli/v1/command) — خود listener HTTP از آن‌ها استفاده نمی‌کند |
+
+وقتی `config` وجود دارد، **فقط همان آبجکت** به‌عنوان تنظیمات merge می‌شود (به‌علاوهٔ ذخیرهٔ `commands` زیر کلید `commands`).
+
+### آبجکت تخت
+
+اگر `config` نباشد، همهٔ کلیدهای سطح بالا **به‌جز** `env` و `commands` به‌عنوان تنظیمات merge می‌شوند. برای فایل‌های دستی یا مینیمال مفید است.
+
+## Placeholder محیطی (`ALL_CAPS`)
+
+وقتی مقدار **رشته** در JSON با این الگو جور باشد، در زمان خواندن از **محیط فرایند** resolve می‌شود:
+
+- طول بیشتر از ۱
+- فقط حروف بزرگ ASCII و underscore
+- کاراکتر اول حرف یا `_`
+
+نمونه‌های scaffold CLI:
+
+| مقدار JSON | معنی |
+| --- | --- |
+| `"HOST"` | هنگام خواندن با `HOST` محیط جایگزین می‌شود؛ اگر ست نباشد، همان `"HOST"` می‌ماند |
+| `"SECRET_KEY"` | همان قاعده — رایج برای رمزها |
+
+عدد، بولین، آبجکت و رشته‌های mixed-case به‌عنوان placeholder تلقی **نمی‌شوند**.
+
+در stage و prod، scaffold مقدار `"host": "HOST"` می‌گذارد تا آدرس bind از env بیاید. در dev مقدار لفظی `"127.0.0.1"` است.
+
+## کلیدهایی که Fusion واقعاً مصرف می‌کند
+
+این‌ها کلیدهایی هستند که هستهٔ مشترک / باندینگ‌ها برای HTTP و مستندات می‌خوانند. می‌توانید کلیدهای دیگر برای اپ خود اضافه کنید؛ با `settings.get(...)` در دسترس‌اند.
+
+| کلید | نوع | پیش‌فرض اگر نباشد | کاربرد |
+| --- | --- | --- | --- |
+| `host` | string | `127.0.0.1` | آدرس bind برای `listen` |
+| `port` | number / string | `3000` | پورت bind (`fusion init` به‌جای آن 8080 / 8081 / 9090 می‌گذارد) |
+| `debug` | bool / string | `false` | پرچم دیباگ (Node ممکن است URL گوش‌دادن را لاگ کند) |
+| `secret_key` | string | — | رمز اپ؛ در scaffold به شکل `fusion-framework-<uuid>`. در prod ترجیحاً placeholder |
+| `fingerprint.enabled` | bool | `true` | وقتی true باشد، هسته headerهای هویت فریم‌ورک را روی wire تزریق می‌کند |
+| `swagger.*` | object | پایین را ببینید | Mount کردن Swagger UI و OpenAPI |
+| `commands` | object | — | برای Tool؛ اگر در JSON باشد در map تنظیمات هم ذخیره می‌شود |
+
+جستجوی کلید case-insensitive است و `-` و `_` یکسان‌اند (`secret-key` ≡ `secret_key`). مسیر نقطه‌ای کار می‌کند: `settings.get("swagger.enabled")`.
+
+### کلیدهای Swagger در runtime
+
+| کلید | پیش‌فرض معمول |
+| --- | --- |
+| `swagger.enabled` | `true` (در scaffold: در dev روشن، در stage/prod خاموش) |
+| `swagger.path` | `/swagger` |
+| `swagger.title` | برگشت به `swagger.info.title` یا `"Fusion API Docs"` |
+| `swagger.info` | آبجکت `info` اوپن‌اپی |
+| `swagger.servers` | لیست سرورها |
+| `swagger.auth` | schemes، `global`، `oauth`، `persistAuthorization` |
+| `swagger.navbar` | گزینه‌های Topbar / navbar نسخه |
+| `swagger.ui` | آبجکت پیکربندی Swagger UI |
+
+→ جزئیات زبان: [Swagger پایتون](../../python/v1/swagger)
+
+## نمونهٔ حاشیه‌نویسی‌شدهٔ `fusion.dev.json`
+
+`fusion init` همین ساختار را برای همهٔ زبان‌ها می‌سازد؛ فقط رشتهٔ `commands.run` فرق می‌کند.
+
+```json
+{
+  "env": "dev",
+  "config": {
+    "port": 8080,
+    "secret_key": "fusion-framework-<uuid>",
+    "host": "127.0.0.1",
+    "debug": true,
+    "fingerprint": {
+      "enabled": true
+    },
+    "swagger": {
+      "enabled": true,
+      "path": "/swagger",
+      "title": "Fusion API Docs",
+      "info": {
+        "title": "Fusion API",
+        "version": "1.0.0",
+        "description": "API documentation generated by fusion-framework",
+        "contact": {
+          "name": "API Support",
+          "email": "support@example.com"
+        },
+        "license": {
+          "name": "MIT"
+        }
+      },
+      "servers": [
+        { "url": "/", "description": "Current host" }
+      ],
+      "auth": {
+        "persistAuthorization": true,
+        "schemes": {
+          "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+          },
+          "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key"
+          }
+        },
+        "global": [],
+        "oauth": {
+          "clientId": "",
+          "appName": "Fusion API",
+          "scopes": "",
+          "usePkceWithAuthorizationCodeGrant": true
+        }
+      },
+      "navbar": {
+        "enabled": true,
+        "showUrlInput": false
+      },
+      "ui": {
+        "deepLinking": true,
+        "displayOperationId": false,
+        "defaultModelsExpandDepth": 1,
+        "defaultModelExpandDepth": 1,
+        "defaultModelRendering": "example",
+        "docExpansion": "list",
+        "filter": true,
+        "tryItOutEnabled": true,
+        "displayRequestDuration": true,
+        "showExtensions": false,
+        "showCommonExtensions": false,
+        "withCredentials": false,
+        "syntaxHighlight": {
+          "activated": true,
+          "theme": "agate"
+        }
+      }
+    }
+  },
+  "commands": {
+    "run": "python main.py"
+  }
+}
+```
+
+| فیلد | دلیل وجود |
+| --- | --- |
+| `env` | این فایل را به‌عنوان محیط `dev` برچسب می‌زند |
+| `config.port` | صراحتاً **8080** (نه پیش‌فرض خالی هسته یعنی 3000) |
+| `config.secret_key` | UUID تازه در هر init |
+| `config.host` | loopback برای توسعهٔ محلی |
+| `config.debug` | فقط در فایل تولیدشدهٔ **dev** برابر `true` |
+| `config.fingerprint` | headerهای هویت فریم‌ورک |
+| `config.swagger` | بلوک کامل Swagger؛ در dev **enabled** |
+| `commands.run` | آنچه `fusion command run` اجرا می‌کند |
+
+## تفاوت stage و prod
+
+همان schema؛ مقادیر فرق می‌کنند:
+
+| فیلد | `fusion.dev.json` | `fusion.stage.json` | `fusion.prod.json` |
+| --- | --- | --- | --- |
+| `env` | `dev` | `stage` | `prod` |
+| `config.port` | `8080` | `8081` | `9090` |
+| `config.host` | `"127.0.0.1"` | `"HOST"` (placeholder) | `"HOST"` |
+| `config.debug` | `true` | `false` | `false` |
+| `config.swagger.enabled` | `true` | `false` | `false` |
+| `config.fingerprint.enabled` | `true` | `true` | `true` |
+| `config.secret_key` | UUID تازه | UUID تازه | UUID تازه |
+| `commands.run` | وابسته به زبان | همان | همان |
+
+با ساختن `fusion.<name>.json` (مثلاً `fusion.test.json`) محیط‌های بیشتر اضافه کنید و با `FUSION_ENV=test` یا `fusion command run:test` انتخاب کنید.
+
+## ارتباط با `fusion command`
+
+[`fusion command`](../../cli/v1/command) بلوک `commands` را از فایل محیط انتخاب‌شده می‌خواند و رشتهٔ شل را در ریشهٔ پروژه با این متغیر اجرا می‌کند:
+
+```text
+FUSION_ENV=<محیط انتخاب‌شده>
+```
+
+ترتیب resolve نام محیط:
+
+1. پسوند درون‌خطی: `run:stage`
+2. پرچم: `--stage` / `--prod` / `--env <name>`
+3. `FUSION_ENV` موجود
+4. پیش‌فرض `dev`
+
+به همین دلیل `fusion command run:prod` باعث لود `fusion.prod.json` می‌شود بدون اینکه خودتان `FUSION_ENV` را export کنید.
+
+## Overlayهای زبانی
+
+### پایتون — `load_settings_module` / `core/settings.py`
+
+```python
+from fusion_framework.config import load_settings_module, get_settings
+
+load_settings_module("settings")  # همچنین core.settings را امتحان می‌کند
+app_settings = get_settings()
+```
+
+جریان:
+
+1. لود `fusion.<env>.json` از طریق Rust (extra root: پوشهٔ `__main__`)
+2. Import ماژول `settings` یا `core.settings`
+3. فقط attributeهای **UPPERCASE** روی singleton تنظیمات merge می‌شوند (هم `SECRET_KEY` و هم `secret_key`)
+
+پکیج: **`fusion_framework.config`**.
+
+### تایپ‌اسکریپت / Node — `settings.ensureLoaded`
+
+```ts
+import { settings, getSettings, FusionApp } from "fusion-framework";
+
+settings.ensureLoaded([process.cwd()]);
+const app = new FusionApp(getSettings());
+```
+
+`core/settings.ts` scaffold برای کد شما export می‌کند و در هر استارت به‌صورت خودکار merge **نمی‌شود**. helper اختیاری `run({ settingsModule })` فقط `HOST`، `PORT` و `DEBUG` را در صورت وجود merge می‌کند.
+
+پکیج: **`fusion-framework`**.
+
+### سی‌شارپ — `SettingsStore`
+
+```csharp
+SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
+using var app = new FusionApp(SettingsStore.GetSettings());
+```
+
+`CoreSettings` در scaffold یک wrapper استاتیک روی `SettingsStore` است. Namespace: **`FusionFramework`**. پکیج NuGet: **`Fusion-Framework`**.
+
+## مدل ذهنی
+
+```text
+FUSION_ENV (پیش‌فرض: dev)
+        │
+        ▼
+fusion.<env>.json  ──►  fusion-core Settings
+        │                      │
+   config / تخت                ├── host / port / debug
+   ALL_CAPS → env              ├── fingerprint.enabled
+   commands (Tool)             └── swagger.*
+        │
+        ▼ (اختیاری)
+overlay UPPERCASE پایتون  /  HOST|PORT|DEBUG در Node run()  /  Merge در C#
+        │
+        ▼
+FusionApp.listen(…)
+```
+
+## ادامه
+
+- [چرخهٔ عمر اپلیکیشن](./lifecycle) — جای لود تنظیمات در استارت
+- [ساختار پروژه](./project-structure) — فایل‌هایی که `fusion init` می‌سازد
+- [دستورات و محیط‌ها](../../cli/v1/command) — بلوک `commands` و سینتکس `:env`
+- Config زبان: [پایتون](../../python/v1/config) · [تایپ‌اسکریپت](../../typescript/v1/config) · [سی‌شارپ](../../csharp/v1/config)

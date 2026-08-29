@@ -1,0 +1,79 @@
+---
+title: Workspace و crateها
+description: چیدمان ریپوی fusion-framework — fusion-core، باندینگ‌ها و artifactهای پکیج
+---
+
+## نقشهٔ ریپو
+
+ریپوی [fusion-framework](https://github.com/cipherunits/fusion-framework) یک workspace کارگو است. پکیج‌های زبانی از این مونوریپو منتشر می‌شوند؛ CLI در ریپوی جداست ([fusion-tool](https://github.com/cipherunits/fusion-tool)).
+
+| مسیر | نقش | Artifact منتشرشده |
+| --- | --- | --- |
+| `crates/fusion-core/` | موتور مشترک Rust (Hyper + Tokio) | کتابخانهٔ استفاده‌شده توسط همهٔ باندینگ‌ها |
+| `crates/fusion-py/` | افزونهٔ PyO3 + پکیج پایتون | PyPI `fusion-framework` |
+| `crates/fusion-node/` | addon N-API + façade جاوااسکریپت | npm `fusion-framework` |
+| `crates/fusion-ffi/` | C ABI (`cdylib` / `staticlib`) | کتابخانهٔ native برای C# |
+| `bindings/csharp/FusionFramework/` | باندینگ مدیریت‌شدهٔ C# | NuGet `Fusion-Framework` |
+| `examples/` | نمونه‌های قابل اجرا به‌ازای زبان | — |
+| `scripts/set-version.sh` | بالابردن نسخه در همهٔ مانیفست‌ها | — |
+
+نسخهٔ فعلی پکیج workspace: **1.2.6**.
+
+## گراف وابستگی
+
+```text
+fusion-core
+   ├── fusion-py      (PyO3)
+   ├── fusion-node    (N-API)
+   └── fusion-ffi     (C ABI)
+          └── C# FusionFramework (P/Invoke)
+```
+
+معناهای مشترک (توکن‌های مسیر، coercion، envelopeها، JSON تنظیمات، pagination، ثابت‌های status/header، سرور Hyper) در **`fusion-core`** هستند. باندینگ‌ها رفتار را با syntax بومی آینه می‌کنند — نباید معنای HTTP واگرا اختراع کنند.
+
+## چه چیزی کجا باشد؟
+
+| نوع تغییر | ترجیح |
+| --- | --- |
+| توکن‌های مسیر، نام‌گذاری، کد وضعیت، کلیدهای settings، رفتار سرور | `fusion-core` |
+| Decoratorها، reflection، سیم‌کشی UI OpenAPI، حلقه‌های async host | باندینگ زبانی |
+| قالب‌های scaffold، چیدمان `fusion init` | [fusion-tool](../../cli/v1) (ریپوی جدا) |
+
+## ماژول‌های هسته (منتخب)
+
+| ماژول | مسئولیت |
+| --- | --- |
+| `App` | Router + settings؛ `route` / `listen` |
+| `Router` | تطبیق method + path (`{name}`، `[name]`) |
+| `Request` / `Response` | مقادیر HTTP پارس‌شده و سازنده‌های پاسخ |
+| `Settings` | بارگذاری `fusion.<env>.json`، placeholderهای env |
+| `naming` | گسترش `[module]` / `[action]` |
+| `dispatch` | بایندینگ آرگومان + envelope پاسخ |
+| `pagination` | کمک‌کننده‌های `page` / `page_size` |
+| `server` | حلقهٔ listen Hyper، headerهای fingerprint |
+
+## ساخت از سورس (نمای کلی)
+
+```bash
+# Workspace
+cargo check --workspace
+cargo test -p fusion-core
+
+# Python
+cd crates/fusion-py && maturin develop
+
+# Node
+cd crates/fusion-node && npm install && npm run build:debug
+
+# FFI / C#
+cargo build -p fusion-ffi
+dotnet build bindings/csharp/FusionFramework/FusionFramework.csproj
+```
+
+انتشار با GitHub Actions روی تگ‌های نسخه (`vX.Y.Z`) برای PyPI، npm و NuGet انجام می‌شود. در ریپوی فریم‌ورک `.github/PUBLISHING.md` را ببینید.
+
+## مرتبط
+
+- [نمای کلی معماری](./index)
+- [FMA](./fma)
+- [Fusion Tool](../../cli/v1)

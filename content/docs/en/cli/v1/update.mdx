@@ -9,11 +9,23 @@ description: Upgrade Fusion Tool to the latest release
 fusion update
 ```
 
-This checks the latest [GitHub release](https://github.com/cipherunits/fusion-tool/releases), downloads the build for your platform if a newer version exists, and replaces the running `fusion` binary in place.
+This checks the latest [GitHub release](https://github.com/cipherunits/fusion-tool/releases), downloads the build for your platform if a newer version exists, and replaces the running `fusion` binary in place via `self-replace`.
 
-- Works the same on Linux, macOS, and Windows
+### Supported update targets
+
+| Target | Notes |
+| --- | --- |
+| `x86_64-unknown-linux-gnu` | Linux x86_64 |
+| `x86_64-apple-darwin` | macOS Intel |
+| `x86_64-pc-windows-msvc` | Windows x64 |
+
+Other OS/arch combinations should rebuild from source (`cargo install --path .`) or use the install scripts where supported. The macOS installer currently targets **x86_64** (ARM64 is not offered as a prebuilt in the installer script).
+
+### Behavior
+
 - Keeps the current install location — no reinstall or `PATH` change
 - Does nothing if you are already up to date
+- Does **not** bump the framework pin inside existing projects (`fusion-framework.toml` / dependency files)
 
 If Fusion Tool was installed to a system-wide directory, run the update with write permission for that path:
 

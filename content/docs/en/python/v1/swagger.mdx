@@ -1,0 +1,30 @@
+---
+title: Swagger / OpenAPI
+description: Built-in Swagger UI and OpenAPI specs generated from route modules
+---
+
+## Overview
+
+Fusion mounts **Swagger UI** and OpenAPI JSON from your registered route modules (convention + custom HTTP routes).
+
+| Setting | Default |
+| --- | --- |
+| `swagger.enabled` | `true` |
+| `swagger.path` | `/swagger` |
+
+Configure under `config.swagger` in `fusion.<env>.json`. CLI scaffolds enable Swagger in **dev** and typically disable it in **stage** / **prod**. Full file schema: [Settings and configuration](../../architecture/v1/settings).
+
+## What is documented
+
+- Paths from `@route` / `route()` / `[Route]`
+- Convention verbs and `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` operations
+- `tags`, `title`, `desc`, `deprecated`, `version`
+- When `version="v1"` is set, paths are prefixed (`/v1/...`) and the UI can show a version navbar
+
+## Global config
+
+See [Commands & environments](../../cli/v1/command) for the full `swagger` JSON block (`info`, `servers`, `auth`, `navbar`, `ui`).
+
+## Disable
+
+Set `swagger.enabled` to `false`, or clear / falsify `swagger.path`.

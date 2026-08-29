@@ -1,0 +1,34 @@
+---
+title: به‌روزرسانی
+description: ارتقای Fusion Tool به آخرین release
+---
+
+## به‌روزرسانی Fusion Tool
+
+```bash
+fusion update
+```
+
+آخرین [GitHub release](https://github.com/cipherunits/fusion-tool/releases) را چک می‌کند، در صورت وجود نسخهٔ جدیدتر بیلد پلتفرم شما را دانلود می‌کند، و باینری در حال اجرای `fusion` را با `self-replace` درجا عوض می‌کند.
+
+### هدف‌های پشتیبانی‌شده برای update
+
+| هدف | توضیح |
+| --- | --- |
+| `x86_64-unknown-linux-gnu` | Linux x86_64 |
+| `x86_64-apple-darwin` | macOS Intel |
+| `x86_64-pc-windows-msvc` | Windows x64 |
+
+ترکیب‌های دیگر OS/arch باید از سورس بسازند (`cargo install --path .`) یا در صورت پشتیبانی از اسکریپت‌های نصب استفاده کنند. نصب‌کنندهٔ macOS فعلاً **x86_64** را هدف می‌گیرد (ARM64 به‌عنوان prebuilt در اسکریپت نصب ارائه نمی‌شود).
+
+### رفتار
+
+- محل نصب فعلی را نگه می‌دارد — بدون نصب مجدد یا تغییر `PATH`
+- اگر از قبل به‌روز باشید کاری نمی‌کند
+- پین فریم‌ورک داخل پروژه‌های موجود را **بالا نمی‌برد** (`fusion-framework.toml` / فایل‌های dependency)
+
+اگر Fusion Tool در مسیر system-wide نصب شده، update را با دسترسی نوشتن اجرا کنید:
+
+```bash
+sudo fusion update
+```

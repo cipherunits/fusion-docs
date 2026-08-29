@@ -1,0 +1,63 @@
+---
+title: چرخهٔ عمر درخواست
+description: مسیر یک درخواست HTTP از middleware تا handler
+---
+
+## Pipeline
+
+```mermaid
+sequenceDiagram
+  participant C as کلاینت
+  participant H as Hyper fusion-core
+  participant G as Middleware سراسری
+  participant R as Middleware روی route
+  participant A as Handler
+
+  C->>H: درخواست HTTP
+  H->>H: پارس method path headers body params query
+  H->>G: آبجکت/دیکت request
+  G->>R: call_next
+  R->>A: call_next
+  A-->>R: envelope پاسخ
+  R-->>G: envelope پاسخ
+  G-->>H: envelope پاسخ
+  H-->>C: پاسخ HTTP
+```
+
+## فیلدهای request
+
+| فیلد | معنا |
+| --- | --- |
+| `method` | فعل HTTP |
+| `path` | مسیر درخواست |
+| `headers` | نقشهٔ header |
+| `body` | بدنهٔ خام |
+| `params` | پارامترهای مسیر |
+| `query` | نقشهٔ query string |
+| `state` | کیسهٔ mutable برای middleware (مثلاً JWT) |
+
+## Envelope پاسخ
+
+Handlerها (یا middleware که زنجیره را کوتاه می‌کند) آبجکتی شبیه این برمی‌گردانند:
+
+```json
+{ "status": 200, "body": { }, "headers": { } }
+```
+
+از helperهای `self.response(...)` / `Response(...)` استفاده کنید. بدنه‌های غیررشته‌ای در صورت مناسب توسط هسته JSON می‌شوند.
+
+## ترتیب middleware
+
+1. Middleware سراسری ثبت‌شده روی `FusionApp` (outer اول)
+2. Middleware روی route از `@route(..., middleware=...)` / `roles=...`
+3. Handler
+
+برگرداندن `{ "status": …, "body": … }` زنجیره را متوقف می‌کند.
+
+## بایندینگ پارامتر پایتون
+
+فقط در پایتون، **پارامترهای امضای** handler از path → body (برای متدهای نوشتن) → query پر می‌شوند. این یک **DI container** نیست. Node و C# به‌جای آن `params` / `query` / `body` را روی آبجکت request نشان می‌دهند.
+
+## Headerهای fingerprint
+
+وقتی فعال باشد، Fusion ممکن است headerهای هویت مانند `X-Powered-By`، `X-Framework` و `X-Fusion-Version` را بچسباند (لایهٔ middleware و/یا سرور بسته به باندینگ و `fingerprint.enabled`). راهنماهای middleware زبان را ببینید.

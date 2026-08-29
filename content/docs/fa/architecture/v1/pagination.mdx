@@ -1,0 +1,83 @@
+---
+title: Pagination
+description: صفحه‌بندی مشترک لیست‌ها — query params، PageParams و بدنهٔ پاسخ paginated
+---
+
+## چیست؟
+
+Fusion یک **مدل pagination مشترک** در `fusion-core` دارد که در همهٔ باندینگ‌ها آینه شده:
+
+- پارس query به `PageParams` نرمال
+- ساخت بدنهٔ استاندارد JSON: `{ items, pagination: { … } }`
+- اختیاری: برش مجموعهٔ درحافظه
+
+پیش‌فرض‌ها: **`page_size = 20`**، **`max_page_size = 100`**، **`page` از ۱ شروع می‌شود**.
+
+## پارامترهای query
+
+| کلید | معنا |
+| --- | --- |
+| `page` | ایندکس ۱-مبنا (پیش‌فرض `1`؛ `0` → HTTP 400) |
+| `page_size` | اندازهٔ صفحه (تا max محدود می‌شود) |
+| `per_page` | Alias برای `page_size` |
+| `limit` | Alias برای `page_size` |
+| `offset` | offset اختیاری ۰-مبنا (جایگزین `(page - 1) * page_size`) |
+
+## شکل پاسخ
+
+```json
+{
+  "items": [ /* آیتم‌های صفحه */ ],
+  "pagination": {
+    "page": 2,
+    "page_size": 10,
+    "offset": 10,
+    "limit": 10,
+    "total": 25,
+    "total_pages": 3,
+    "has_next": true,
+    "has_prev": true
+  }
+}
+```
+
+## پایتون
+
+```python
+@route("/api/[module]", tags=["products"], version="v1")
+class ProductModule(FusionBaseApi):
+    def get(self, page: int = 1, page_size: int = 20):
+        params = self.pagination(page=page, page_size=page_size)
+        start = int(params.offset)
+        end = start + int(params.limit)
+        items = ALL[start:end]
+        return self.paginated(items, total=len(ALL), params=params, status=status.HTTP_SUCCESS)
+```
+
+سطح پایین: `parse_pagination` / `paginated_body`.
+
+## TypeScript / Node.js
+
+```ts
+const params = this.pagination({ page: Number(this.query.page || 1), pageSize: Number(this.query.page_size || 20) });
+return this.paginated(items, total, params, { status: status.HTTP_SUCCESS });
+```
+
+## C#
+
+```csharp
+var p = PageParams(page: 2, pageSize: 10);
+return Paginated(items, total: 100, p);
+```
+
+## انواع هسته (Rust)
+
+| نوع / تابع | نقش |
+| --- | --- |
+| `PageConfig` | پیش‌فرض‌ها (20 / 100) |
+| `PageParams` | حالت نرمال؛ `limit()` → `page_size` |
+| `parse_page_params` | پارس + اعتبارسنجی |
+| `paginated_body` | envelope JSON |
+| `paginate_slice` | برش درحافظه |
+
+نمونه: `examples/pagination.py` / `.mjs` / `.cs`.
