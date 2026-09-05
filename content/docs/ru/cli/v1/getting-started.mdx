@@ -1,18 +1,140 @@
 ---
-title: Getting Started
-description: Установка и использование Fusion CLI
+title: Начало работы
+description: Установите Fusion Tool и создайте проект
 ---
 
-## Installation
+## Установка
 
-```bash
-npm install -g @cipherunits/fusion-cli
+Выберите операционную систему:
+
+```bash tab="Linux"
+curl -fsSL https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.sh | bash
 ```
 
-## Quick start
+```powershell tab="Windows"
+irm https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.ps1 | iex
+```
+
+```bash tab="macOS"
+curl -fsSL https://raw.githubusercontent.com/cipherunits/fusion-tool/main/scripts/install.sh | bash
+```
+
+В Windows установщик кладёт `fusion.exe` в `%LOCALAPPDATA%\Programs\fusion` и обновляет пользовательский `PATH`. После этого откройте **новый** терминал и проверьте:
+
+```bash
+fusion --help
+```
+
+Можно установить из исходников через Rust:
+
+```bash
+git clone https://github.com/cipherunits/fusion-tool.git
+cd fusion-tool && cargo install --path .
+```
+
+## Проверка версии
+
+```bash
+fusion --version
+```
+
+Пример вывода:
+
+```text
+fusion 1.2.6
+```
+
+## Создание проекта
+
+### Интерактивно
+
+```bash
+fusion init
+```
+
+Или в указанную директорию:
 
 ```bash
 fusion init my-app
-cd my-app
-fusion start
 ```
+
+Вам предложат указать:
+
+1. Язык — Python, TypeScript или C# (`asp-core` / `csharp`)
+2. Имя проекта
+3. Описание проекта
+
+### Без интерактива
+
+```bash
+fusion init --lang python --name fusion-test --description "A Fusion Framework project"
+```
+
+| Аргумент | Описание |
+| --- | --- |
+| `[DIRECTORY]` | Целевая папка (создаётся при отсутствии; по умолчанию — текущая) |
+| `--lang` | `python`, `typescript`, `csharp` или `asp-core` (алиасы C#) |
+| `--name` | Имя проекта |
+| `--description` | Описание проекта |
+
+Пропущенные опции всё равно спросят интерактивно.
+
+Примеры:
+
+```bash
+fusion init --lang python --name my-app
+fusion init ./apps/demo --lang python --name demo
+```
+
+## Сгенерированная структура
+
+Для Python-проекта `fusion init` создаёт небольшой стартовый приложение — включая пример модуля **products**:
+
+```text
+├── core/
+│   └── settings.py
+├── src/
+│   └── modules/
+│       └── products/
+│           └── products.py
+├── main.py
+├── fusion-framework.toml
+├── fusion.dev.json
+├── fusion.prod.json
+├── fusion.stage.json
+└── .gitignore
+```
+
+- **`main.py`** — точка входа: импортирует модули (чтобы классы `@route` зарегистрировались), подключает опциональный `MIDDLEWARE`, собирает `FusionApp` из settings и слушает порт
+- **`src/modules/products/products.py`** — пример API-модуля; здесь же можно задать Swagger-метаданные на route (`tags`, `desc`, `version`, …)
+- **`core/settings.py`** — загружает блок `config` из `fusion.<env>.json` (`FUSION_ENV`, по умолчанию `dev`)
+
+TypeScript-проекты используют ту же схему с `main.ts`, `core/settings.ts` и примером модуля в `src/modules/…`. C# (`csharp` / `asp-core`) скаффолдит entrypoint в стиле .NET и модули с `[Route]` вместо `@route`.
+
+Значения окружений по умолчанию из CLI-скаффолда:
+
+| Файл | Port | Host | Debug | Swagger |
+| --- | --- | --- | --- | --- |
+| `fusion.dev.json` | `8080` | `127.0.0.1` | `true` | on |
+| `fusion.stage.json` | `8081` | из env `HOST` | `false` | off |
+| `fusion.prod.json` | `9090` | из env `HOST` | `false` | off |
+
+## Запуск проекта
+
+Установите фреймворк, затем запустите команду `run` по умолчанию в окружении `dev`:
+
+```bash
+pip install fusion-framework
+fusion command run:dev
+```
+
+При дефолтном `fusion.dev.json` (`host` `127.0.0.1`, `port` `8080`, Swagger включён):
+
+| Что | URL |
+| --- | --- |
+| API | [http://127.0.0.1:8080](http://127.0.0.1:8080) |
+| Swagger UI | [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger) |
+
+Swagger / OpenAPI **генерируется автоматически** из модулей `@route`. Откройте Swagger UI, чтобы попробовать эндпоинты без отдельного клиента.
+
+Далее: [Команды и окружения](./command) — кастомные env, команды и глобальный конфиг Swagger.

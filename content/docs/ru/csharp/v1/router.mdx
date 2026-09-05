@@ -1,11 +1,11 @@
 ---
 title: Router
-description: "Register class-based APIs with [Route] in C#"
+description: "Регистрация классовых API с [Route] в C#"
 ---
 
-## Overview
+## Обзор
 
-Annotate a `FusionBaseApi` subclass with `[Route(...)]`, then call `Route.Register<T>()` or `Route.RegisterAll(assembly)` before `Listen()`.
+Пометьте подкласс `FusionBaseApi` атрибутом `[Route(...)]`, затем вызовите `Route.Register<T>()` или `Route.RegisterAll(assembly)` до `Listen()`.
 
 ```csharp
 [Route("api/[module]/{id}", Tags = new[] { "items" }, Desc = "Items by id")]
@@ -21,34 +21,34 @@ public class ItemModule : FusionBaseApi
 Route.Register<ItemModule>();
 ```
 
-HTTP verbs are public instance methods named `Get`, `Post`, `Put`, `Patch`, `Delete`, … (case-insensitive).
+HTTP-глаголы — публичные instance-методы с именами `Get`, `Post`, `Put`, `Patch`, `Delete`, … (без учёта регистра).
 
-## Path templates
+## Шаблоны путей
 
-Same tokens as Python/Node: static segments, `[module]`, `{name}` → `Params["name"]`.
+Те же токены, что в Python/Node: статические сегменты, `[module]`, `{name}` → `Params["name"]`.
 
-`Version = "v1"` prefixes the resolved path.
+`Version = "v1"` добавляет префикс к resolved-пути.
 
-## Options on `[Route]`
+## Опции `[Route]`
 
-| Property | Purpose |
+| Свойство | Назначение |
 | --- | --- |
-| `Tags`, `Desc`, `Title`, `Deprecated` | Metadata (Swagger when enabled later) |
-| `Version` | Path prefix |
-| `Roles` | Appends role middleware |
-| `RoleClaim` / `RoleStateKey` | Customize claim lookup |
+| `Tags`, `Desc`, `Title`, `Deprecated` | Метаданные (Swagger, когда будет включён) |
+| `Version` | Префикс пути |
+| `Roles` | Добавляет role middleware |
+| `RoleClaim` / `RoleStateKey` | Настройка lookup claim |
 
-You can also `Route.Register(type, path, middleware:, roles:)`.
+Также можно вызвать `Route.Register(type, path, middleware:, roles:)`.
 
-## Request view
+## Представление запроса
 
-| Member | Content |
+| Член | Содержимое |
 | --- | --- |
-| `Method`, `Path`, `Body` | Basics |
-| `Headers`, `Params`, `Query` | Maps |
-| `State` | Middleware bag (`JsonNode`) |
-| `Response(body, status, headers?)` | Envelope helper |
+| `Method`, `Path`, `Body` | Базовые поля |
+| `Headers`, `Params`, `Query` | Карты |
+| `State` | Сумка middleware (`JsonNode`) |
+| `Response(body, status, headers?)` | Helper конверта ответа |
 
-## Errors
+## Ошибки
 
-Throw `HttpException` or return `{ status, body }` dictionaries.
+Бросайте `HttpException` или возвращайте словари `{ status, body }`.

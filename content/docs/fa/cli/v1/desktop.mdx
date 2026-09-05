@@ -3,25 +3,32 @@ title: Fusion Desktop
 description: اپ گرافیکی همراه برای مدیریت بک‌اندهای Fusion Framework
 ---
 
-## چیست؟
+## چیست
 
-**Fusion Desktop** رابط گرافیکی رسمی همراه Fusion Framework است (ساختهٔ [Cipher Unit](https://cipherunit.xyz)). مکمل باینری `fusion` برای کسانی است که گردش‌کار ویژوال می‌خواهند.
+**Fusion Desktop** اپ گرافیکی رسمی همراه Fusion Framework است (ساختهٔ [Cipher Unit](https://cipherunit.xyz)). برای توسعه‌دهندگانی که گردش‌کار بصری روی دسکتاپ را ترجیح می‌دهند، مکمل CLI باینری `fusion` است.
 
-صفحهٔ دانلود: [Fusion Desktop](/fa/gui).
+صفحهٔ اصلی دانلود: [Fusion Desktop](/fa/gui).
 
 ## پلتفرم‌ها
 
-| پلتفرم | توضیح |
+| پلتفرم | یادداشت |
 | --- | --- |
-| **Windows** | ویندوز ۱۰ / ۱۱ — نصب کاربر، نصب سیستم، `.zip`، CLI — **x64** و **Arm64** |
-| **Linux** | `.deb`، `.rpm`، Snap، `.tar.gz`، CLI — **x64** و **Arm64** |
+| **Windows** | Windows 10 / 11 — نصب‌کنندهٔ کاربر، نصب‌کنندهٔ سیستم، `.zip`، بیلدهای CLI — **x64** و **Arm64** |
+| **Linux** | `.deb` (Debian/Ubuntu)، `.rpm` (RHEL/Fedora/SUSE)، Snap، `.tar.gz`، CLI — **x64** و **Arm64** |
 
-ماتریس دقیق artifactها: [/fa/gui](/fa/gui).
+برای ماتریس دقیق artifactها به UI زندهٔ دانلود نگاه کنید: [/fa/gui](/fa/gui).
 
-## رابطه با CLI
+## ارتباط با CLI
 
-فرمت روی دیسک پروژه یکی است (`fusion-framework.toml`، `fusion.<env>.json`، ماژول‌های route). می‌توانید CLI و Desktop را روی یک پروژه با هم استفاده کنید.
+| کار | CLI | Desktop |
+| --- | --- | --- |
+| اسکفولد پروژه | `fusion init` | UI راهنما (همان چیدمان پروژه) |
+| اجرای دستورات env | `fusion command` | اکشن‌های UI روی همان `commands` داخل `fusion.<env>.json` |
+| نصب ماژول | `fusion add` | گردش‌کار ماژول هرجا در اپ در دسترس باشد |
+| به‌روزرسانی خود CLI | `fusion update` | به‌روزرسانی اپ از طریق نصب‌کننده‌های خودش |
 
-## اسکرین شات
+فرمت روی دیسک پروژه یکسان می‌ماند (`fusion-framework.toml`، `fusion.<env>.json`، ماژول‌های route). می‌توانید روی یک پروژه CLI و Desktop را با هم مخلوط کنید.
+
+## اسکرین‌شات
 
 ![Fusion Desktop](./fusion_desktop.jpeg)

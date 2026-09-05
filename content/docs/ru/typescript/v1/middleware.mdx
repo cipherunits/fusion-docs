@@ -1,26 +1,26 @@
 ---
 title: Middleware
-description: Global and route middleware for Node.js — no framework defaults
+description: Глобальный и маршрутный middleware для Node.js — без значений по умолчанию от фреймворка
 ---
 
-## Overview
+## Обзор
 
-Same model as Python:
+Та же модель, что в Python:
 
 ```text
 (request, callNext) => response | callNext(request)
 ```
 
-**No default middleware.** Register globally in `main.ts` or per-route via `route(..., { middleware, roles })`.
+**Нет middleware по умолчанию.** Регистрируйте глобально в `main.ts` или per-route через `route(..., { middleware, roles })`.
 
-## Two layers
+## Два уровня
 
-1. **Global** — `app.use(mw)` from a `MIDDLEWARE` array  
-2. **Route** — `middleware: [...]` or `roles: [...]` on `route`
+1. **Global** — `app.use(mw)` из массива `MIDDLEWARE`  
+2. **Route** — `middleware: [...]` или `roles: [...]` на `route`
 
-Order: global first, then route, then handler.
+Порядок: сначала global, затем route, затем handler.
 
-## Register in `main.ts`
+## Регистрация в `main.ts`
 
 ```ts
 import { FusionApp, getSettings, settings, bearerJwt } from "fusion-framework";
@@ -35,7 +35,7 @@ for (const mw of MIDDLEWARE) app.use(mw);
 await app.listen();
 ```
 
-## Write middleware
+## Написание middleware
 
 ```ts
 function requireApiKey(request, callNext) {
@@ -47,9 +47,9 @@ function requireApiKey(request, callNext) {
 }
 ```
 
-Share data via `request.state` (created if missing). Handlers read `this.state`.
+Делитесь данными через `request.state` (создаётся при отсутствии). Handlers читают `this.state`.
 
-## Route middleware / roles
+## Middleware / roles на уровне route
 
 ```ts
 route("/api/admin", { roles: ["admin", "super_admin"] })(
@@ -71,8 +71,8 @@ requireRoles("admin");
 requireRoles({ roles: ["admin"], claim: "roles", stateKey: "jwt" });
 ```
 
-Default `bearerJwt` base64url-decodes the JWT payload without crypto verification — pass `verify` for production.
+По умолчанию `bearerJwt` декодирует payload JWT через base64url без криптографической проверки — для production передайте `verify`.
 
 ## Async
 
-Middleware may be `async` and `await callNext(request)`. Handlers may be `async` too.
+Middleware может быть `async` и делать `await callNext(request)`. Handlers тоже могут быть `async`.

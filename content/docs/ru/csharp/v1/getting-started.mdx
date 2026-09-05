@@ -1,17 +1,24 @@
 ---
-title: Getting Started
-description: C# quickstart for Fusion Framework
+title: Быстрый старт
+description: Быстрый старт C# для Fusion Framework
 ---
 
 ## Prerequisites
 
+**Опубликованный пакет:**
+
 ```bash
-# from fusion-framework repo
+dotnet add package Fusion-Framework
+```
+
+**Из монорепозитория fusion-framework (разработка):**
+
+```bash
 cargo build -p fusion-ffi
 dotnet build bindings/csharp/FusionFramework
 ```
 
-Optional: `export FUSION_FFI_PATH=$PWD/target/debug/libfusion_ffi.so` (`.dll` / `.dylib` on Windows/macOS).
+Опционально: `export FUSION_FFI_PATH=$PWD/target/debug/libfusion_ffi.so` (`.dll` / `.dylib` на Windows/macOS).
 
 ## Scaffold
 
@@ -47,9 +54,9 @@ public static class Program
 }
 ```
 
-Sample in the monorepo: `examples/csharp_hello`.
+Пример в монорепозитории: `examples/csharp_hello`.
 
 ## Next
 
 - [Router](./router) · [Config](./config) · [Middleware](./middleware)  
-- Concepts: [Python Getting Started](../../python/v1/getting-started)
+- Концепции: [Быстрый старт Python](../../python/v1/getting-started)

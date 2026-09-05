@@ -1,29 +1,56 @@
 ---
 title: Введение
-description: Обзор Fusion Framework — кроссплатформенная документация бэкенда для Node.js, Python и C# от Cipher Unit
+description: Обзор Fusion Framework, FMA и кроссплатформенной документации бэкенда для Node.js, Python и C# от Cipher Unit
 ---
 
-## Добро пожаловать
+## Что такое Fusion?
 
-**Fusion Framework** — фреймворк для бэкенда с единым опытом разработки на нескольких языках.
+**Fusion Framework** — кроссплатформенный бэкенд-фреймворк на общем Rust-ядре и **FMA (Fusion Module Architecture)**.
 
-Эта документация охватывает концепции, настройку и SDK. Когда будете готовы к интеграции, выберите SDK в боковой панели.
+Вы пишете HTTP API на классах на удобном языке. Маршрутизация, разбор запросов, сериализация ответов, settings и хелперы заголовков работают в Rust-движке — языковые привязки остаются тонкими и сосредоточены на DX.
 
-Fusion разрабатывается командой **[Cipher Unit](https://cipherunit.xyz)**.
+Текущая версия пакета фреймворка в открытом репозитории: **1.2.6**.
 
-## SDK
+## Зачем нужен Fusion
 
-Выберите язык под ваш стек. У каждого раздела SDK свои версии и руководства по быстрому старту.
+Командам часто нужны одни и те же HTTP-семантики на нескольких языках. Fusion держит **одно ядро** для маршрутизации и сериализации и даёт идиоматические API на Python, TypeScript/Node.js и C#. Приложения собираются из **route-модулей** и опциональных **переиспользуемых пакетов**, а не из одного бесструктурного скрипта.
+
+Fusion разрабатывает **[Cipher Unit](https://cipherunit.xyz)**.
+
+## Поддержка языков
+
+| Язык | Статус |
+| --- | --- |
+| **Python** | Доступен — `pip install fusion-framework` |
+| **TypeScript / Node.js** | Доступен — `npm i fusion-framework` |
+| **C#** | Доступен — NuGet `Fusion-Framework` (пространство имён `FusionFramework`) + `fusion-ffi` |
+
+## Рекомендуемый путь обучения
+
+Читайте в таком порядке — сначала архитектура, затем CLI, затем ваш язык:
+
+1. **[Обзор архитектуры](./architecture/v1)** — ментальная модель стека
+2. **[Workspace и crates](./architecture/v1/workspace)** — core vs bindings
+3. **[FMA](./architecture/v1/fma)** — как стыкуются модули и пакеты
+4. **[Чем Fusion не является](./architecture/v1/what-fusion-is-not)** — границы области
+5. **[Fusion Tool](./cli/v1)** — скаффолд проектов и окружения
+6. Языковой гайд: [Python](./python/v1/getting-started) · [TypeScript](./typescript/v1/getting-started) · [C#](./csharp/v1/getting-started)
+7. [Settings и конфигурация](./architecture/v1/settings) — `fusion.<env>.json`, `FUSION_ENV`, overlays
+8. [Router](./python/v1/router) · [Middleware](./python/v1/middleware) · языковой [Config](./python/v1/config)
+9. [Переиспользуемые пакеты](./cli/v1/modules)
+10. [Лучшие практики](./architecture/v1/best-practices) · [Устранение неполадок](./architecture/v1/troubleshooting)
 
 ## Инструменты
 
-- **[Fusion Tool](./cli/v1)** — официальный CLI для создания проектов и управления окружениями
-- **[Fusion Desktop](/ru/gui)** — графический интерфейс для управления бэкендами Fusion на Windows и Linux
+- **[Fusion Tool](./cli/v1)** — официальный CLI для скаффолда проектов, управления окружениями и запуска команд проекта
+- **[Fusion Desktop](/ru/gui)** — графический интерфейс для управления Fusion-бэкендами на Windows и Linux
 
-Подробнее о команде: [cipherunit.xyz](https://cipherunit.xyz)
+Fusion — open source под [лицензией BSD](https://github.com/cipherunits/fusion-framework/blob/main/LICENSE/). Подробнее о команде: [cipherunit.xyz](https://cipherunit.xyz).
 
-## Дальнейшие шаги
+## Версионирование
 
-1. Выберите SDK в боковой панели.
-2. Откройте **Getting Started** для установки и минимального примера.
-3. Изучите остальную документацию этого SDK: API и типовые сценарии.
+Fusion — молодой фреймворк, поэтому пока ядро стабилизируется мы используем осознанную стратегию версий.
+
+Цель — непрерывное улучшение к надёжной основе для продакшен-бэкендов.
+
+![Fusion Framework versioning chart by Cipher Unit](./fusion-framework-versioning-chart.png)

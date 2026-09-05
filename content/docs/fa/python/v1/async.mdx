@@ -1,30 +1,40 @@
 ---
 title: Async
-description: Handler و middleware ناهمگام در Fusion Python
+description: هندلرهای async و middlewareهای async در Fusion Python
 ---
 
 ## نمای کلی
 
-Fusion از handler و middleware **async** پشتیبانی می‌کند. sync و async در یک اپ قابل ترکیب‌اند. اگر هر middleware یا خود handler ناهمگام باشد، آن درخواست روی runtime مشترک asyncio اجرا می‌شود.
+Fusion از هندلرهای HTTP **async** و middlewareهای **async** پشتیبانی می‌کند. Sync و async می‌توانند در یک اپ کنار هم باشند. وقتی هر middleware یا خود هندلر async باشد، آن درخواست روی runtime مشترک asyncio که از Rust bridge شده اجرا می‌شود.
 
-## Handler ناهمگام
+## هندلرهای async
+
+متد را با `async def` تعریف کنید:
 
 ```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
 @route("api/[module]/")
 class JobModule(FusionBaseApi):
     def get(self):
-        return self.response({"mode": "sync"})
+        return self.response({"mode": "sync"}, status=status.HTTP_SUCCESS)
 
     async def post(self):
+        # await DB / HTTP / asyncio APIs here
         result = await do_work()
         return self.response(result, status=status.HTTP_201_CREATED)
 ```
 
-- همان بایندینگ پارامتر sync  
-- همان `self.response` / `HTTPException`  
-- داخل `async def` I/O سنگین sync نکنید  
+قواعد:
 
-## Middleware ناهمگام
+- همان binding پارامتر sync (`path` / `body` / `query`)
+- همان `self.response(...)` / `HTTPException`
+- داخل `async def` با I/O سنگین sync حلقهٔ رویداد را بلاک نکنید — از کتابخانه‌های async یا `asyncio.to_thread` استفاده کنید
+
+## Middleware async
 
 ```python
 async def auth_middleware(request, call_next):
@@ -32,37 +42,115 @@ async def auth_middleware(request, call_next):
     if not token:
         return {"status": 401, "body": {"detail": "missing token"}}
 
-    user = await load_user(token)
+    user = await load_user(token)  # your async call
+    if not user:
+        return {"status": 401, "body": {"detail": "invalid"}}
+
     request.setdefault("state", {})
     request["state"]["user"] = user
     return await call_next(request)
 ```
 
+مثل هر middleware دیگری ثبت کنید:
+
 ```python
 MIDDLEWARE = [auth_middleware]
 ```
 
-حتماً: `return await call_next(request)`.
-
-## ترکیب sync و async
+**مهم:** در middleware async همیشه:
 
 ```python
-MIDDLEWARE = [logging_mw, timing_mw]  # یکی sync، یکی async
+return await call_next(request)
 ```
 
-اگر **هر** عضو زنجیره coroutine باشد، کل زنجیره با `await` اجرا می‌شود.
+وقتی زنجیره async باشد، `call_next` یک awaitable برمی‌گرداند.
+
+## مخلوط sync و async
+
+```python
+def logging_mw(request, call_next):
+    print(request["path"])
+    return call_next(request)
+
+async def timing_mw(request, call_next):
+    import time
+    t0 = time.perf_counter()
+    response = await call_next(request)
+    ms = (time.perf_counter() - t0) * 1000
+    print(f"{request['path']} {ms:.1f}ms")
+    return response
+
+MIDDLEWARE = [logging_mw, timing_mw]
+```
+
+اگر **هر** middleware در زنجیره (یا خود هندلر) تابع coroutine باشد، Fusion کل زنجیره را با `await` اجرا می‌کند.
 
 ## مثال کامل
 
-در `main.py` middleware async ثبت کنید؛ در ماژول `async def get` بنویسید و از `self.state` بخوانید.
+```python
+# main.py
+import src.modules.jobs.jobs
 
-جزئیات middleware: [Middleware](./middleware) · مسیریابی: [Router](./router).
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+
+async def attach_request_id(request, call_next):
+    import uuid
+    request.setdefault("state", {})
+    request["state"]["request_id"] = str(uuid.uuid4())
+    return await call_next(request)
+
+
+MIDDLEWARE = [attach_request_id]
+
+
+def main() -> None:
+    load_settings_module("settings")
+    app = FusionApp(get_settings())
+    for mw in MIDDLEWARE:
+        app.use(mw)
+    app.listen()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+```python
+# src/modules/jobs/jobs.py
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/")
+class JobModule(FusionBaseApi):
+    async def get(self):
+        rid = self.state.get("request_id")
+        data = await fetch_jobs()
+        return self.response(
+            {"request_id": rid, "jobs": data},
+            status=status.HTTP_SUCCESS,
+        )
+```
+
+## زیر پوست
+
+1. Rust درخواست HTTP را می‌گیرد و به bridge هندلر Python می‌فرستد  
+2. زنجیرهٔ middleware اجرا می‌شود (مسیر sync یا async)  
+3. کار async روی حلقهٔ مشترک asyncio فریم‌ورک submit می‌شود تا درخواست‌های همزمان همدیگر را بلاک نکنند  
+
+خودتان در `main.py` حلقهٔ رویداد راه نمی‌اندازید — `app.listen()` چرخهٔ عمر سرور را مدیریت می‌کند.
 
 ## چک‌لیست
 
 | هدف | الگو |
 | --- | --- |
-| متد API ناهمگام | `async def get/post/...` |
-| middleware ناهمگام | `async def mw(...): return await call_next(request)` |
-| ثبت سراسری | `MIDDLEWARE` + `app.use` در `main.py` |
-| خواندن داده | `self.state["…"]` |
+| متد API async | `async def get/post/...` |
+| Middleware async | `async def mw(request, call_next): return await call_next(request)` |
+| ثبت MW سراسری | `MIDDLEWARE` + `app.use` در `main.py` |
+| خواندن دادهٔ MW در هندلر | `self.state["…"]` |
+| خطاها | `raise HTTPException(...)` (در هندلرهای async هم کار می‌کند) |
+
+همچنین ببینید [Middleware](./middleware) و [Router](./router).

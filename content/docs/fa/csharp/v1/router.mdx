@@ -1,11 +1,11 @@
 ---
 title: Router
-description: "Register class-based APIs with [Route] in C#"
+description: "ثبت APIهای کلاس‌محور با [Route] در C#"
 ---
 
-## Overview
+## نمای کلی
 
-Annotate a `FusionBaseApi` subclass with `[Route(...)]`, then call `Route.Register<T>()` or `Route.RegisterAll(assembly)` before `Listen()`.
+یک زیرکلاس `FusionBaseApi` را با `[Route(...)]` annotate کنید، سپس قبل از `Listen()` متد `Route.Register<T>()` یا `Route.RegisterAll(assembly)` را صدا بزنید.
 
 ```csharp
 [Route("api/[module]/{id}", Tags = new[] { "items" }, Desc = "Items by id")]
@@ -21,34 +21,34 @@ public class ItemModule : FusionBaseApi
 Route.Register<ItemModule>();
 ```
 
-HTTP verbs are public instance methods named `Get`, `Post`, `Put`, `Patch`, `Delete`, … (case-insensitive).
+فعل‌های HTTP متدهای instance عمومی با نام `Get`، `Post`، `Put`، `Patch`، `Delete`، … هستند (بدون حساسیت به حروف بزرگ/کوچک).
 
-## Path templates
+## قالب مسیر
 
-Same tokens as Python/Node: static segments, `[module]`, `{name}` → `Params["name"]`.
+همان توکن‌های Python/Node: سگمنت‌های ثابت، `[module]`، `{name}` → `Params["name"]`.
 
-`Version = "v1"` prefixes the resolved path.
+`Version = "v1"` به مسیر resolve‌شده پیشوند می‌زند.
 
-## Options on `[Route]`
+## گزینه‌های `[Route]`
 
-| Property | Purpose |
+| Property | کاربرد |
 | --- | --- |
-| `Tags`, `Desc`, `Title`, `Deprecated` | Metadata (Swagger when enabled later) |
-| `Version` | Path prefix |
-| `Roles` | Appends role middleware |
-| `RoleClaim` / `RoleStateKey` | Customize claim lookup |
+| `Tags`, `Desc`, `Title`, `Deprecated` | متادیتا (Swagger وقتی بعداً فعال باشد) |
+| `Version` | پیشوند مسیر |
+| `Roles` | middleware نقش را اضافه می‌کند |
+| `RoleClaim` / `RoleStateKey` | سفارشی‌سازی lookup claim |
 
-You can also `Route.Register(type, path, middleware:, roles:)`.
+همچنین می‌توانید `Route.Register(type, path, middleware:, roles:)` را صدا بزنید.
 
-## Request view
+## نمای درخواست
 
-| Member | Content |
+| Member | محتوا |
 | --- | --- |
-| `Method`, `Path`, `Body` | Basics |
-| `Headers`, `Params`, `Query` | Maps |
-| `State` | Middleware bag (`JsonNode`) |
-| `Response(body, status, headers?)` | Envelope helper |
+| `Method`, `Path`, `Body` | پایه |
+| `Headers`, `Params`, `Query` | Mapها |
+| `State` | کیسهٔ middleware (`JsonNode`) |
+| `Response(body, status, headers?)` | helper پوشهٔ پاسخ |
 
-## Errors
+## خطاها
 
-Throw `HttpException` or return `{ status, body }` dictionaries.
+`HttpException` پرتاب کنید یا دیکشنری‌های `{ status, body }` برگردانید.

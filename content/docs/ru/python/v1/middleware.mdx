@@ -1,21 +1,21 @@
 ---
 title: Middleware
-description: Global and route middleware — write your own chain, no defaults from the framework
+description: Глобальный и route middleware — пишите свою цепочку, у фреймворка нет дефолтов
 ---
 
-## Overview
+## Обзор
 
-Middleware wraps every request (or a single route) as:
+Middleware оборачивает каждый запрос (или один маршрут) так:
 
 ```text
 (request, call_next) → response | call_next(request)
 ```
 
-**Fusion ships with no default middleware.** Nothing runs until you register callables yourself — typically in `main.py`.
+**В Fusion нет middleware по умолчанию.** Ничего не выполняется, пока вы сами не зарегистрируете callable — обычно в `main.py`.
 
-Helpers like `bearer_jwt` / `require_roles` are optional utilities. You must `app.use(...)` or pass them to `@route` yourself.
+Хелперы вроде `bearer_jwt` / `require_roles` — опциональные утилиты. Их нужно `app.use(...)` или передать в `@route` самостоятельно.
 
-## Two layers
+## Два слоя
 
 ```mermaid
 flowchart LR
@@ -25,12 +25,12 @@ flowchart LR
   Handler --> Res[Response]
 ```
 
-1. **Global** — registered on `FusionApp` via `app.use(...)` (from `MIDDLEWARE` in `main.py`)
-2. **Route** — passed as `middleware=[...]` or `roles=[...]` on `@route`
+1. **Глобальный** — на `FusionApp` через `app.use(...)` (из `MIDDLEWARE` в `main.py`)
+2. **Route** — через `middleware=[...]` или `roles=[...]` на `@route`
 
-Order: global list first (outer → inner), then route list, then the handler.
+Порядок: сначала глобальный список (снаружи → внутрь), затем список route, затем хендлер.
 
-## Register in `main.py`
+## Регистрация в `main.py`
 
 ```python
 """Entry point: register routes, middleware, and start the server."""
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Add your functions to `MIDDLEWARE`:
+Добавьте функции в `MIDDLEWARE`:
 
 ```python
 def logging_middleware(request, call_next):
@@ -66,7 +66,7 @@ def logging_middleware(request, call_next):
 MIDDLEWARE = [logging_middleware]
 ```
 
-## Write a simple middleware
+## Простой middleware
 
 ```python
 def require_api_key(request, call_next):
@@ -76,13 +76,13 @@ def require_api_key(request, call_next):
     return call_next(request)
 ```
 
-| Action | How |
+| Действие | Как |
 | --- | --- |
-| Continue | `return call_next(request)` |
-| Stop early | `return {"status": 401, "body": {...}}` |
-| Share data | `request.setdefault("state", {})["user"] = ...` then `call_next` |
+| Продолжить | `return call_next(request)` |
+| Остановиться рано | `return {"status": 401, "body": {...}}` |
+| Поделиться данными | `request.setdefault("state", {})["user"] = ...` затем `call_next` |
 
-Inside a handler, read state with `self.state`:
+В хендлере читайте state через `self.state`:
 
 ```python
 def get(self):
@@ -90,7 +90,7 @@ def get(self):
     return self.response({"user": user})
 ```
 
-## Route-level middleware
+## Middleware на уровне route
 
 ```python
 from fusion_framework.route import route
@@ -106,13 +106,13 @@ class UploadModule(FusionBaseApi):
         return self.response({"ok": True})
 ```
 
-## Optional helpers
+## Опциональные хелперы
 
-These are **not** auto-enabled.
+Они **не** включаются автоматически.
 
 ### `bearer_jwt()`
 
-Reads `Authorization: Bearer …`, decodes the JWT payload (default: **unverified** base64 decode — pass `verify=` for production), stores it in `request["state"]["jwt"]`.
+Читает `Authorization: Bearer …`, декодирует payload JWT (по умолчанию: **неверифицированный** base64 decode — для production передайте `verify=`), кладёт в `request["state"]["jwt"]`.
 
 ```python
 from fusion_framework import bearer_jwt
@@ -124,7 +124,7 @@ MIDDLEWARE = [bearer_jwt()]
 
 ### `require_roles(...)` / `@route(..., roles=[...])`
 
-Expects a payload already in `state["jwt"]` with a `roles` claim.
+Ожидает payload уже в `state["jwt"]` с claim `roles`.
 
 ```python
 @route("api/admin", roles=["admin", "super_admin"])
@@ -133,7 +133,7 @@ class AdminModule(FusionBaseApi):
         return self.response({"ok": True})
 ```
 
-Equivalent:
+Эквивалент:
 
 ```python
 from fusion_framework.middleware import require_roles
@@ -141,11 +141,11 @@ from fusion_framework.middleware import require_roles
 @route("api/admin", middleware=[require_roles("admin", "super_admin")])
 ```
 
-Missing auth → `401`. Wrong role → `403`.
+Нет auth → `401`. Неверная роль → `403`.
 
 ## Async middleware
 
-Use `async def` and `await call_next(request)`:
+Используйте `async def` и `await call_next(request)`:
 
 ```python
 import asyncio
@@ -157,25 +157,25 @@ async def slow_check(request, call_next):
 MIDDLEWARE = [slow_check]
 ```
 
-You can mix sync and async middleware in one list. See [Async](./async).
+Можно смешивать sync и async middleware в одном списке. См. [Async](./async).
 
-## Request shape
+## Форма request
 
-`request` is a plain dict (same shape the core passes to handlers):
+`request` — обычный dict (та же форма, что ядро передаёт хендлерам):
 
-| Key | Content |
+| Ключ | Содержимое |
 | --- | --- |
-| `method` | HTTP method |
-| `path` | Path |
-| `headers` | Header map |
-| `body` | Raw body string |
-| `params` | Path params |
-| `query` | Query map |
-| `state` | Mutable bag for middleware → handler |
+| `method` | HTTP-метод |
+| `path` | Путь |
+| `headers` | Карта заголовков |
+| `body` | Сырое тело строкой |
+| `params` | Path-параметры |
+| `query` | Карта query |
+| `state` | Изменяемый bag для middleware → хендлер |
 
-## Rules of thumb
+## Правила на память
 
-- Framework never registers middleware for you  
-- Put global middleware in `main.py` → `MIDDLEWARE` → `app.use`  
-- Put auth / scoping next to the route with `middleware=` or `roles=`  
-- Short-circuit with a status envelope; otherwise always call `call_next`
+- Фреймворк никогда не регистрирует middleware за вас  
+- Глобальный middleware — в `main.py` → `MIDDLEWARE` → `app.use`  
+- Auth / scoping — рядом с маршрутом через `middleware=` или `roles=`  
+- Short-circuit через status envelope; иначе всегда вызывайте `call_next`

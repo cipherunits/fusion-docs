@@ -1,21 +1,45 @@
 ---
-title: Python SDK
-description: Обзор Fusion Python SDK
+title: Python
+description: Создавайте HTTP API с Fusion Framework для Python
 ---
 
 ## Обзор
 
-Документация Python описывает клиент Fusion для приложений на Python.
+Python-пакет — основная языковая привязка для **Fusion Framework**.
 
-Вы просматриваете **v1**. Новые версии появятся в селекторе версий после публикации.
+Вы определяете HTTP-модули на классах с `@route` и `FusionBaseApi`. Маршрутизация, привязка параметров, разбор и сериализация ответов выполняются в общем Rust-ядре (`fusion-core`). Python остаётся тонким слоем DX.
 
-## Guides in this version
+Установка:
 
-| Page | Topic |
+```bash
+pip install fusion-framework
+```
+
+Вы смотрите **v1**. Новые версии появятся в селекторе версий после публикации.
+
+## Что вы получаете
+
+- API на классах: `get` / `post` / `put` / `patch` / `delete`
+- Типизированные параметры хендлера из path, JSON body или query
+- Автогенерация Swagger / OpenAPI UI (`fusion.<env>.json` + метаданные `@route` на маршруте)
+- Глобальный и route-**middleware** (по умолчанию нет — регистрируете сами)
+- Хелперы `status`, например `status.HTTP_SUCCESS` (200)
+- Sync и **async** хендлеры и middleware
+- `HTTPException` для структурированных ошибок
+
+## Гайды в этой версии
+
+| Страница | Тема |
 | --- | --- |
-| [Getting started](./getting-started) | Install, scaffold, first API |
-| [Router](./router) | `@route`, path tokens, binding |
-| [Custom HTTP routes](./custom-http-routes) | `@http_get` … `@http_options` (and `HttpGet` aliases) |
-| [Config](./config) | `fusion.<env>.json`, settings |
-| [Middleware](./middleware) | Global / route middleware |
-| [Async](./async) | Async handlers and middleware |
+| [Начало работы](./getting-started) | Установка, скаффолд, первый API |
+| [Router](./router) | `@route`, токены пути, binding, Swagger |
+| [Кастомные HTTP-маршруты](./custom-http-routes) | `@http_get` … `@http_options` (и алиасы `HttpGet`) |
+| [Пагинация](./pagination) | `self.pagination` / `self.paginated` |
+| [Config](./config) | `fusion.<env>.json`, `load_settings_module`, `get_settings` |
+| [Middleware](./middleware) | Глобальный / route middleware, JWT-хелперы |
+| [Коды статуса](./status) | Константы `status.HTTP_*` |
+| [Заголовки](./headers) | Константы и хелперы `header.*` |
+| [Swagger](./swagger) | OpenAPI UI из route-модулей |
+| [Async](./async) | Async-хендлеры и async middleware |
+
+Скаффолдите через `fusion init`, затем начните с [Начало работы](./getting-started).

@@ -1,17 +1,17 @@
 ---
 title: Middleware
-description: Global and route middleware for C# — no framework defaults
+description: Middleware سراسری و روی route برای C# — بدون پیش‌فرض فریم‌ورک
 ---
 
-## Overview
+## نمای کلی
 
 ```csharp
 delegate object? FusionMiddleware(FusionRequest request, Func<FusionRequest, object?> callNext);
 ```
 
-**No default middleware.** Use `app.Use(...)` and/or `[Route(..., Roles = ...)]`.
+**هیچ middleware پیش‌فرضی نیست.** از `app.Use(...)` و/یا `[Route(..., Roles = ...)]` استفاده کنید.
 
-## Global
+## سراسری (Global)
 
 ```csharp
 var MIDDLEWARE = new List<FusionMiddleware>
@@ -24,7 +24,7 @@ foreach (var mw in MIDDLEWARE) app.Use(mw);
 app.Listen();
 ```
 
-## Custom middleware
+## Middleware سفارشی
 
 ```csharp
 FusionMiddleware RequireApiKey = (request, callNext) =>
@@ -39,9 +39,9 @@ FusionMiddleware RequireApiKey = (request, callNext) =>
 };
 ```
 
-Write to `request.State`; handlers read `State`.
+در `request.State` بنویسید؛ handlerها از `State` بخوانند.
 
-## Roles / JWT helpers
+## ابزارهای Roles / JWT
 
 ```csharp
 MIDDLEWARE.Add(Middleware.BearerJwt()); // optional verify: callback
@@ -58,4 +58,4 @@ Middleware.RequireRoles("admin", "super_admin");
 Middleware.RequireRoles(new[] { "admin" }, claim: "roles", stateKey: "jwt");
 ```
 
-Default bearer decode is unverified base64url — supply `verify` for production.
+Decode پیش‌فرض bearer بدون verify و به‌صورت base64url است — برای production مقدار `verify` بدهید.

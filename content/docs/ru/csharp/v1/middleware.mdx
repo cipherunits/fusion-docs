@@ -1,17 +1,17 @@
 ---
 title: Middleware
-description: Global and route middleware for C# — no framework defaults
+description: Глобальный и маршрутный middleware для C# — без значений по умолчанию от фреймворка
 ---
 
-## Overview
+## Обзор
 
 ```csharp
 delegate object? FusionMiddleware(FusionRequest request, Func<FusionRequest, object?> callNext);
 ```
 
-**No default middleware.** Use `app.Use(...)` and/or `[Route(..., Roles = ...)]`.
+**Нет middleware по умолчанию.** Используйте `app.Use(...)` и/или `[Route(..., Roles = ...)]`.
 
-## Global
+## Глобальный уровень
 
 ```csharp
 var MIDDLEWARE = new List<FusionMiddleware>
@@ -24,7 +24,7 @@ foreach (var mw in MIDDLEWARE) app.Use(mw);
 app.Listen();
 ```
 
-## Custom middleware
+## Пользовательский middleware
 
 ```csharp
 FusionMiddleware RequireApiKey = (request, callNext) =>
@@ -39,9 +39,9 @@ FusionMiddleware RequireApiKey = (request, callNext) =>
 };
 ```
 
-Write to `request.State`; handlers read `State`.
+Пишите в `request.State`; handlers читают `State`.
 
-## Roles / JWT helpers
+## Helpers для Roles / JWT
 
 ```csharp
 MIDDLEWARE.Add(Middleware.BearerJwt()); // optional verify: callback
@@ -58,4 +58,4 @@ Middleware.RequireRoles("admin", "super_admin");
 Middleware.RequireRoles(new[] { "admin" }, claim: "roles", stateKey: "jwt");
 ```
 
-Default bearer decode is unverified base64url — supply `verify` for production.
+Decode bearer по умолчанию — непроверенный base64url; для production передайте `verify`.

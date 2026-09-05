@@ -120,15 +120,6 @@ fusion command run --prod
 fusion command run --env test
 ```
 
-### حل محیط
-
-1. پسوند خطی `name:env` (مثلاً `run:stage`) اگر باشد
-2. وگرنه `--env` / `--dev` / `--stage` / `--prod`
-3. وگرنه متغیر محیطی `FUSION_ENV`
-4. وگرنه `"dev"`
-
-اگر محیط خطی و فلگ با هم تعارض داشته باشند، خطا می‌گیرید.
-
 ### مثال: شروع API نمونه
 
 بعد از `fusion init` و `pip install fusion-framework`:
@@ -142,7 +133,7 @@ fusion command run:dev
 - **API:** [http://127.0.0.1:8080](http://127.0.0.1:8080)
 - **Swagger UI:** [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger)
 
-Fusion مستندات OpenAPI/Swagger را از ماژول‌های route شما می‌سازد (شامل ماژول شروع‌کنندهٔ `products`).
+Fusion مستندات OpenAPI/Swagger را از ماژول‌های route شما می‌سازد (شامل ماژول شروع‌کنندهٔ `products`). با Swagger UI می‌توانید endpointها را صدا بزنید، schemaها را ببینید و auth را امتحان کنید — بدون راه‌اندازی جداگانه برای docs.
 
 بدون فلگ یا پسوند `:env`، محیط از `FUSION_ENV` (اگر تنظیم شده) وگرنه `dev` گرفته می‌شود.
 

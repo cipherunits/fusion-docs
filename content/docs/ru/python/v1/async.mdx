@@ -1,15 +1,15 @@
 ---
 title: Async
-description: Async handlers and async middleware in Fusion Python
+description: Async-хендлеры и async middleware в Fusion Python
 ---
 
-## Overview
+## Обзор
 
-Fusion supports **async** HTTP handlers and **async** middleware. Sync and async can coexist in the same app. When any middleware or the handler is async, that request runs on the shared asyncio runtime bridged from Rust.
+Fusion поддерживает **async** HTTP-хендлеры и **async** middleware. Sync и async могут сосуществовать в одном приложении. Если любой middleware или сам хендлер async, этот запрос выполняется на общем asyncio runtime, связанном из Rust.
 
-## Async handlers
+## Async-хендлеры
 
-Define the method with `async def`:
+Определите метод через `async def`:
 
 ```python
 from fusion_framework.api import FusionBaseApi
@@ -28,11 +28,11 @@ class JobModule(FusionBaseApi):
         return self.response(result, status=status.HTTP_201_CREATED)
 ```
 
-Rules:
+Правила:
 
-- Same parameter binding as sync (`path` / `body` / `query`)
-- Same `self.response(...)` / `HTTPException`
-- Do not block the event loop with heavy sync I/O inside `async def` — use async libraries or `asyncio.to_thread`
+- Та же привязка параметров, что у sync (`path` / `body` / `query`)
+- Те же `self.response(...)` / `HTTPException`
+- Не блокируйте event loop тяжёлым sync I/O внутри `async def` — используйте async-библиотеки или `asyncio.to_thread`
 
 ## Async middleware
 
@@ -51,21 +51,21 @@ async def auth_middleware(request, call_next):
     return await call_next(request)
 ```
 
-Register like any other middleware:
+Регистрируйте как любой другой middleware:
 
 ```python
 MIDDLEWARE = [auth_middleware]
 ```
 
-**Important:** in async middleware, always:
+**Важно:** в async middleware всегда:
 
 ```python
 return await call_next(request)
 ```
 
-`call_next` returns an awaitable when the chain is async.
+Когда цепочка async, `call_next` возвращает awaitable.
 
-## Mixing sync and async
+## Смешивание sync и async
 
 ```python
 def logging_mw(request, call_next):
@@ -83,9 +83,9 @@ async def timing_mw(request, call_next):
 MIDDLEWARE = [logging_mw, timing_mw]
 ```
 
-If **any** middleware in the chain (or the handler) is a coroutine function, Fusion runs the whole chain with `await`.
+Если **любой** middleware в цепочке (или хендлер) — coroutine function, Fusion выполняет всю цепочку через `await`.
 
-## Full example
+## Полный пример
 
 ```python
 # main.py
@@ -135,22 +135,22 @@ class JobModule(FusionBaseApi):
         )
 ```
 
-## Under the hood
+## Под капотом
 
-1. Rust receives the HTTP request and dispatches to the Python handler bridge  
-2. Middleware chain runs (sync path or async path)  
-3. Async work is submitted to Fusion’s shared asyncio loop so concurrent requests do not block each other  
+1. Rust принимает HTTP-запрос и диспатчит в Python bridge хендлера  
+2. Выполняется цепочка middleware (sync- или async-путь)  
+3. Async-работа отправляется в общий asyncio loop Fusion, чтобы параллельные запросы не блокировали друг друга  
 
-You do not start an event loop in `main.py` yourself — `app.listen()` owns the server lifecycle.
+Event loop в `main.py` сами не запускаете — жизненным циклом сервера владеет `app.listen()`.
 
-## Checklist
+## Чеклист
 
-| Goal | Pattern |
+| Цель | Паттерн |
 | --- | --- |
-| Async API method | `async def get/post/...` |
+| Async API-метод | `async def get/post/...` |
 | Async middleware | `async def mw(request, call_next): return await call_next(request)` |
-| Register global MW | `MIDDLEWARE` + `app.use` in `main.py` |
-| Read MW data in handler | `self.state["…"]` |
-| Errors | `raise HTTPException(...)` (works in async handlers too) |
+| Регистрация глобального MW | `MIDDLEWARE` + `app.use` в `main.py` |
+| Чтение данных MW в хендлере | `self.state["…"]` |
+| Ошибки | `raise HTTPException(...)` (работает и в async-хендлерах) |
 
-See also [Middleware](./middleware) and [Router](./router).
+См. также [Middleware](./middleware) и [Router](./router).

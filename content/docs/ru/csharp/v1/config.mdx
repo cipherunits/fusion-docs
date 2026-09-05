@@ -1,13 +1,15 @@
 ---
 title: Config
-description: fusion.<env>.json and Settings in C#
+description: fusion.<env>.json и SettingsStore в C# (FusionFramework)
 ---
 
-## Overview
+## Обзор
 
-Settings load through FFI from the same `fusion.<env>.json` files as other languages (`FUSION_ENV`, default `dev`).
+Настройки загружаются через FFI из тех же файлов `fusion.<env>.json`, что и в других языках (`FUSION_ENV`, по умолчанию `dev`). Типы живут в пространстве имён **`FusionFramework`** (NuGet-пакет **`Fusion-Framework`**).
 
-→ **[Настройки и конфигурация](../../architecture/v1/settings)**
+Общие правила discovery, плейсхолдеры, потребляемые ключи и полные схемы CLI:
+
+→ **[Settings и конфигурация](../../architecture/v1/settings)**
 
 ```csharp
 SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
@@ -16,7 +18,7 @@ var port = SettingsStore.Current.Port;
 var secret = SettingsStore.Current.Get("secret_key");
 ```
 
-## Startup
+## Старт
 
 ```csharp
 SettingsStore.Current.EnsureLoaded(Directory.GetCurrentDirectory());
@@ -24,15 +26,24 @@ using var app = new FusionApp(SettingsStore.GetSettings());
 app.Listen(); // host/port from settings
 ```
 
+В скаффолденных приложениях также есть статический хелпер `CoreSettings`, который читает из `SettingsStore` — он не заменяет JSON.
+
 ## API
 
-| API | Role |
+| API | Роль |
 | --- | --- |
-| `EnsureLoaded(extraRoots…)` | Discover JSON |
-| `LoadJson(path, env, roots…)` | Explicit load |
-| `Get(key, default?)` | JSON node / value |
+| `EnsureLoaded(extraRoots…)` | Найти JSON |
+| `LoadJson(path, env, roots…)` | Явная загрузка |
+| `Get(key, default?)` | JSON-узел / значение |
 | `Merge(object)` | Overlay |
-| `Host` / `Port` / `Debug` / `Env` | Common fields |
-| `SettingsStore.Configure(values)` | Merge into singleton |
+| `Host` / `Port` / `Debug` / `Env` | Частые поля |
+| `SettingsStore.Configure(values)` | Merge в singleton |
 
-`commands` in JSON are for Fusion Tool only.
+## Смена окружения
+
+```bash
+FUSION_ENV=prod dotnet run
+fusion command run:prod
+```
+
+`commands` в JSON предназначены только для Fusion Tool.
