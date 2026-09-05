@@ -1,11 +1,11 @@
 ---
 title: Router
-description: Register class-based APIs with route / router in Node.js
+description: Регистрация классовых API с route / router в Node.js
 ---
 
-## Overview
+## Обзор
 
-Decorate a `FusionBaseApi` subclass with `route(...)` (or `router`). Registration happens when the module is imported — import it from `main.ts` before `listen()`.
+Декорируйте подкласс `FusionBaseApi` через `route(...)` (или `router`). Регистрация происходит при импорте модуля — импортируйте его из `main.ts` до `listen()`.
 
 ```ts
 import { FusionBaseApi, route, status } from "fusion-framework";
@@ -22,49 +22,49 @@ export const ItemModule = route("/api/[module]/{id}", {
 );
 ```
 
-Path params are read from `this.params` (strings). Coerce with `coerceParam` if needed — Node does **not** bind handler signatures like Python.
+Path-параметры читаются из `this.params` (строки). При необходимости приводите через `coerceParam` — Node **не** биндит сигнатуры handlers, как Python.
 
 ## `route` vs `router`
 
-| Symbol | Role |
+| Символ | Роль |
 | --- | --- |
-| `route(path, options?)` | Primary — path + Swagger metadata + middleware / roles |
-| `router(path, options?)` | Same function (alias) |
+| `route(path, options?)` | Основной — путь + метаданные Swagger + middleware / roles |
+| `router(path, options?)` | Та же функция (alias) |
 
-## Path templates
+## Шаблоны путей
 
-| Token | Meaning |
+| Токен | Значение |
 | --- | --- |
-| Static text | Exact segment |
-| `[module]` | Class name stem, lowercased, `Module` suffix stripped |
-| `{name}` | Dynamic path param → `this.params.name` |
+| Статический текст | Точный сегмент |
+| `[module]` | Stem имени класса в нижнем регистре, суффикс `Module` снимается |
+| `{name}` | Динамический path-параметр → `this.params.name` |
 
 ```ts
 route("api/[module]/{id}")(class ProductModule extends FusionBaseApi { ... });
 // → /api/product/{id}
 ```
 
-`version: "v1"` prefixes the resolved path: `/v1/api/product/...`.
+`version: "v1"` добавляет префикс к resolved-пути: `/v1/api/product/...`.
 
-## Options
+## Опции
 
-| Option | Purpose |
+| Опция | Назначение |
 | --- | --- |
-| `tags`, `desc`, `title`, `deprecated` | OpenAPI metadata (when enabled) |
-| `version` | Path prefix |
-| `middleware` | Route-only middleware list |
-| `roles` | Appends `requireRoles(...)` |
-| `roleClaim` / `roleStateKey` | Customize roles claim lookup |
+| `tags`, `desc`, `title`, `deprecated` | Метаданные OpenAPI (когда включено) |
+| `version` | Префикс пути |
+| `middleware` | Список middleware только для маршрута |
+| `roles` | Добавляет `requireRoles(...)` |
+| `roleClaim` / `roleStateKey` | Настройка lookup claim ролей |
 
-## Request view
+## Представление запроса
 
-| Accessor | Content |
+| Accessor | Содержимое |
 | --- | --- |
-| `this.method` / `this.path` / `this.body` | Request basics |
-| `this.headers` / `this.params` / `this.query` | Maps |
-| `this.state` | Middleware bag |
-| `this.response(body, status?, headers?)` | Envelope helper |
+| `this.method` / `this.path` / `this.body` | Базовые поля запроса |
+| `this.headers` / `this.params` / `this.query` | Карты |
+| `this.state` | Сумка middleware |
+| `this.response(body, status?, headers?)` | Helper конверта ответа |
 
-## Errors
+## Ошибки
 
-Throw or return `HTTPException` / `{ status, body }` envelopes. See [Middleware](./middleware).
+Бросайте или возвращайте конверты `HTTPException` / `{ status, body }`. См. [Middleware](./middleware).

@@ -1,0 +1,63 @@
+---
+title: Жизненный цикл запроса
+description: Путь HTTP-запроса через middleware и handlers
+---
+
+## Конвейер
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant H as Hyper fusion-core
+  participant G as Global middleware
+  participant R as Route middleware
+  participant A as Handler
+
+  C->>H: HTTP request
+  H->>H: Parse method path headers body params query
+  H->>G: request dict/object
+  G->>R: call_next
+  R->>A: call_next
+  A-->>R: response envelope
+  R-->>G: response envelope
+  G-->>H: response envelope
+  H-->>C: HTTP response
+```
+
+## Поля запроса
+
+| Поле | Значение |
+| --- | --- |
+| `method` | HTTP-глагол |
+| `path` | Путь запроса |
+| `headers` | Карта заголовков |
+| `body` | Сырое тело как строка |
+| `params` | Параметры пути |
+| `query` | Карта query string |
+| `state` | Изменяемый bag для middleware (например JWT) |
+
+## Конверт ответа
+
+Handlers возвращают (или middleware прерывает цепочку) объект вида:
+
+```json
+{ "status": 200, "body": { }, "headers": { } }
+```
+
+Используйте хелперы `self.response(...)` / `Response(...)`. Нестроковые тела при необходимости сериализуются в JSON ядром.
+
+## Порядок middleware
+
+1. Глобальный middleware, зарегистрированный на `FusionApp` (внешний первым)
+2. Route middleware из `@route(..., middleware=...)` / `roles=...`
+3. Handler
+
+Возврат `{ "status": …, "body": … }` останавливает цепочку.
+
+## Parameter binding в Python
+
+Только в Python **параметры сигнатуры** handler заполняются из path → body (для write-методов) → query. Это **не** контейнер dependency injection. В Node и C# поля `params` / `query` / `body` доступны на объекте запроса.
+
+## Fingerprint-заголовки
+
+При включении Fusion может добавить заголовки идентичности вроде `X-Powered-By`, `X-Framework` и `X-Fusion-Version` (слой middleware и/или сервера — зависит от биндинга и `fingerprint.enabled`). См. гайды middleware по языкам.

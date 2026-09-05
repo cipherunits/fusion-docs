@@ -1,6 +1,6 @@
 {
   "title": "TypeScript",
-  "description": "TypeScript SDK",
+  "description": "باندینگ TypeScript / Node.js برای Fusion Framework",
   "icon": "FileType",
   "root": true,
   "pages": ["v1"]

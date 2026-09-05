@@ -1,33 +1,45 @@
 ---
 title: Python
-description: ساخت APIهای HTTP با Fusion Framework برای پایتون
+description: ساخت HTTP API با Fusion Framework برای Python
 ---
 
 ## نمای کلی
 
-بستهٔ پایتون binding اصلی **Fusion Framework** است.
+پکیج Python binding اصلی زبان برای **Fusion Framework** است.
 
-ماژول‌های HTTP کلاس‌محور را با `@route` و `FusionBaseApi` تعریف می‌کنید. مسیریابی، بایندینگ پارامتر، پارس و سریالایز پاسخ در هستهٔ مشترک Rust (`fusion-core`) اجرا می‌شود.
+ماژول‌های HTTP کلاس‌محور را با `@route` و `FusionBaseApi` تعریف می‌کنید. مسیریابی، binding پارامتر، پارس، و سریالایز پاسخ در هستهٔ مشترک Rust (`fusion-core`) اجرا می‌شود. Python لایهٔ نازک تجربهٔ توسعه‌دهنده می‌ماند.
+
+نصب:
 
 ```bash
 pip install fusion-framework
 ```
 
-شما در حال مشاهده **v1** هستید.
+در حال مشاهدهٔ **v1** هستید. نسخه‌های جدید وقتی منتشر شوند در انتخابگر نسخه ظاهر می‌شوند.
+
+## چه چیزی می‌گیرید
+
+- APIهای کلاس‌محور: `get` / `post` / `put` / `patch` / `delete`
+- پارامترهای typed هندلر از path، JSON body، یا query
+- UI خودکار Swagger / OpenAPI (`fusion.<env>.json` + متادیتای `@route` هر route)
+- Middleware سراسری و سطح route (به‌صورت پیش‌فرض هیچ‌کدام — خودتان ثبت می‌کنید)
+- هلپرهای `status` مثل `status.HTTP_SUCCESS` (200)
+- هندلر و middleware هم sync و هم **async**
+- `HTTPException` برای پاسخ‌های خطای ساخت‌یافته
 
 ## راهنماهای این نسخه
 
 | صفحه | موضوع |
 | --- | --- |
-| [شروع سریع](./getting-started) | نصب، scaffold، اولین API |
-| [Router](./router) | `@route`، توکن مسیر، بایندینگ، Swagger |
-| [مسیرهای HTTP سفارشی](./custom-http-routes) | `@http_get` … `@http_options` (و aliasهای `HttpGet`) |
-| [Pagination](./pagination) | `self.pagination` / `self.paginated` |
+| [شروع کار](./getting-started) | نصب، اسکفولد، اولین API |
+| [Router](./router) | `@route`، توکن‌های مسیر، binding، Swagger |
+| [Routeهای HTTP سفارشی](./custom-http-routes) | `@http_get` … `@http_options` (و aliasهای `HttpGet`) |
+| [صفحه‌بندی](./pagination) | `self.pagination` / `self.paginated` |
 | [Config](./config) | `fusion.<env>.json`، `load_settings_module`، `get_settings` |
-| [Middleware](./middleware) | middleware سراسری / روی route |
+| [Middleware](./middleware) | Middleware سراسری / route، هلپرهای JWT |
 | [کدهای وضعیت](./status) | ثابت‌های `status.HTTP_*` |
-| [Headerها](./headers) | ثابت‌ها و helperهای `header.*` |
+| [Headerها](./headers) | ثابت‌ها و هلپرهای `header.*` |
 | [Swagger](./swagger) | UI OpenAPI از ماژول‌های route |
-| [Async](./async) | handler و middleware ناهمگام |
+| [Async](./async) | هندلر و middlewareهای async |
 
-با `fusion init` پروژه بسازید، سپس از [شروع سریع](./getting-started) ادامه دهید.
+با `fusion init` اسکفولد کنید، سپس از [شروع کار](./getting-started) شروع کنید.

@@ -1,33 +1,35 @@
 ---
-title: Pagination
-description: صفحه‌بندی مشترک لیست‌ها — query params، PageParams و بدنهٔ پاسخ paginated
+title: صفحه‌بندی
+description: صفحه‌بندی مشترک لیست‌ها — پارامترهای کوئری، PageParams و بدنهٔ پاسخ صفحه‌بندی‌شده
 ---
 
-## چیست؟
+## چیست
 
-Fusion یک **مدل pagination مشترک** در `fusion-core` دارد که در همهٔ باندینگ‌ها آینه شده:
+Fusion یک **مدل صفحه‌بندی مشترک** در `fusion-core` دارد که در همهٔ bindingها منعکس شده:
 
-- پارس query به `PageParams` نرمال
-- ساخت بدنهٔ استاندارد JSON: `{ items, pagination: { … } }`
-- اختیاری: برش مجموعهٔ درحافظه
+- پارس پارامترهای کوئری به `PageParams` نرمال‌شده
+- ساخت بدنهٔ JSON استاندارد: `{ items, pagination: { … } }`
+- در صورت نیاز، برش مجموعه‌های درون‌حافظه
 
 پیش‌فرض‌ها: **`page_size = 20`**، **`max_page_size = 100`**، **`page` از ۱ شروع می‌شود**.
 
-## پارامترهای query
+## پارامترهای کوئری
 
-| کلید | معنا |
+| کلید کوئری | معنی |
 | --- | --- |
-| `page` | ایندکس ۱-مبنا (پیش‌فرض `1`؛ `0` → HTTP 400) |
-| `page_size` | اندازهٔ صفحه (تا max محدود می‌شود) |
-| `per_page` | Alias برای `page_size` |
-| `limit` | Alias برای `page_size` |
-| `offset` | offset اختیاری ۰-مبنا (جایگزین `(page - 1) * page_size`) |
+| `page` | شمارهٔ صفحهٔ ۱-مبنا (پیش‌فرض `1`؛ `0` → HTTP 400) |
+| `page_size` | اندازهٔ صفحه (تا سقف max محدود می‌شود) |
+| `per_page` | نام مستعار برای `page_size` |
+| `limit` | نام مستعار برای `page_size` |
+| `offset` | آفست اختیاری ۰-مبنا (بر `(page - 1) * page_size` اولویت دارد) |
+
+`page` / `page_size` نامعتبر با مقدار `0` پاسخ **400** می‌دهد.
 
 ## شکل پاسخ
 
 ```json
 {
-  "items": [ /* آیتم‌های صفحه */ ],
+  "items": [ /* page of items */ ],
   "pagination": {
     "page": 2,
     "page_size": 10,
@@ -41,12 +43,21 @@ Fusion یک **مدل pagination مشترک** در `fusion-core` دارد که د
 }
 ```
 
-## پایتون
+`limit` برابر `page_size` است. `total` / `total_pages` / `has_next` / `has_prev` از همان `total` که شما می‌دهید محاسبه می‌شوند.
+
+## Python
 
 ```python
+from fusion_framework import status
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+
+ALL = [{"id": i} for i in range(1, 51)]
+
 @route("/api/[module]", tags=["products"], version="v1")
 class ProductModule(FusionBaseApi):
     def get(self, page: int = 1, page_size: int = 20):
+        # GET /v1/api/product/?page=2&page_size=10
         params = self.pagination(page=page, page_size=page_size)
         start = int(params.offset)
         end = start + int(params.limit)
@@ -54,30 +65,53 @@ class ProductModule(FusionBaseApi):
         return self.paginated(items, total=len(ALL), params=params, status=status.HTTP_SUCCESS)
 ```
 
-سطح پایین: `parse_pagination` / `paginated_body`.
+سطح پایین‌تر:
+
+```python
+from fusion_framework import parse_pagination, paginated_body
+
+params = parse_pagination(request_query)  # dict[str, str]
+body = paginated_body(items, total, params)
+```
+
+`FusionBaseApi.pagination(...)` از `self.query` می‌خواند؛ `page=` / `page_size=` / `offset=` صریح روی مقادیر کوئری اولویت دارند. `paginated(...)` همان `paginated_body` را داخل `self.response(...)` می‌پیچد.
 
 ## TypeScript / Node.js
 
 ```ts
-const params = this.pagination({ page: Number(this.query.page || 1), pageSize: Number(this.query.page_size || 20) });
-return this.paginated(items, total, params, { status: status.HTTP_SUCCESS });
+get() {
+  const params = this.pagination({
+    page: Number(this.query.page || 1),
+    pageSize: Number(this.query.page_size || this.query.per_page || this.query.limit || 20),
+  });
+  const items = ALL.slice(params.offset, params.offset + params.page_size);
+  return this.paginated(items, ALL.length, params, { status: status.HTTP_SUCCESS });
+}
 ```
+
+همچنین: `parsePagination(query)` و `paginatedBody(items, total, params)` از `fusion-framework`.
 
 ## C#
 
 ```csharp
-var p = PageParams(page: 2, pageSize: 10);
-return Paginated(items, total: 100, p);
+public object Get()
+{
+    var p = PageParams(page: 2, pageSize: 10);
+    var items = FetchItems((int)p.Offset, (int)p.Limit);
+    return Paginated(items, total: 100, p);
+}
 ```
 
-## انواع هسته (Rust)
+هلپرهای استاتیک: `Pagination.Parse(...)` / `Pagination.Body(...)`. همان کلیدهای کوئری زبان‌های دیگر.
 
-| نوع / تابع | نقش |
+## تایپ‌های هسته (Rust)
+
+| Type / fn | نقش |
 | --- | --- |
-| `PageConfig` | پیش‌فرض‌ها (20 / 100) |
-| `PageParams` | حالت نرمال؛ `limit()` → `page_size` |
-| `parse_page_params` | پارس + اعتبارسنجی |
-| `paginated_body` | envelope JSON |
-| `paginate_slice` | برش درحافظه |
+| `PageConfig {{ default_page_size, max_page_size }}` | پیش‌فرض‌ها (20 / 100) |
+| `PageParams {{ page, page_size, offset }}` | حالت نرمال‌شده؛ `limit()` → `page_size` |
+| `parse_page_params(query, &config)` | پارس + اعتبارسنجی |
+| `paginated_body(items, total, &params)` | پوشهٔ JSON |
+| `paginate_slice(&[T], &params)` | هلپر برش درون‌حافظه |
 
-نمونه: `examples/pagination.py` / `.mjs` / `.cs`.
+مثال در ریپوی فریم‌ورک: `examples/pagination.py` / `.mjs` / `.cs`.

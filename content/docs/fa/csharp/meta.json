@@ -1,6 +1,6 @@
 {
   "title": "C#",
-  "description": "C# SDK",
+  "description": "باندینگ C# برای Fusion Framework (fusion-ffi)",
   "icon": "Braces",
   "root": true,
   "pages": ["v1"]

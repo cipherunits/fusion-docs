@@ -1,6 +1,6 @@
 {
   "title": "TypeScript",
-  "description": "TypeScript SDK",
+  "description": "TypeScript / Node.js-привязка для Fusion Framework",
   "icon": "FileType",
   "root": true,
   "pages": ["v1"]

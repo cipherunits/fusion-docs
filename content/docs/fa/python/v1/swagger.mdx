@@ -1,17 +1,30 @@
 ---
 title: Swagger / OpenAPI
-description: Swagger UI و مشخصات OpenAPI ساخته‌شده از ماژول‌های route
+description: Swagger UI داخلی و مشخصات OpenAPI تولیدشده از ماژول‌های route
 ---
 
 ## نمای کلی
 
-Fusion از ماژول‌های route ثبت‌شده **Swagger UI** و JSON OpenAPI را mount می‌کند.
+Fusion **Swagger UI** و JSON OpenAPI را از ماژول‌های route ثبت‌شده mount می‌کند (قراردادی + routeهای HTTP سفارشی).
 
 | تنظیم | پیش‌فرض |
 | --- | --- |
 | `swagger.enabled` | `true` |
 | `swagger.path` | `/swagger` |
 
-پیکربندی زیر `config.swagger` در `fusion.<env>.json`. Scaffoldهای CLI معمولاً در **dev** روشن و در **stage** / **prod** خاموش‌اند. schema کامل فایل: [تنظیمات و پیکربندی](../../architecture/v1/settings).
+زیر `config.swagger` در `fusion.<env>.json` پیکربندی کنید. اسکفولد CLI در **dev** معمولاً Swagger را روشن و در **stage** / **prod** خاموش می‌کند. schema کامل فایل: [Settings و پیکربندی](../../architecture/v1/settings).
 
-جزئیات بلوک JSON: [دستورات و محیط‌ها](../../cli/v1/command).
+## چه چیزی مستند می‌شود
+
+- مسیرها از `@route` / `route()` / `[Route]`
+- verbهای قراردادی و عملیات‌های `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]`
+- `tags`، `title`، `desc`، `deprecated`، `version`
+- وقتی `version="v1"` تنظیم شود، مسیرها پیشوند می‌گیرند (`/v1/...`) و UI می‌تواند navbar نسخه نشان دهد
+
+## پیکربندی سراسری
+
+برای بلوک کامل JSON مربوط به `swagger` (`info`، `servers`، `auth`، `navbar`، `ui`) به [دستورات و محیط‌ها](../../cli/v1/command) مراجعه کنید.
+
+## غیرفعال کردن
+
+`swagger.enabled` را `false` کنید، یا `swagger.path` را خالی / false کنید.

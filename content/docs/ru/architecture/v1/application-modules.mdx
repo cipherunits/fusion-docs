@@ -1,0 +1,118 @@
+---
+title: Route-модули приложения
+description: Создавайте route-модули FusionBaseApi, регистрируйте их и структурируйте обработчики
+---
+
+## Что это
+
+**Route-модуль приложения** — это класс, который расширяет `FusionBaseApi` и регистрируется с шаблоном пути. Convention HTTP-методы и опциональные custom HTTP routes становятся смонтированными endpoints в `fusion-core`.
+
+## Зачем
+
+Группировка обработчиков на классе держит HTTP-поверхность одного ресурса цельной и позволяет `[module]` выводить стабильный stem пути из имени класса.
+
+## Когда
+
+Используйте route-модуль для каждого HTTP-ресурса (или связной группы endpoints), который экспонирует ваше приложение.
+
+## Создание route-модуля (Python)
+
+```python
+# src/modules/users/users.py
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework.http_route import http_get, http_post
+from fusion_framework import status
+
+
+@route(
+    "api/[module]/",
+    tags=["users"],
+    desc="User resource",
+    version="v1",
+)
+class UserModule(FusionBaseApi):
+    def get(self):
+        return self.response({"users": []}, status=status.HTTP_SUCCESS)
+
+    @http_get("profile/[action]", title="Current profile action")
+    def ProfileAction(self):
+        return self.response({"profile": True}, status=status.HTTP_SUCCESS)
+
+    @http_post("create/[action]", title="Create user")
+    def CreateAction(self):
+        return self.response({"created": True}, status=status.HTTP_SUCCESS)
+```
+
+Регистрация — через импорт из entrypoint:
+
+```python
+# main.py
+import src.modules.users.users  # noqa: F401 — runs @route
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+def main() -> None:
+    load_settings_module("settings")
+    FusionApp(get_settings()).listen()
+
+if __name__ == "__main__":
+    main()
+```
+
+### Получаемые пути
+
+| Handler | Method | Path (с `version="v1"`) |
+| --- | --- | --- |
+| `get` | GET | `/v1/api/user/` |
+| `ProfileAction` | GET | `/v1/api/user/profile/profile` |
+| `CreateAction` | POST | `/v1/api/user/create/create` |
+
+`UserModule` → `[module]` = `user`. `ProfileAction` → `[action]` = `profile`. `CreateAction` → `[action]` = `create`.
+
+## Convention vs custom routes
+
+| Режим | Механизм | Пример |
+| --- | --- | --- |
+| Convention | Методы с именами `get`, `post`, `put`, `patch`, `delete`, `head`, `options` | `GET /api/user/` |
+| Custom | `@http_get` … `@http_options` / `httpGet` … `httpOptions` / `[HttpGet]` … `[HttpOptions]` | `GET /api/user/profile/profile`, `POST /api/user/create/create` |
+
+Оба режима могут сосуществовать на одном классе. Подробности: [Python Router](../../python/v1/router) · [Custom HTTP routes](../../python/v1/custom-http-routes).
+
+## Опции маршрута
+
+| Опция | Назначение |
+| --- | --- |
+| `tags`, `title`, `desc` | Метаданные OpenAPI |
+| `version` | Префикс пути + запись в navbar версий Swagger |
+| `deprecated` | Пометить операции как deprecated |
+| `middleware` | Список route-scoped middleware |
+| `roles` | Добавляет middleware `require_roles(...)` |
+
+## Чеклист регистрации
+
+1. Создайте файл под `src/modules/...`
+2. Сделайте подкласс `FusionBaseApi`
+3. Примените `@route` / `route()` / `[Route]`
+4. Импортируйте модуль из entrypoint **до** `listen()`
+5. (C#) явно вызовите `Route.Register<T>()`
+
+## TypeScript / C#
+
+Та же семантика, другой синтаксис — см. страницы роутера по языкам:
+
+- [TypeScript](../../typescript/v1/router)
+- [C#](../../csharp/v1/router)
+
+## Лучшие практики
+
+- Один основной ресурс на класс
+- Не держите startup в файлах модулей
+- Предпочитайте `[module]` жёстко прошитым именам ресурсов
+- Используйте `version=` для ломающих изменений API
+
+## См. также
+
+- [FMA](./fma)
+- [Переиспользуемые пакеты](./packages) — для кода, общего между приложениями

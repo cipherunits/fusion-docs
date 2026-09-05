@@ -1,0 +1,30 @@
+---
+title: Глоссарий
+description: Терминология Fusion Framework
+---
+
+| Термин | Значение |
+| --- | --- |
+| **Fusion Framework** | Классовый HTTP-фреймворк с общим Rust-ядром и языковыми биндингами |
+| **fusion-core** | Rust-crate: сервер, router, settings, headers, naming |
+| **fusion-ffi** | C ABI, используемый C#-биндингом |
+| **Binding** | Пакет Python / Node / C#, который открывает API Fusion этому языку |
+| **FMA** | Fusion Module Architecture — композиция route-модулей + library-пакетов |
+| **Route module** | Класс `FusionBaseApi`, зарегистрированный с шаблоном пути |
+| **Library package / CLI module** | Публикуемый пакет с `fusion.module.toml`, ставится через `fusion add` |
+| **FusionApp** | Объект приложения: настройки, middleware и запуск прослушивания |
+| **FusionBaseApi** | Базовый класс route-модулей; даёт представление запроса и `response` |
+| **Convention route** | Handler с именем `get`/`post`/…, смонтированный на базовый путь модуля |
+| **Custom HTTP route** | `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` с явным шаблоном пути |
+| **`[module]`** | Токен пути, раскрываемый из стема имени класса |
+| **`[action]`** | Токен пути, раскрываемый из стема имени handler (`*Action` отбрасывается) |
+| **Middleware** | Функция `(request, call_next)`, оборачивающая handlers |
+| **Settings** | Runtime-конфиг из `fusion.<env>.json` (+ опциональный overlay в Python) |
+| **Fingerprint headers** | Заголовки идентичности вроде `X-Powered-By` / `X-Framework` / `X-Fusion-Version` |
+| **Fusion Tool** | Внешний CLI (`fusion`) для init, команд и пакетов |
+| **OpenAPI / Swagger** | Встроенный UI документации API и JSON-спеки, монтируемые приложением |
+
+| **Pagination** | Общая постраничная выдача списков: `page` / `page_size` → `{ items, pagination }` |
+| **Custom HTTP route** | `@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` сверх convention-глаголов |
+| **Fusion Desktop** | GUI-компаньон для бэкендов на Fusion |
+| **Fusion Snippets** | Расширение сниппетов VS Code / Cursor для API Fusion |

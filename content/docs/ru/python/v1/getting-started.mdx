@@ -1,18 +1,235 @@
 ---
 title: Начало работы
-description: Установка и инициализация Python SDK
+description: Установите Fusion Framework для Python и напишите первый API
 ---
 
 ## Установка
 
 ```bash
-pip install cipherunits-fusion
+pip install fusion-framework
 ```
 
-## Быстрый старт
+Скаффолдите проект через [Fusion Tool](../../cli/v1/getting-started), чтобы получить стандартную структуру (`main.py`, `core/settings.py`, пример модуля `products` и файлы окружений):
+
+```bash
+fusion init --lang python --name my-app --description "My Fusion API"
+cd my-app
+pip install fusion-framework
+```
+
+## Структура проекта (что создаёт `fusion init`)
+
+```text
+├── main.py                          # entrypoint — always starts the app here
+├── core/
+│   └── settings.py
+└── src/
+    └── modules/
+        └── products/
+            └── products.py          # sample module — edit / copy this pattern
+```
+
+### `main.py`
+
+Точка входа импортирует модули (чтобы классы `@route` зарегистрировались), загружает settings, регистрирует опциональный middleware и запускает сервер. Логику старта держите здесь — не вызывайте `listen()` внутри файлов модулей:
 
 ```python
-from fusion import Fusion
+"""Entry point: register routes, middleware, and start the server."""
 
-client = Fusion(api_key="...")
+import src.modules.products.products  # registers @route classes
+
+from fusion_framework.app import FusionApp
+from fusion_framework.config import get_settings, load_settings_module
+
+# Global middleware (optional). Framework ships with none by default.
+MIDDLEWARE: list = []
+
+
+def main() -> None:
+    load_settings_module("settings")
+    app = FusionApp(get_settings())
+    for middleware in MIDDLEWARE:
+        app.use(middleware)
+    app.listen()
+
+
+if __name__ == "__main__":
+    main()
 ```
+
+Когда добавляете ещё один модуль, импортируйте его в `main.py` так же. См. [Middleware](./middleware) и [Config](./config).
+
+### Пример модуля `products`
+
+`fusion init` кладёт небольшой API **products**. Хендлеры пишете на подклассе `FusionBaseApi`, Swagger-метаданные передаёте в `@route`:
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route(
+    "api/[module]/",
+    tags=["swagger"],
+    desc="Fusion Framework Api",
+    version="v1",
+    deprecated=False,
+)
+class ProductModule(FusionBaseApi):
+    """Product management module."""
+
+    def get(self):
+        return self.response({"products_id": 12}, status=status.HTTP_SUCCESS)
+
+    def post(self):
+        return self.response({"products_id": 12}, status=status.HTTP_201_CREATED)
+
+    def delete(self):
+        return self.response({"products_id": 12}, status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self):
+        return self.response({"products_id": 12}, status=status.HTTP_SUCCESS)
+```
+
+`[module]` берётся из имени класса (`ProductModule` → `product`), поэтому маршрут становится `/api/product/`.
+
+Опции Swagger на `@route`:
+
+| Аргумент | Назначение |
+| --- | --- |
+| `tags` | OpenAPI tags (группировка в Swagger UI) |
+| `desc` | Описание операции / API |
+| `title` | Опциональный заголовок |
+| `version` | Метаданные версии API |
+| `deprecated` | Пометить маршрут устаревшим в OpenAPI |
+
+Глобальные настройки Swagger UI (path, схемы auth, UI) живут в `fusion.<env>.json` — см. [Команды и окружения](../../cli/v1/command).
+
+## Запуск
+
+```bash
+fusion command run:dev
+```
+
+Затем откройте:
+
+- **API:** [http://127.0.0.1:8080](http://127.0.0.1:8080)
+- **Swagger UI:** [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger)
+
+Swagger генерируется автоматически из модулей `@route`. Через UI можно исследовать и вызывать примерные эндпоинты products.
+
+## Коды статуса
+
+Используйте модуль `status` вместо «сырых» чисел:
+
+```python
+from fusion_framework import status
+
+status.HTTP_SUCCESS        # 200
+status.HTTP_201_CREATED    # 201
+status.HTTP_204_NO_CONTENT # 204
+status.HTTP_404_NOT_FOUND  # 404
+```
+
+```python
+return self.response({"ok": True}, status=status.HTTP_SUCCESS)
+```
+
+## Хендлеры
+
+Реализуйте HTTP-методы как обычно: `get`, `post`, `put`, `patch`, `delete`.
+
+### Привязка параметров
+
+Аргументы берутся из сигнатуры метода. Источник зависит от имени параметра:
+
+1. Имя совпадает с параметром **path** → path
+2. Иначе если метод `POST` / `PUT` / `PATCH` и имя есть в JSON **body** → body
+3. Иначе если имя есть в **query** → query
+4. Отсутствующие опциональные параметры (default или аннотация) приходят как `None`
+
+```python
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.http import HTTPException
+from fusion_framework.route import route
+from fusion_framework import status
+
+
+@route("api/[module]/{id}", tags=["items"], desc="Items by id")
+class Items(FusionBaseApi):
+    def get(self, id: int):
+        return self.response({"id": id}, status=status.HTTP_SUCCESS)
+
+    def post(self, id: int, title: str = "untitled"):
+        # id ← path, title ← JSON body (optional via default)
+        return self.response(
+            {"id": id, "title": title},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+@route("api/[module]/", tags=["products"], desc="Products list")
+class Products(FusionBaseApi):
+    def get(self, id: int):
+        # GET /api/products/?id=12
+        if not id:
+            raise HTTPException(400, {"message": "id is required"})
+        return self.response({"products_id": id}, status=status.HTTP_SUCCESS)
+```
+
+Помните: новые модули кладите в `src/modules/...` и **импортируйте из `main.py`**. Старт приложения (`load_settings_module` / `FusionApp` / `listen`) оставляйте только в `main.py`.
+
+Подробнее: [Router](./router).
+
+### Ответы
+
+Используйте `self.response(body, status=status.HTTP_SUCCESS, **headers)` для envelope ответа. Dict и list сериализуются в JSON ядром.
+
+### Ошибки
+
+```python
+from fusion_framework.http import HTTPException
+
+raise HTTPException(404, {"detail": "not found"})
+```
+
+### Async-хендлеры
+
+```python
+@route("/")
+class Root(FusionBaseApi):
+    def get(self):
+        return self.response({"status": "ok"}, status=status.HTTP_SUCCESS)
+
+    async def post(self):
+        return self.response({"status": "async ok"}, status=status.HTTP_SUCCESS)
+```
+
+Полный гайд: [Async](./async).
+
+## Конфигурация
+
+Настройки runtime приходят из `fusion.<env>.json` (`FUSION_ENV`, по умолчанию `dev`). Загружайте их в `main.py` через `load_settings_module` / `get_settings`.
+
+Полный гайд: [Config](./config). Также [Команды и окружения](../../cli/v1/command).
+
+## Middleware
+
+По умолчанию middleware не запускается. Регистрируйте свой в `main.py` (`MIDDLEWARE` + `app.use`) или на `@route(..., middleware=..., roles=...)`.
+
+Полный гайд: [Middleware](./middleware).
+
+## Основные API
+
+| Символ | Роль |
+| --- | --- |
+| `FusionBaseApi` | View запроса (`method`, `path`, `body`, `headers`, `params`, `query`, `state`) и `response(...)` |
+| `route(...)` | Регистрация модуля; Swagger-метаданные + опционально `middleware` / `roles` |
+| `router(path)` | Алиас `route(path)` без Swagger-метаданных |
+| `status` | Константы HTTP-статусов (`HTTP_SUCCESS` → 200, …) |
+| `FusionApp` / `app.use` / `listen` | Приложение + глобальный middleware — вызывайте из `main.py` |
+| `load_settings_module` / `get_settings` | Загрузка `fusion.<env>.json` + `core/settings.py` |
+| `HTTPException` | Выбросить HTTP-ответ с ошибкой |
+
+Под капотом PyO3 мостит к `fusion-core` для маршрутизации, binding и сериализации.

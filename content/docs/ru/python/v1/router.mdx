@@ -1,11 +1,11 @@
 ---
 title: Router
-description: Register class-based APIs with @route, path tokens, parameters, and Swagger metadata
+description: Регистрация API на классах через @route, токены пути, параметры и Swagger-метаданные
 ---
 
-## Overview
+## Обзор
 
-Routing in Fusion Python is declarative. You decorate a `FusionBaseApi` subclass with `@route(...)`. At import time the class is registered; when the app mounts, each HTTP method you define (`get`, `post`, …) becomes a real route in the Rust core.
+Маршрутизация в Fusion Python декларативна. Вы декорируете подкласс `FusionBaseApi` через `@route(...)`. При импорте класс регистрируется; когда приложение монтируется, каждый определённый HTTP-метод (`get`, `post`, …) становится реальным маршрутом в Rust-ядре.
 
 ```python
 from fusion_framework.api import FusionBaseApi
@@ -19,26 +19,26 @@ class ItemModule(FusionBaseApi):
         return self.response({"id": id}, status=status.HTTP_SUCCESS)
 ```
 
-Import the module from `main.py` so registration runs before `listen()`.
+Импортируйте модуль из `main.py`, чтобы регистрация прошла до `listen()`.
 
 ## `@route` vs `router`
 
-| Symbol | Role |
+| Символ | Роль |
 | --- | --- |
-| `route(path, **options)` | Primary decorator — path + Swagger + middleware / roles |
-| `router(path)` | Alias of `route(path)` with no extra metadata |
+| `route(path, **options)` | Основной декоратор — путь + Swagger + middleware / roles |
+| `router(path)` | Алиас `route(path)` без дополнительных метаданных |
 
-Prefer `@route` for new code.
+Для нового кода предпочитайте `@route`.
 
-## Path templates
+## Шаблоны пути
 
-Path segments are resolved when the class is registered.
+Сегменты пути разрешаются при регистрации класса.
 
-| Token | Meaning | Example |
+| Токен | Значение | Пример |
 | --- | --- | --- |
-| Static text | Exact segment | `api` → `/api/...` |
-| `[module]` | Stem of the class name, lowercased, with `Module` / `MODULE` stripped | `ProductModule` → `product` |
-| `{name}` | Dynamic path parameter bound to a handler argument | `{id}` → `id: int` |
+| Статический текст | Точный сегмент | `api` → `/api/...` |
+| `[module]` | Стем имени класса в нижнем регистре, без `Module` / `MODULE` | `ProductModule` → `product` |
+| `{name}` | Динамический path-параметр, привязанный к аргументу хендлера | `{id}` → `id: int` |
 
 ```python
 @route("api/[module]/{id}")
@@ -48,9 +48,9 @@ class ProductModule(FusionBaseApi):
 # Resolves to: /api/product/{id}
 ```
 
-### Version prefix
+### Префикс версии
 
-Pass `version=` to prefix the resolved path:
+Передайте `version=`, чтобы префиксировать разрешённый путь:
 
 ```python
 @route("api/[module]/", version="v1")
@@ -59,26 +59,26 @@ class ProductModule(FusionBaseApi):
 # → /v1/api/product/
 ```
 
-## Swagger / OpenAPI options
+## Опции Swagger / OpenAPI
 
-These only affect documentation (Swagger UI / `openapi.json`), not runtime routing:
+Влияют только на документацию (Swagger UI / `openapi.json`), не на runtime-маршрутизацию:
 
-| Argument | Type | Purpose |
+| Аргумент | Тип | Назначение |
 | --- | --- | --- |
-| `tags` | `list[str]` | Group operations in Swagger |
-| `desc` | `str` | Description |
+| `tags` | `list[str]` | Группировка операций в Swagger |
+| `desc` | `str` | Описание |
 | `title` | `str` | Summary / title |
-| `version` | `str` | Path prefix (also used as API versioning) |
-| `deprecated` | `bool` | Mark operations deprecated |
+| `version` | `str` | Префикс пути (также версионирование API) |
+| `deprecated` | `bool` | Пометить операции устаревшими |
 
-Global Swagger UI settings (`path`, auth, UI) live in `fusion.<env>.json` — see [Commands & environments](../../cli/v1/command).
+Глобальные настройки Swagger UI (`path`, auth, UI) живут в `fusion.<env>.json` — см. [Команды и окружения](../../cli/v1/command).
 
-## Route middleware and roles
+## Route middleware и roles
 
-| Argument | Purpose |
+| Аргумент | Назначение |
 | --- | --- |
-| `middleware` | List of `(request, call_next)` callables for this route only |
-| `roles` | Shorthand — appends a role guard (expects JWT payload in `request["state"]["jwt"]`) |
+| `middleware` | Список callable `(request, call_next)` только для этого маршрута |
+| `roles` | Сокращение — добавляет role guard (ожидает JWT payload в `request["state"]["jwt"]`) |
 
 ```python
 @route("api/admin", roles=["admin", "super_admin"])
@@ -88,16 +88,16 @@ class AdminModule(FusionBaseApi):
         return self.response({"sub": user.get("sub")})
 ```
 
-See [Middleware](./middleware) for the full model (global vs route-level).
+Полная модель (глобальный vs route) — в [Middleware](./middleware).
 
-## Parameter binding
+## Привязка параметров
 
-Handler arguments are filled from the request automatically:
+Аргументы хендлера заполняются из запроса автоматически:
 
-1. Name matches a **path** parameter → path  
-2. Else if method is `POST` / `PUT` / `PATCH` and the name is in the JSON **body** → body  
-3. Else if the name is in the **query** string → query  
-4. Missing optional / defaulted args arrive as `None`
+1. Имя совпадает с параметром **path** → path  
+2. Иначе если метод `POST` / `PUT` / `PATCH` и имя есть в JSON **body** → body  
+3. Иначе если имя есть в **query** → query  
+4. Отсутствующие опциональные / с default аргументы приходят как `None`
 
 ```python
 @route("api/[module]/{id}")
@@ -111,21 +111,21 @@ class ItemModule(FusionBaseApi):
         return self.response({"id": id, "title": title}, status=status.HTTP_201_CREATED)
 ```
 
-Types (`int`, `str`, `float`, `bool`, `Optional[...]`) drive coercion. Invalid values become `400`.
+Типы (`int`, `str`, `float`, `bool`, `Optional[...]`) управляют coercion. Невалидные значения дают `400`.
 
-## Request view on the class
+## Request view на классе
 
-Inside a handler you always have `self`:
+Внутри хендлера всегда есть `self`:
 
-| Property | Source |
+| Свойство | Источник |
 | --- | --- |
-| `self.method` | HTTP method |
-| `self.path` | Request path |
-| `self.body` | Raw body string |
-| `self.headers` | Header map |
-| `self.params` | Path params |
+| `self.method` | HTTP-метод |
+| `self.path` | Путь запроса |
+| `self.body` | Сырое тело строкой |
+| `self.headers` | Карта заголовков |
+| `self.params` | Path-параметры |
 | `self.query` | Query string |
-| `self.state` | Per-request data from middleware |
+| `self.state` | Per-request данные из middleware |
 
 ```python
 def get(self):
@@ -135,7 +135,7 @@ def get(self):
     })
 ```
 
-## Responses and errors
+## Ответы и ошибки
 
 ```python
 return self.response({"ok": True}, status=status.HTTP_SUCCESS)
@@ -144,4 +144,4 @@ from fusion_framework.http import HTTPException
 raise HTTPException(404, {"detail": "not found"})
 ```
 
-Dicts / lists are JSON-encoded by the core. See [Async](./async) for `async def` handlers.
+Dict / list кодируются в JSON ядром. Для `async def` хендлеров см. [Async](./async).

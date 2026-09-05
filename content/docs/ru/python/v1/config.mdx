@@ -1,15 +1,17 @@
 ---
 title: Config
-description: Load fusion.<env>.json and core/settings.py with fusion_framework.config
+description: Загрузка fusion.<env>.json и core/settings.py через fusion_framework.config
 ---
 
-## Overview
+## Обзор
 
-`fusion_framework.config` is the Python façade over shared settings in `fusion-core`.
+`fusion_framework.config` — Python-фасад над общими настройками в **fusion-core**.
 
-Runtime values live in **`fusion.<env>.json`** (like a typed `.env` per environment). Optional Python overlay lives in **`core/settings.py`**. The active environment comes from **`FUSION_ENV`** (default: `dev`).
+Значения времени выполнения живут в **`fusion.<env>.json`**. Опциональный Python-overlay — в **`core/settings.py`**. Активное окружение берётся из **`FUSION_ENV`** (по умолчанию: `dev`).
 
-→ **[Настройки и конфигурация](../../architecture/v1/settings)**
+Правила discovery, envelope vs плоский JSON, env-плейсхолдеры и полная аннотированная схема `fusion.dev.json` / stage / prod — в общем гайде:
+
+→ **[Settings и конфигурация](../../architecture/v1/settings)**
 
 ```python
 from fusion_framework.config import load_settings_module, get_settings
@@ -19,23 +21,23 @@ s = get_settings()
 print(s.host, s.port, s.debug)
 ```
 
-## What the module exports
+## Что экспортирует модуль
 
-| Symbol | Role |
+| Символ | Роль |
 | --- | --- |
-| `settings` | Global singleton settings object |
-| `Settings` | Class (usually you use the singleton) |
-| `get_settings()` | Ensure JSON is loaded, return the singleton |
-| `load_settings_module(...)` | Load JSON + merge UPPERCASE attrs from a Python module |
-| `configure(**kwargs)` | Set values in code without editing JSON |
+| `settings` | Глобальный singleton настроек |
+| `Settings` | Класс (обычно используете singleton) |
+| `get_settings()` | Гарантирует загрузку JSON, возвращает singleton |
+| `load_settings_module(...)` | Загрузка JSON + merge UPPERCASE-атрибутов из Python-модуля |
+| `configure(**kwargs)` | Задать значения в коде без правки JSON |
 
-Also available as:
+Также доступно как:
 
 ```python
 from fusion_framework import settings
 ```
 
-## Typical startup in `main.py`
+## Типичный старт в `main.py`
 
 ```python
 from fusion_framework.app import FusionApp
@@ -62,11 +64,11 @@ load_settings_module("settings")
 load_settings_module("core.settings")
 ```
 
-What it does:
+Что делает:
 
-1. Discovers and loads `fusion.<env>.json` from the project (and parent dirs)
-2. Imports the Python module (`settings` → also tries `core.settings`)
-3. Merges only **UPPERCASE** names from that module onto the settings object
+1. Находит и загружает `fusion.<env>.json` (cwd, родители, каталог `__main__`)
+2. Импортирует Python-модуль (`settings` → также пробует `core.settings`)
+3. Мержит только **UPPERCASE**-имена из этого модуля в объект settings
 
 ```python
 # core/settings.py
@@ -76,90 +78,32 @@ SECRET_KEY = settings.get("secret_key")
 DEBUG = settings.get("debug", default=False)
 ```
 
-These names become available as `settings.get("secret_key")` / `settings.get("SECRET_KEY")` after load.
-
-## `get_settings`
-
-Returns the same singleton. If JSON was not loaded yet, it calls `ensure_loaded` (looks next to `__main__` and cwd).
+## `get_settings` и объект `settings`
 
 ```python
 s = get_settings()
 s.host   # str, default "127.0.0.1"
-s.port   # int, default 3000 (or from JSON)
+s.port   # int, default 3000 (scaffold uses 8080 in fusion.dev.json)
 s.debug  # bool
 s.env    # "dev" | "prod" | "stage" | …
 ```
 
-## The `settings` object
-
-| API | Purpose |
+| API | Назначение |
 | --- | --- |
-| `settings.get("key", default=...)` | Read a config key |
-| `settings["key"]` | Same, raises `KeyError` if missing |
-| `"key" in settings` | Membership |
-| `settings.host` / `.port` / `.debug` / `.env` | Common fields |
-| `settings.config` | Full config map as a dict |
-| `settings.merge({...})` | Overlay a dict |
-| `settings.configure(**kwargs)` | Overlay keyword args |
-| `settings.load_json(...)` | Load JSON explicitly |
-| `settings.ensure_loaded()` | Lazy-load if needed |
-| `settings.clear()` | Reset |
+| `settings.get("key", default=...)` | Чтение ключа (поддерживает dotted paths) |
+| `settings["key"]` | То же, при отсутствии — `KeyError` |
+| `settings.host` / `.port` / `.debug` / `.env` | Частые поля |
+| `settings.merge({...})` / `configure(**kwargs)` | Overlay |
+| `settings.load_json(...)` / `ensure_loaded()` | Явная / ленивая загрузка |
 
-```python
-from fusion_framework import settings
-
-settings.get("secret_key")
-settings.get("missing", default=False)
-settings.port
-```
-
-### Environment placeholders
-
-If a string value in JSON is `ALL_CAPS` (e.g. `"HOST"`), the core resolves it from the process environment at read time.
-
-## `fusion.<env>.json` shape
-
-Created by `fusion init`. Example:
-
-```json
-{
-  "env": "dev",
-  "config": {
-    "host": "127.0.0.1",
-    "port": 8080,
-    "debug": true,
-    "secret_key": "fusion-framework-…",
-    "swagger": { "enabled": true, "path": "/swagger" }
-  },
-  "commands": {
-    "run": "python main.py"
-  }
-}
-```
-
-| Block | Used by |
-| --- | --- |
-| `config` | App settings (`host`, `port`, your keys, Swagger) |
-| `commands` | `fusion command run` / `run:prod` |
-
-Switch environment:
+## Смена окружения
 
 ```bash
 FUSION_ENV=prod python main.py
 fusion command run:prod
 ```
 
-## `configure` (in-code overrides)
-
-Useful for tests or one-off runs:
-
-```python
-from fusion_framework.config import configure
-
-configure(host="0.0.0.0", port=9000, debug=True)
-```
-
-## Mental model
+## Ментальная модель
 
 ```text
 fusion.dev.json  →  config block  →  settings singleton
@@ -167,4 +111,4 @@ core/settings.py →  UPPERCASE overlay (optional)
 get_settings()   →  FusionApp.listen(host, port)
 ```
 
-JSON is the source of truth. Python settings is a convenient reader, not a second config system.
+JSON — источник истины. Ключи (`host`, `port`, `fingerprint`, `swagger`, …) и содержимое файлов CLI — в **[Settings](../../architecture/v1/settings)**.

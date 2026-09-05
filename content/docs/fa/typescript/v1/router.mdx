@@ -1,11 +1,11 @@
 ---
 title: Router
-description: Register class-based APIs with route / router in Node.js
+description: ثبت APIهای کلاس‌محور با route / router در Node.js
 ---
 
-## Overview
+## نمای کلی
 
-Decorate a `FusionBaseApi` subclass with `route(...)` (or `router`). Registration happens when the module is imported — import it from `main.ts` before `listen()`.
+یک زیرکلاس `FusionBaseApi` را با `route(...)` (یا `router`) تزئین کنید. ثبت هنگام import ماژول انجام می‌شود — قبل از `listen()` آن را از `main.ts` import کنید.
 
 ```ts
 import { FusionBaseApi, route, status } from "fusion-framework";
@@ -22,49 +22,49 @@ export const ItemModule = route("/api/[module]/{id}", {
 );
 ```
 
-Path params are read from `this.params` (strings). Coerce with `coerceParam` if needed — Node does **not** bind handler signatures like Python.
+پارامترهای مسیر از `this.params` خوانده می‌شوند (رشته). در صورت نیاز با `coerceParam` تبدیل کنید — Node برخلاف Python signature handler را bind نمی‌کند.
 
-## `route` vs `router`
+## `route` در برابر `router`
 
-| Symbol | Role |
+| نماد | نقش |
 | --- | --- |
-| `route(path, options?)` | Primary — path + Swagger metadata + middleware / roles |
-| `router(path, options?)` | Same function (alias) |
+| `route(path, options?)` | اصلی — مسیر + متادیتای Swagger + middleware / roles |
+| `router(path, options?)` | همان تابع (alias) |
 
-## Path templates
+## قالب مسیر
 
-| Token | Meaning |
+| توکن | معنی |
 | --- | --- |
-| Static text | Exact segment |
-| `[module]` | Class name stem, lowercased, `Module` suffix stripped |
-| `{name}` | Dynamic path param → `this.params.name` |
+| متن ثابت | سگمنت دقیق |
+| `[module]` | stem نام کلاس، حروف کوچک، پسوند `Module` حذف‌شده |
+| `{name}` | پارامتر دینامیک مسیر → `this.params.name` |
 
 ```ts
 route("api/[module]/{id}")(class ProductModule extends FusionBaseApi { ... });
 // → /api/product/{id}
 ```
 
-`version: "v1"` prefixes the resolved path: `/v1/api/product/...`.
+`version: "v1"` به مسیر resolve‌شده پیشوند می‌زند: `/v1/api/product/...`.
 
-## Options
+## گزینه‌ها
 
-| Option | Purpose |
+| Option | کاربرد |
 | --- | --- |
-| `tags`, `desc`, `title`, `deprecated` | OpenAPI metadata (when enabled) |
-| `version` | Path prefix |
-| `middleware` | Route-only middleware list |
-| `roles` | Appends `requireRoles(...)` |
-| `roleClaim` / `roleStateKey` | Customize roles claim lookup |
+| `tags`, `desc`, `title`, `deprecated` | متادیتای OpenAPI (وقتی فعال باشد) |
+| `version` | پیشوند مسیر |
+| `middleware` | لیست middleware فقط برای این route |
+| `roles` | `requireRoles(...)` را اضافه می‌کند |
+| `roleClaim` / `roleStateKey` | سفارشی‌سازی lookup claim نقش‌ها |
 
-## Request view
+## نمای درخواست
 
-| Accessor | Content |
+| Accessor | محتوا |
 | --- | --- |
-| `this.method` / `this.path` / `this.body` | Request basics |
-| `this.headers` / `this.params` / `this.query` | Maps |
-| `this.state` | Middleware bag |
-| `this.response(body, status?, headers?)` | Envelope helper |
+| `this.method` / `this.path` / `this.body` | پایهٔ درخواست |
+| `this.headers` / `this.params` / `this.query` | Mapها |
+| `this.state` | کیسهٔ middleware |
+| `this.response(body, status?, headers?)` | helper پوشهٔ پاسخ |
 
-## Errors
+## خطاها
 
-Throw or return `HTTPException` / `{ status, body }` envelopes. See [Middleware](./middleware).
+`HTTPException` / پوشه‌های `{ status, body }` را پرتاب یا برگردانید. ببینید [Middleware](./middleware).

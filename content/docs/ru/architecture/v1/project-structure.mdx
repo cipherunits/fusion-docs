@@ -1,0 +1,52 @@
+---
+title: Структура проекта
+description: Стандартная раскладка приложения Fusion, создаваемая fusion init
+---
+
+## Раскладка scaffold (Python)
+
+`fusion init --lang python` создаёт структуру примерно такого вида:
+
+```text
+my-app/
+├── main.py                 # Required entry — listen() lives here
+├── core/
+│   └── settings.py         # Optional UPPERCASE overlay
+├── src/
+│   └── modules/
+│       └── products/
+│           └── products.py # Sample route module
+├── fusion.dev.json         # Environment config + commands
+├── fusion.stage.json
+├── fusion.prod.json
+└── fusion-framework.toml   # App metadata + installed [[modules]]
+```
+
+Точный набор файлов может отличаться в зависимости от версии Fusion Tool — при scaffolding считайте вывод CLI источником истины.
+
+## Роли файлов
+
+| Путь | Владелец | Роль |
+| --- | --- | --- |
+| `main.py` | Вы | Импортирует route-модули, загружает настройки, регистрирует middleware, вызывает `listen()` |
+| `src/modules/**` | Вы | Route-модули (классы `FusionBaseApi`) |
+| `core/settings.py` | Вы | Overlay настроек Python (имена UPPERCASE) |
+| `fusion.<env>.json` | Вы | Host/port/swagger/commands для этой среды — см. [Settings](./settings) |
+| `fusion-framework.toml` | Вы + CLI | Идентичность приложения; `[[modules]]` после `fusion add` |
+| `.fusion/modules/` | CLI | Vendored library-пакеты (генерируются/управляются CLI) |
+
+## Обязательное vs опциональное
+
+| Нужно для запуска | Опционально |
+| --- | --- |
+| Точка входа, которая создаёт `FusionApp` и слушает | Дополнительные среды |
+| Хотя бы один зарегистрированный маршрут (или только поверхность Swagger/404) | Library-пакеты |
+| Обнаруживаемые настройки (или значения по умолчанию) | `core/settings.py` |
+
+## TypeScript / C#
+
+Scaffolding отличается по языку, но идеи те же: одна точка входа, route-модули, environment JSON. См. страницы getting-started по языкам и [Fusion Tool](../../cli/v1).
+
+## Сгенерированное / vendored
+
+Не правьте вручную деревья vendored-пакетов под `.fusion/modules/` как источник истины — меняйте upstream-репозиторий пакета и делайте re-add/update.

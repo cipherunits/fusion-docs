@@ -1,0 +1,117 @@
+---
+title: Пагинация
+description: Общая пагинация списков — query-параметры, PageParams и тело paginated-ответа
+---
+
+## Что это
+
+Fusion поставляет **общую модель пагинации** в `fusion-core`, зеркалируемую в каждом биндинге:
+
+- Разбор query-параметров в нормализованные `PageParams`
+- Сборка стандартного JSON-тела: `{ items, pagination: { … } }`
+- Опциональная нарезка коллекций в памяти
+
+Значения по умолчанию: **`page_size = 20`**, **`max_page_size = 100`**, **`page` — 1-based**.
+
+## Query-параметры
+
+| Query-ключ | Смысл |
+| --- | --- |
+| `page` | 1-based индекс страницы (по умолчанию `1`; `0` → HTTP 400) |
+| `page_size` | Размер страницы (ограничивается максимумом) |
+| `per_page` | Псевдоним для `page_size` |
+| `limit` | Псевдоним для `page_size` |
+| `offset` | Опциональный 0-based offset элементов (перекрывает `(page - 1) * page_size`) |
+
+Некорректные `page` / `page_size` равные `0` возвращают **400**.
+
+## Форма ответа
+
+```json
+{
+  "items": [ /* page of items */ ],
+  "pagination": {
+    "page": 2,
+    "page_size": 10,
+    "offset": 10,
+    "limit": 10,
+    "total": 25,
+    "total_pages": 3,
+    "has_next": true,
+    "has_prev": true
+  }
+}
+```
+
+`limit` равен `page_size`. `total` / `total_pages` / `has_next` / `has_prev` вычисляются из `total`, который вы передаёте.
+
+## Python
+
+```python
+from fusion_framework import status
+from fusion_framework.api import FusionBaseApi
+from fusion_framework.route import route
+
+ALL = [{"id": i} for i in range(1, 51)]
+
+@route("/api/[module]", tags=["products"], version="v1")
+class ProductModule(FusionBaseApi):
+    def get(self, page: int = 1, page_size: int = 20):
+        # GET /v1/api/product/?page=2&page_size=10
+        params = self.pagination(page=page, page_size=page_size)
+        start = int(params.offset)
+        end = start + int(params.limit)
+        items = ALL[start:end]
+        return self.paginated(items, total=len(ALL), params=params, status=status.HTTP_SUCCESS)
+```
+
+Низкоуровнево:
+
+```python
+from fusion_framework import parse_pagination, paginated_body
+
+params = parse_pagination(request_query)  # dict[str, str]
+body = paginated_body(items, total, params)
+```
+
+`FusionBaseApi.pagination(...)` читает `self.query`; явные `page=` / `page_size=` / `offset=` перекрывают значения из query. `paginated(...)` оборачивает `paginated_body` в `self.response(...)`.
+
+## TypeScript / Node.js
+
+```ts
+get() {
+  const params = this.pagination({
+    page: Number(this.query.page || 1),
+    pageSize: Number(this.query.page_size || this.query.per_page || this.query.limit || 20),
+  });
+  const items = ALL.slice(params.offset, params.offset + params.page_size);
+  return this.paginated(items, ALL.length, params, { status: status.HTTP_SUCCESS });
+}
+```
+
+Также: `parsePagination(query)` и `paginatedBody(items, total, params)` из `fusion-framework`.
+
+## C#
+
+```csharp
+public object Get()
+{
+    var p = PageParams(page: 2, pageSize: 10);
+    var items = FetchItems((int)p.Offset, (int)p.Limit);
+    return Paginated(items, total: 100, p);
+}
+```
+
+Статические хелперы: `Pagination.Parse(...)` / `Pagination.Body(...)`. Те же query-ключи, что и в других языках.
+
+## Типы ядра (Rust)
+
+| Type / fn | Роль |
+| --- | --- |
+| `PageConfig {{ default_page_size, max_page_size }}` | Значения по умолчанию (20 / 100) |
+| `PageParams {{ page, page_size, offset }}` | Нормализованное состояние; `limit()` → `page_size` |
+| `parse_page_params(query, &config)` | Разбор + валидация |
+| `paginated_body(items, total, &params)` | JSON envelope |
+| `paginate_slice(&[T], &params)` | Хелпер нарезки в памяти |
+
+Пример в репозитории фреймворка: `examples/pagination.py` / `.mjs` / `.cs`.

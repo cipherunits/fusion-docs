@@ -1,25 +1,37 @@
 ---
-title: Snippetهای VS Code / Cursor
-description: اکستنشن Fusion Snippets برای کدنویسی سریع‌تر Fusion Framework
+title: اسنیپت‌های VS Code / Cursor
+description: اکستنشن Fusion Snippets برای کدنویسی سریع‌تر با Fusion Framework
 ---
 
-## چیست؟
+## چیست
 
-**Fusion Snippets** اکستنشن ادیتور Cipher Unit است که snippet برای **Fusion Framework** در **Python**، **TypeScript / Node.js** و **C#** می‌دهد.
+**Fusion Snippets** اکستنشن ادیتور Cipher Unit است که اسنیپت‌های کد برای **Fusion Framework** در **Python**، **TypeScript / Node.js** و **C#** می‌دهد.
 
-الگوهای رایج را سریع می‌کند: ماژول‌های route، `@route` / `route()` / `[Route]`، مسیرهای HTTP سفارشی، middleware، پاسخ با `status` / `header`، و pagination.
+الگوهای رایج را سریع‌تر می‌نویسد: ماژول‌های route، `@route` / `route()` / `[Route]`، routeهای HTTP سفارشی (`@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]`)، سیم‌کشی middleware، پاسخ با `status` / `header`، و هلپرهای صفحه‌بندی.
 
 ## نصب
 
 1. **VS Code** یا **Cursor** را باز کنید
-2. Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`)
-3. جستجو: **Fusion Snippets** (ناشر: Cipher Unit / cipherunits)
-4. نصب کنید؛ در فایل `.py` / `.ts` / `.cs` با پیشوند IntelliSense صدا بزنید
+2. به Extensions بروید (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+3. **Fusion Snippets** را جستجو کنید (ناشر: Cipher Unit / cipherunits)
+4. نصب کنید، سپس یک فایل `.py` / `.ts` / `.cs` در پروژهٔ Fusion باز کنید و با پیشوند IntelliSense اسنیپت‌ها را فراخوانی کنید
 
-> ابزارهای VFX به نام «Fusion» (DaVinci) را با این اکستنشن اشتباه نگیرید — مخصوص **Fusion Framework** است.
+> اگر نام لیست مارکت‌پلیس در کانال شما کمی فرق دارد، `Fusion` + `Cipher` را جستجو کنید و اکستنشن اسنیپت مربوط به **Fusion Framework** را بگیرید (نه ابزارهای VFX بلک‌مجیک «Fusion»).
+
+## اهداف رایج اسنیپت
+
+| حوزه | مثال‌ها |
+| --- | --- |
+| نقطهٔ ورود اپ | `FusionApp`، `listen`، بارگذاری settings |
+| ماژول route | `FusionBaseApi` + `@route` / `route` / `[Route]` |
+| Routeهای سفارشی | `http_get`…`http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` |
+| پاسخ‌ها | `status.HTTP_*`، `header.download` |
+| لیست‌ها | `pagination` / `paginated` / `PageParams` |
+
+اسنیپت‌ها کد شروع می‌گذارند — همچنان باید ماژول‌ها را از `main` ثبت کنید و با `fusion command` یا Desktop اجرا کنید.
 
 ## مرتبط
 
-- [مسیرهای HTTP سفارشی (پایتون)](../../python/v1/custom-http-routes)
-- [Pagination](../../architecture/v1/pagination)
+- [Routeهای HTTP سفارشی (Python)](../../python/v1/custom-http-routes)
+- [صفحه‌بندی](../../architecture/v1/pagination)
 - [Fusion Desktop](./desktop)

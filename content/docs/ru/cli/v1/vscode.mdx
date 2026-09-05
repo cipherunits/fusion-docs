@@ -1,0 +1,37 @@
+---
+title: Сниппеты VS Code / Cursor
+description: Расширение Fusion Snippets для более быстрой разработки на Fusion Framework
+---
+
+## Что это
+
+**Fusion Snippets** — расширение редактора от Cipher Unit со сниппетами для **Fusion Framework** в **Python**, **TypeScript / Node.js** и **C#**.
+
+Оно ускоряет типичные паттерны: route-модули, `@route` / `route()` / `[Route]`, пользовательские HTTP-маршруты (`@http_get`…`@http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]`), подключение middleware, ответы с `status` / `header` и helpers пагинации.
+
+## Установка
+
+1. Откройте **VS Code** или **Cursor**
+2. Перейдите в Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+3. Найдите **Fusion Snippets** (издатель: Cipher Unit / cipherunits)
+4. Установите, затем откройте файл `.py` / `.ts` / `.cs` в проекте Fusion и вызывайте сниппеты через префикс IntelliSense
+
+> Если название в Marketplace на вашем канале чуть отличается, ищите `Fusion` + `Cipher` и выбирайте расширение сниппетов для **Fusion Framework** (не VFX-инструменты Blackmagic DaVinci «Fusion»).
+
+## Типичные цели сниппетов
+
+| Область | Примеры |
+| --- | --- |
+| Точка входа приложения | `FusionApp`, `listen`, загрузка settings |
+| Route-модуль | `FusionBaseApi` + `@route` / `route` / `[Route]` |
+| Пользовательские маршруты | `http_get`…`http_options` / `httpGet`…`httpOptions` / `[HttpGet]`…`[HttpOptions]` |
+| Ответы | `status.HTTP_*`, `header.download` |
+| Списки | `pagination` / `paginated` / `PageParams` |
+
+Сниппеты вставляют стартовый код — модули всё равно нужно регистрировать из `main` и запускать через `fusion command` или Desktop.
+
+## Связанные материалы
+
+- [Пользовательские HTTP-маршруты (Python)](../../python/v1/custom-http-routes)
+- [Пагинация](../../architecture/v1/pagination)
+- [Fusion Desktop](./desktop)

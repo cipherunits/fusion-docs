@@ -5,13 +5,13 @@ description: بارگذاری fusion.<env>.json و core/settings.py با fusion_
 
 ## نمای کلی
 
-`fusion_framework.config` لایهٔ پایتون روی تنظیمات مشترک **fusion-core** است.
+`fusion_framework.config` نمای Python روی تنظیمات مشترک **fusion-core** است.
 
-مقادیر runtime در **`fusion.<env>.json`** هستند. لایهٔ اختیاری پایتون در **`core/settings.py`** است. محیط فعال از **`FUSION_ENV`** می‌آید (پیش‌فرض: `dev`).
+مقادیر زمان اجرا در **`fusion.<env>.json`** هستند. overlay اختیاری Python در **`core/settings.py`**. محیط فعال از **`FUSION_ENV`** می‌آید (پیش‌فرض: `dev`).
 
-قواعد کشف فایل، envelope در برابر JSON تخت، placeholderها و schema کامل `fusion.dev.json` / stage / prod:
+برای قواعد کشف، envelope در برابر JSON تخت، placeholderهای env، و schema کامل حاشیه‌نویسی‌شدهٔ `fusion.dev.json` / stage / prod، راهنمای مشترک را ببینید:
 
-→ **[تنظیمات و پیکربندی](../../architecture/v1/settings)**
+→ **[Settings و پیکربندی](../../architecture/v1/settings)**
 
 ```python
 from fusion_framework.config import load_settings_module, get_settings
@@ -21,21 +21,23 @@ s = get_settings()
 print(s.host, s.port, s.debug)
 ```
 
-## خروجی‌های ماژول
+## آنچه ماژول export می‌کند
 
 | نماد | نقش |
 | --- | --- |
-| `settings` | singleton سراسری تنظیمات |
-| `Settings` | کلاس (معمولاً همان singleton را استفاده کنید) |
-| `get_settings()` | اطمینان از لود JSON و برگرداندن singleton |
-| `load_settings_module(...)` | لود JSON + merge نام‌های UPPERCASE از ماژول پایتون |
-| `configure(**kwargs)` | تنظیم دستی بدون ویرایش JSON |
+| `settings` | آبجکت settings سراسری (singleton) |
+| `Settings` | کلاس (معمولاً همان singleton را می‌گیرید) |
+| `get_settings()` | اطمینان از بارگذاری JSON، برگرداندن singleton |
+| `load_settings_module(...)` | بارگذاری JSON + ادغام ATTRهای UPPERCASE از یک ماژول Python |
+| `configure(**kwargs)` | تنظیم مقادیر در کد بدون ویرایش JSON |
+
+همچنین به‌صورت زیر در دسترس است:
 
 ```python
 from fusion_framework import settings
 ```
 
-## استارت معمول در `main.py`
+## راه‌اندازی معمول در `main.py`
 
 ```python
 from fusion_framework.app import FusionApp
@@ -44,11 +46,11 @@ from fusion_framework.config import get_settings, load_settings_module
 MIDDLEWARE: list = []
 
 def main() -> None:
-    load_settings_module("settings")   # ۱) JSON + core/settings.py
-    app = FusionApp(get_settings())    # ۲) host / port / debug
+    load_settings_module("settings")   # 1) JSON + core/settings.py
+    app = FusionApp(get_settings())    # 2) host / port / debug
     for mw in MIDDLEWARE:
         app.use(mw)
-    app.listen()
+    app.listen()                       # 3) start server
 
 if __name__ == "__main__":
     main()
@@ -56,9 +58,17 @@ if __name__ == "__main__":
 
 ## `load_settings_module`
 
-1. فایل `fusion.<env>.json` را پیدا و لود می‌کند  
-2. ماژول پایتون را import می‌کند (`settings` → همچنین `core.settings`)  
-3. فقط نام‌های **UPPERCASE** را روی تنظیمات merge می‌کند  
+```python
+load_settings_module("settings")
+# or
+load_settings_module("core.settings")
+```
+
+کارهایی که انجام می‌دهد:
+
+1. `fusion.<env>.json` را کشف و بارگذاری می‌کند (cwd، والدین، دایرکتوری `__main__`)
+2. ماژول Python را import می‌کند (`settings` → همچنین `core.settings` را امتحان می‌کند)
+3. فقط نام‌های **UPPERCASE** آن ماژول را روی آبجکت settings ادغام می‌کند
 
 ```python
 # core/settings.py
@@ -67,6 +77,24 @@ from fusion_framework import settings
 SECRET_KEY = settings.get("secret_key")
 DEBUG = settings.get("debug", default=False)
 ```
+
+## `get_settings` و آبجکت `settings`
+
+```python
+s = get_settings()
+s.host   # str, default "127.0.0.1"
+s.port   # int, default 3000 (scaffold uses 8080 in fusion.dev.json)
+s.debug  # bool
+s.env    # "dev" | "prod" | "stage" | …
+```
+
+| API | هدف |
+| --- | --- |
+| `settings.get("key", default=...)` | خواندن کلید config (مسیر نقطه‌ای پشتیبانی می‌شود) |
+| `settings["key"]` | همان، اگر نباشد `KeyError` |
+| `settings.host` / `.port` / `.debug` / `.env` | فیلدهای رایج |
+| `settings.merge({...})` / `configure(**kwargs)` | overlay |
+| `settings.load_json(...)` / `ensure_loaded()` | بارگذاری صریح / تنبل |
 
 ## تعویض محیط
 
@@ -78,9 +106,9 @@ fusion command run:prod
 ## مدل ذهنی
 
 ```text
-fusion.dev.json  →  بلوک config  →  singleton settings
-core/settings.py →  overlay اختیاری UPPERCASE
+fusion.dev.json  →  config block  →  settings singleton
+core/settings.py →  UPPERCASE overlay (optional)
 get_settings()   →  FusionApp.listen(host, port)
 ```
 
-منبع حقیقت JSON است. جزئیات کلیدها و فایل‌های تولیدشدهٔ CLI: **[تنظیمات](../../architecture/v1/settings)**.
+JSON منبع حقیقت است. برای کلیدها (`host`، `port`، `fingerprint`، `swagger`، …) و محتوای فایل‌های تولیدشدهٔ CLI، **[Settings](../../architecture/v1/settings)** را ببینید.

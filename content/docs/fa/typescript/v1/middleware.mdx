@@ -1,26 +1,26 @@
 ---
 title: Middleware
-description: Global and route middleware for Node.js — no framework defaults
+description: Middleware سراسری و روی route برای Node.js — بدون پیش‌فرض فریم‌ورک
 ---
 
-## Overview
+## نمای کلی
 
-Same model as Python:
+همان مدل Python:
 
 ```text
 (request, callNext) => response | callNext(request)
 ```
 
-**No default middleware.** Register globally in `main.ts` or per-route via `route(..., { middleware, roles })`.
+**هیچ middleware پیش‌فرضی نیست.** سراسری در `main.ts` ثبت کنید یا per-route با `route(..., { middleware, roles })`.
 
-## Two layers
+## دو لایه
 
-1. **Global** — `app.use(mw)` from a `MIDDLEWARE` array  
-2. **Route** — `middleware: [...]` or `roles: [...]` on `route`
+1. **Global** — `app.use(mw)` از آرایهٔ `MIDDLEWARE`  
+2. **Route** — `middleware: [...]` یا `roles: [...]` روی `route`
 
-Order: global first, then route, then handler.
+ترتیب: اول global، بعد route، بعد handler.
 
-## Register in `main.ts`
+## ثبت در `main.ts`
 
 ```ts
 import { FusionApp, getSettings, settings, bearerJwt } from "fusion-framework";
@@ -35,7 +35,7 @@ for (const mw of MIDDLEWARE) app.use(mw);
 await app.listen();
 ```
 
-## Write middleware
+## نوشتن middleware
 
 ```ts
 function requireApiKey(request, callNext) {
@@ -47,9 +47,9 @@ function requireApiKey(request, callNext) {
 }
 ```
 
-Share data via `request.state` (created if missing). Handlers read `this.state`.
+داده را از طریق `request.state` به اشتراک بگذارید (اگر نباشد ساخته می‌شود). Handlerها از `this.state` می‌خوانند.
 
-## Route middleware / roles
+## Middleware / roles سطح route
 
 ```ts
 route("/api/admin", { roles: ["admin", "super_admin"] })(
@@ -61,7 +61,7 @@ route("/api/admin", { roles: ["admin", "super_admin"] })(
 );
 ```
 
-Helpers:
+ابزارها:
 
 ```ts
 import { bearerJwt, requireRoles } from "fusion-framework";
@@ -71,8 +71,8 @@ requireRoles("admin");
 requireRoles({ roles: ["admin"], claim: "roles", stateKey: "jwt" });
 ```
 
-Default `bearerJwt` base64url-decodes the JWT payload without crypto verification — pass `verify` for production.
+`bearerJwt` پیش‌فرض payload JWT را بدون verify رمزنگاری، با base64url decode می‌کند — برای production مقدار `verify` بدهید.
 
 ## Async
 
-Middleware may be `async` and `await callNext(request)`. Handlers may be `async` too.
+Middleware می‌تواند `async` باشد و `await callNext(request)` کند. Handlerها هم می‌توانند `async` باشند.

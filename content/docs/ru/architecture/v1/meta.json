@@ -2,6 +2,22 @@
   "title": "v1",
   "description": "1.2.6",
   "pages": [
-    "settings"
+    "index",
+    "workspace",
+    "fma",
+    "application-modules",
+    "packages",
+    "lifecycle",
+    "settings",
+    "request-lifecycle",
+    "pagination",
+    "status",
+    "headers",
+    "project-structure",
+    "glossary",
+    "best-practices",
+    "anti-patterns",
+    "troubleshooting",
+    "what-fusion-is-not"
   ]
 }
