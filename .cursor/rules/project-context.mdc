@@ -1,0 +1,71 @@
+---
+description: >-
+  Fusion Docs project context — stack, layout, conventions, and pointers to
+  .agents skills. Read before non-trivial work on this repo.
+alwaysApply: true
+---
+
+# Fusion Docs — project context
+
+Official **Fusion Framework** docs site (Cipher Unit). Single Next.js app — **not** a monorepo / Electron app.
+
+## Stack
+
+| Piece | Detail |
+| --- | --- |
+| Runtime | Next.js **16** App Router, React **19**, React Compiler |
+| Docs | Fumadocs (MDX, search, UI) |
+| i18n | Fumadocs i18n + i18next; locales `en` / `fa` (RTL) / `ru` |
+| Style | Tailwind CSS **4**, tokens in `src/app/styles/globals.css`, shadcn (`components.json`) + Base UI |
+| Tooling | pnpm **11.5.2**, TypeScript strict, ESLint, Husky |
+| Aliases | `@/*` → `src/*`, `@content/*` → `content/*` |
+
+Config entry points: `next.config.mjs`, `tsconfig.json`, `postcss.config.mjs`, `components.json`, `pnpm-workspace.yaml` (build allows only — not packages).
+
+## Folder roles
+
+```text
+content/docs/{en,fa,ru}/…   # MDX docs (en = source of truth)
+content/locales/{en,fa,ru}/ # UI JSON (common, fumadocs-ui, gui, home, seo)
+src/app/[lang]/…            # Routes: home, docs, gui, og, api/search
+src/components/             # docs/, gui/, home/, ui/
+src/lib/                    # i18n, source, docs helpers, SEO, layout
+public/                     # fonts, images
+.agents/skills/             # Agent skills (authoritative workflows)
+.cursor/rules/ + skills/    # Cursor rules; skills mirror/subset of .agents
+```
+
+Products under docs: `architecture`, `cli`, `python`, `typescript`, `csharp` (versioned `v1/`).
+
+Key modules: `src/lib/i18n.ts`, `locales-registry.ts`, `source.ts`, `docs.ts`, `layout.shared.tsx`, `src/proxy.ts`.
+
+## Conventions
+
+- **Tri-lingual content**: same relative path under `en` / `fa` / `ru`; align `meta.json` `pages[]`.
+- **Package names**: `fusion-framework` (PyPI/npm), `fusion_framework` / `FusionFramework`, NuGet `Fusion-Framework`, CLI from `fusion-tool`. Do not invent APIs.
+- **Links**: include product version segment (`v1`).
+- **UI**: functional React/RSC; `cn()` + CVA variants; colors via CSS vars / Tailwind token classes from `globals.css` — no hardcoded HEX/RGB/HSL.
+- **Commits**: branch off `main` (`feat/` / `fix/` / `docs/` / `i18n/`); before PR run `pnpm check` and `pnpm build`.
+- Guides: root `README.md`, `DEVELOPING.md`, `TRANSLATING.md`.
+
+## Must-know
+
+1. Translators stay in `content/`; app work spans `src/` + config.
+2. Locales are discovered from `content/locales/meta.json`.
+3. Prefer verifying framework behavior against `fusion-framework` / `fusion-tool` sources before documenting.
+4. For agent workflows and deeper rules, **always check `.agents`** (below) — do not rely on this file alone.
+
+## Agent skills (`.agents`)
+
+Read the matching skill **before** related work. Relative to repo root:
+
+| Skill | Path | When |
+| --- | --- | --- |
+| Fusion docs (i18n / MDX / meta) | [`.agents/skills/fusion-docs/SKILL.md`](../../.agents/skills/fusion-docs/SKILL.md) | Editing `content/docs` or `content/locales` |
+| Translate docs | [`.agents/skills/translate-docs/SKILL.md`](../../.agents/skills/translate-docs/SKILL.md) | User asks to translate / ترجمه |
+| UI/UX design-system | [`.agents/skills/ui-ux-design-system-compliance/SKILL.md`](../../.agents/skills/ui-ux-design-system-compliance/SKILL.md) | Creating/editing UI, styles, colors |
+| Git commit | [`.agents/skills/git-commit/SKILL.md`](../../.agents/skills/git-commit/SKILL.md) | User asks to commit / write commit message |
+
+Also see: [`.agents/skills/fusion-docs/reference.md`](../../.agents/skills/fusion-docs/reference.md).
+
+Note: `.cursor/skills/` mirrors `.agents/skills/` for fusion-docs and git-commit; **prefer `.agents/skills/`** as the source of truth when they diverge. Content-scoped Cursor rule: `.cursor/rules/fusion-docs-i18n.mdc`.
