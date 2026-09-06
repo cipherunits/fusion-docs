@@ -2,18 +2,26 @@
 
 Thank you for helping make Fusion accessible in more languages.
 
-You do **not** need to be a programmer. Most of your work is editing text files under `content/`.
+You do **not** need to be a programmer. Most work is editing text under `content/` — MDX docs and JSON UI strings.
 
-If you only want to translate and get stuck on setup, open an Issue or ask a maintainer — we will help.
+**Source language:** English (`en`).  
+**Active locales:** `en`, Persian (`fa`, RTL), Russian (`ru`).
 
-## What you can translate
+If setup blocks you, open an [Issue](https://github.com/cipherunits/fusion-docs/issues) — maintainers will help.
 
-1. **Documentation pages** — MDX files in `content/docs/`
-2. **UI strings** — JSON files in `content/locales/` (home page buttons, labels, …)
+## What you translate
 
-English (`en`) is the source language. New languages copy from English, then translate.
+| Area | Path | Format |
+| --- | --- | --- |
+| Documentation | `content/docs/{lang}/` | MDX (Markdown + frontmatter) |
+| UI strings | `content/locales/{lang}/` | JSON key → value |
+| Navigation labels | `meta.json` inside docs folders | JSON (`title`, `description` only) |
+
+English under `content/docs/en/` and `content/locales/en/` is always the reference. Copy structure from English, then translate prose.
 
 ## Setup (once)
+
+Requires [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) (project uses **11.5.2**).
 
 ```bash
 git clone https://github.com/cipherunits/fusion-docs.git
@@ -22,47 +30,45 @@ pnpm install
 pnpm dev
 ```
 
-Site: [http://localhost:3000](http://localhost:3000)
+Preview: [http://localhost:3000](http://localhost:3000)  
+Persian: `/fa` · Russian: `/ru` · English: `/en`
 
-You need [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/).
-
-## Adding a new language
-
-Example: Persian (`fa`).
-
-### 1. Tell the project about the language
-
-Ask a maintainer, or in your PR update `src/lib/i18n.ts`:
-
-```ts
-languages: ['en', 'fa'],
-```
-
-And, if the language is right-to-left:
-
-```ts
-export const localeDirection = {
-  en: 'ltr',
-  fa: 'rtl',
-};
-```
-
-### 2. UI strings
-
-Copy both namespaces:
+## Folder layout
 
 ```text
-content/locales/en/common.json
-→ content/locales/{lang}/common.json
+content/docs/
+  en/python/v1/getting-started.mdx    ← source
+  fa/python/v1/getting-started.mdx    ← your translation
+  ru/python/v1/getting-started.mdx
 
-content/locales/en/fumadocs-ui.json
-→ content/locales/{lang}/fumadocs-ui.json
+content/locales/
+  en/common.json                      ← source
+  fa/common.json
+  ru/common.json
+  meta.json                           ← locale registry (maintainers)
 ```
 
-- `common.json` — home page, nav links, custom labels
-- `fumadocs-ui.json` — language display name, Search, TOC, theme switcher, …
+**Fallback:** If a page is missing in `fa/` or `ru/`, the site shows English for that page. You can translate incrementally — but aim to keep `meta.json` nav aligned across locales when you add pages.
 
-Translate the **values** only. Keep the keys unchanged:
+## UI strings (`content/locales/{lang}/`)
+
+Copy all namespaces from `en/` when starting a new locale:
+
+| File | What it controls |
+| --- | --- |
+| `common.json` | Nav links, shared labels |
+| `home.json` | Home page hero and buttons |
+| `gui.json` | Fusion Tool desktop download page |
+| `seo.json` | Page titles and meta descriptions |
+| `fumadocs-ui.json` | Search, TOC, theme switcher, language names |
+
+**Rules:**
+
+- Translate **values** only — never rename keys.
+- Keep JSON valid (quotes, commas, escaping).
+- Use natural, professional technical language — not word-for-word machine translation.
+
+Example — only values change:
 
 ```json
 {
@@ -71,69 +77,155 @@ Translate the **values** only. Keep the keys unchanged:
 }
 ```
 
-### 3. Documentation pages
+## Documentation pages (MDX)
 
-Docs live in **locale folders**, same idea as `content/locales/`:
+### Workflow
 
-```text
-content/docs/en/python/v1/getting-started.mdx   # English (source)
-content/docs/fa/python/v1/getting-started.mdx   # Persian (optional)
-content/docs/ru/python/v1/getting-started.mdx   # Russian (optional)
+1. Find the English file under `content/docs/en/…`.
+2. Create the same path under `content/docs/fa/…` or `content/docs/ru/…`.
+3. Translate:
+   - `title` and `description` in frontmatter (`---` block at top)
+   - Body headings and paragraphs
+4. Leave unchanged:
+   - Code blocks and shell commands
+   - Package names, API/type identifiers, file paths
+   - Link targets (URLs) unless the path is locale-specific
+
+### Frontmatter example
+
+English source:
+
+```mdx
+---
+title: Getting started
+description: Install and run Fusion with Python
+---
+
+# Getting started
 ```
 
-**Fallback:** If a page is missing under `fa/` or `ru/`, the site shows the English page. You can ship English-only docs; other locales catch up later.
+Persian — translate title, description, and prose; keep code fences in English:
 
-Workflow:
+```mdx
+---
+title: شروع به کار
+description: نصب و اجرای Fusion با Python
+---
 
-1. Copy the English folder/file under `content/docs/en/...`.
-2. Paste into `content/docs/{lang}/...` with the same path.
-3. Translate titles, descriptions, and body text.
-4. Leave code blocks, commands, package names, and API identifiers as in English.
+# شروع به کار
+```
+
+### `meta.json` (navigation)
+
+Each docs folder may contain `meta.json`. Translate human-readable fields only:
+
+| Field | Translate? |
+| --- | --- |
+| `title` | Yes (when it is prose) |
+| `description` | Yes (unless it is a version number like `"1.2.6"`) |
+| `pages` | **No** — same slugs and order as English |
+| `icon`, `root` | **No** |
+
+Product names like **Fusion Tool** often stay in English.
 
 ## Translation rules
 
-- Keep the original meaning.
-- Do **not** translate code, commands, file paths, or API/type names.
-- Keep Markdown / MDX structure (headings, lists, links, fences).
-- Keep links working.
-- Prefer consistent technical wording across pages.
-- Do not ship raw machine translation without a human pass.
+### Do translate
+
+- Sentences, headings, table headers (prose cells)
+- Button labels, tooltips, SEO descriptions
+- Explanatory text around code samples
+
+### Do not translate
+
+- Code inside ` ``` ` fences
+- Commands (`pip install fusion-framework`, `pnpm add …`)
+- Package names: `fusion-framework`, `fusion_framework`, `Fusion-Framework`, `FusionFramework`
+- Config filenames: `fusion-framework.toml`
+- API names, types, HTTP paths, query parameters
+- MDX component names and props
 
 Good:
 
 ````md
-Install with:
+نصب با دستور زیر:
+
+```bash
+pip install fusion-framework
+```
+````
+
+Bad — wrong package name:
 
 ```bash
 pip install cipherunits-fusion
 ```
-````
 
-The command stays in English; only the surrounding sentence is translated.
+### Quality
+
+- Preserve meaning and tone — conversational-professional, not stiff or overly casual.
+- Keep Markdown/MDX structure (heading levels, lists, tables, components).
+- Use consistent terminology across pages (pick one Persian/Russian term per concept).
+- For **Persian (`fa`)**: site is RTL — check layout after translating.
+- For **Russian (`ru`)**: slightly more formal register is fine; do not incorrectly decline English API names inside sentences.
 
 ## Check your work
 
 1. Run `pnpm dev`.
-2. Open `/fa` (or your locale) and the docs pages you changed.
-3. Confirm layout (especially RTL), links, and that code still looks correct.
+2. Open your locale (`/fa` or `/ru`) and every page you changed.
+3. Confirm:
+   - [ ] Layout looks correct (especially RTL for `fa`)
+   - [ ] Links work
+   - [ ] Code blocks unchanged
+   - [ ] No leftover English paragraphs (except intentional technical terms)
+   - [ ] Sidebar order matches English (`meta.json` `pages[]`)
 
-## Branch, commit, PR
+## Branch, commit, pull request
 
 ```bash
 git checkout -b i18n/fa-getting-started
-git add .
+git add content/docs/fa/... content/locales/fa/...
 git commit -m "i18n: add Persian getting started"
 git push -u origin HEAD
 ```
 
-Then open a Pull Request. In the description, mention:
+Commit messages must follow project rules (`commitlint.config.mjs`):
 
-- Language code
-- Which pages / JSON files you translated
-- Anything reviewers should double-check
+```text
+<type>: <short subject in lowercase>
+```
+
+Use **`i18n`** for translation-only work. Examples:
+
+```text
+i18n: add Persian getting started
+i18n: update Russian pagination guide
+docs: fix English typo in router page
+```
+
+Header max length: **100** characters. Invalid messages are rejected by the git hook.
+
+Open a Pull Request and include:
+
+- Language code (`fa` / `ru`)
+- Files or sections translated
+- Anything reviewers should double-check (ambiguous terms, long pages partially done)
+
+## Adding a new language
+
+Today the site ships `en`, `fa`, and `ru`. For a **new** language, coordinate with maintainers:
+
+1. Add locale to `content/locales/meta.json` (`name`, `dir`, `ogLocale`).
+2. Copy all JSON namespaces from `en/`.
+3. Copy `content/docs/en/` tree to `content/docs/{lang}/` and translate.
+
+Maintainers handle any app wiring; locale discovery is automatic from `meta.json`.
 
 ## Need help?
 
-Open an Issue on [fusion-docs](https://github.com/cipherunits/fusion-docs/issues) with the language you want to add. Maintainers can enable the locale and review your first PR with you.
+- [fusion-docs Issues](https://github.com/cipherunits/fusion-docs/issues) — ask before large efforts
+- Maintainers can review your first PR and suggest terminology
 
-Back to the main [README](./README.md).
+For automated / agent-assisted translation workflows, see [`.agents/skills/translate-docs/SKILL.md`](./.agents/skills/translate-docs/SKILL.md).
+
+Back to [README](./README.md).

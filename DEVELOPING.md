@@ -1,30 +1,28 @@
 # Guide for developers
 
-This repo is the Fusion Framework documentation site: **Next.js**, **Fumadocs**, **Tailwind**, and **i18n**.
+Official docs site for **[Fusion Framework](https://cipherunit.xyz)** — **Next.js 16**, **Fumadocs**, **Tailwind CSS 4**, and **tri-lingual i18n** (`en` / `fa` / `ru`).
 
-For translation-only work, see [TRANSLATING.md](./TRANSLATING.md).
+Translators: see **[TRANSLATING.md](./TRANSLATING.md)**.  
+Contributors using Cursor agents: see **[`.agents/skills/`](./.agents/skills/)** for detailed workflows.
 
 ## Stack
 
 | Piece | Role |
 | --- | --- |
-| Next.js 16 (App Router) | App & routing (`src/app`) |
-| Fumadocs | Docs layout, MDX, search |
+| Next.js 16 (App Router) | Routes under `src/app/[lang]/…` |
+| React 19 + React Compiler | UI (`src/components`) |
+| Fumadocs | MDX docs, sidebar, search |
 | i18next + Fumadocs i18n | UI strings + locale-aware docs |
-| Tailwind CSS 4 | Styling |
-| pnpm 11.5.2 | Package manager |
+| Tailwind CSS 4 + shadcn / Base UI | Styling via `src/app/styles/globals.css` |
+| pnpm 11.5.2 | Package manager (`packageManager` in `package.json`) |
+| Husky + commitlint | Commit message enforcement |
 
-## Requirements
+Path aliases (`tsconfig.json`): `@/*` → `src/*`, `@content/*` → `content/*`.
 
-- Node.js (LTS recommended)
-- pnpm **11.5.2** (see `packageManager` in `package.json`)
+## Requirements & setup
 
-```bash
-node --version
-pnpm --version
-```
-
-## Setup
+- **Node.js** LTS recommended
+- **pnpm 11.5.2** — match `packageManager` in `package.json`
 
 ```bash
 git clone https://github.com/cipherunits/fusion-docs.git
@@ -33,85 +31,136 @@ pnpm install
 pnpm dev
 ```
 
-App: [http://localhost:3000](http://localhost:3000) (default locale under `/en`).
+Open [http://localhost:3000](http://localhost:3000) (default locale: `/en`).
 
 ## Scripts
 
 | Command | Purpose |
 | --- | --- |
 | `pnpm dev` | Development server |
-| `pnpm build` | Production build |
-| `pnpm start` | Serve production build |
-| `pnpm lint` | ESLint |
-| `pnpm lint:fix` | ESLint with autofix |
+| `pnpm check` | CipherScope banner + typecheck + lint |
 | `pnpm typecheck` | TypeScript (`tsc --noEmit`) |
-| `pnpm check` | Banner + typecheck + lint |
-| `pnpm clean` | Remove `.next` / caches |
+| `pnpm lint` / `pnpm lint:fix` | ESLint |
+| `pnpm commitlint` | Validate a commit message (used by Husky) |
+| `pnpm clean` | Remove `.next`, `out`, caches |
 
-Before a PR, prefer:
+Before a PR:
 
 ```bash
 pnpm check
-pnpm build
+pnpm exec next build
 ```
 
-## Project map
+## Repository map
 
 ```text
-src/
-  app/                 # Routes: /[lang], /[lang]/docs, …
-  components/          # UI + home particles, docs widgets
-  lib/                 # i18n, source loader, docs helpers, layout options
 content/
-  docs/                # MDX docs by product + version
-  locales/{lang}/      # UI JSON namespaces (e.g. common.json)
-public/                # Static assets
-pnpm-workspace.yaml    # pnpm allowBuilds, etc.
+  docs/{en,fa,ru}/           # MDX docs (en = source of truth)
+  locales/{en,fa,ru}/        # UI JSON namespaces
+  locales/meta.json          # Locale registry (names, dir, ogLocale)
+src/
+  app/[lang]/                # home, docs, gui, og, api/search
+  app/styles/globals.css     # Design tokens — single source for colors
+  components/                # docs/, gui/, home/, ui/
+  lib/                       # i18n, source loader, docs helpers, SEO
+public/                      # fonts, images
+.agents/skills/              # Agent workflows (fusion-docs, translate, git-commit, …)
+.cursor/                     # Cursor rules + skill mirrors
+commitlint.config.mjs        # Commit message rules
+pnpm-workspace.yaml          # pnpm allowBuilds (not a monorepo)
 ```
 
-Important entry points:
+### Key entry points
 
-- `src/lib/i18n.ts` — locales list and text direction
-- `src/lib/source.ts` — Fumadocs content loader
-- `src/lib/layout.shared.tsx` — nav title, links (copy from `content/locales`)
-- `content/locales/{lang}/common.json` — home / nav UI strings
-- `content/locales/{lang}/fumadocs-ui.json` — Fumadocs chrome + language display names
-- `src/lib/docs.ts` — product / version helpers
-- `src/proxy.ts` — i18n middleware
+| File | Purpose |
+| --- | --- |
+| `src/lib/locales-registry.ts` | Reads `content/locales/meta.json` |
+| `src/lib/i18n.ts` | Fumadocs locale routing + fallback |
+| `src/lib/source.ts` | MDX content loader |
+| `src/lib/docs.ts` | Product / version discovery from page tree |
+| `src/lib/layout.shared.tsx` | Nav title and links |
+| `src/proxy.ts` | Locale middleware |
 
-## Content & versions
+## Documentation content
 
-Docs live under:
+### Layout
 
 ```text
-content/docs/{product}/{version}/…
+content/docs/{lang}/meta.json                    # top nav order
+content/docs/{lang}/{product}/meta.json          # product root (icon, pages: ["v1"])
+content/docs/{lang}/{product}/v1/meta.json       # sidebar pages[]; description = release
+content/docs/{lang}/{product}/v1/{page}.mdx
 ```
 
-Products today: `typescript`, `python`, `csharp`.  
-Register versions in `src/lib/docs.ts` when you add a new version folder.
+**Products today:** `architecture`, `cli`, `python`, `typescript`, `csharp` (each versioned under `v1/`).
 
-Locale files for docs use the **dir** parser (one folder per language):
+**URLs:** `/{lang}/docs/{product}/{version}/{page}` — always include the version segment (`v1`).
+
+Products and versions are **discovered from the page tree**, not hard-coded in `src/lib/docs.ts`.
+
+### Tri-lingual rule
+
+When you add or change docs or nav, update the **same relative path** under all three:
+
+- `content/docs/en/…`
+- `content/docs/fa/…`
+- `content/docs/ru/…`
+
+Keep `meta.json` `pages[]` lists **identical** across locales (translate `title` / `description` only).
+
+### Package names (do not invent alternatives)
+
+| Ecosystem | Name |
+| --- | --- |
+| PyPI / npm | `fusion-framework` |
+| Python import | `fusion_framework` |
+| NuGet | `Fusion-Framework` |
+| C# namespace | `FusionFramework` |
+| CLI | Fusion Tool (`fusion` binary) from `fusion-tool` |
+| Config file | `fusion-framework.toml` |
+
+Verify APIs against [fusion-framework](https://github.com/cipherunits/fusion-framework) and [fusion-tool](https://github.com/cipherunits/fusion-tool) — do not guess.
+
+### New docs page checklist
 
 ```text
-content/docs/en/…/getting-started.mdx
-content/docs/fa/…/getting-started.mdx
-content/docs/ru/…/getting-started.mdx
+- [ ] Updated en MDX (source of truth)
+- [ ] Updated fa + ru MDX (translated prose only)
+- [ ] Updated meta.json pages[] in en, fa, ru (same order)
+- [ ] Links include v1 (or relative …/v1/…)
+- [ ] Code samples match framework / tool source
+- [ ] Package names from table above
+- [ ] UI copy changed → content/locales/{en,fa,ru}/
 ```
 
-UI copy:
+Deep reference: [`.agents/skills/fusion-docs/SKILL.md`](./.agents/skills/fusion-docs/SKILL.md).
 
-```text
-content/locales/{lang}/{namespace}.json
-```
+## UI strings
 
-Loaded via `@content/locales/...` (see `src/lib/i18next`).
+Namespaces under `content/locales/{lang}/`:
 
-## Adding a locale (code side)
+| File | Contents |
+| --- | --- |
+| `common.json` | Nav, shared labels |
+| `home.json` | Home page copy |
+| `gui.json` | Desktop app download page |
+| `seo.json` | SEO titles / descriptions |
+| `fumadocs-ui.json` | Fumadocs chrome (search, TOC, theme) |
 
-1. Extend `languages` in `src/lib/i18n.ts`.
-2. Set `localeDirection` (`ltr` / `rtl`).
-3. Add `content/locales/{lang}/common.json` and `fumadocs-ui.json` (copy from `en`).
-4. Add pages under `content/docs/{lang}/...` (copy from `en` as needed).
+Loaded via `@content/locales/…` (see `src/lib/i18next/`). Update **all locales** when changing UI copy.
+
+## Styling & components
+
+- Tokens live in `src/app/styles/globals.css` — use CSS variables / Tailwind token classes.
+- Do **not** hardcode HEX, RGB, or HSL in components.
+- Reuse patterns from `src/components/ui/` (shadcn + CVA). See [`.agents/skills/ui-ux-design-system-compliance/SKILL.md`](./.agents/skills/ui-ux-design-system-compliance/SKILL.md).
+
+## Adding a locale
+
+1. Add an entry to `content/locales/meta.json` (`name`, `dir`, `ogLocale`).
+2. Create `content/locales/{lang}/` — copy all JSON namespaces from `en`.
+3. Add `content/docs/{lang}/` — copy from `en` and translate.
+4. No code change in `src/lib/i18n.ts` is required; locales are auto-discovered.
 
 ## Branching & commits
 
@@ -122,14 +171,30 @@ git checkout -b feat/home-responsive
 # or fix/…, docs/…, i18n/…
 ```
 
-Commit style examples:
+Commit messages are enforced by **commitlint** (`commitlint.config.mjs` + `.husky/commit-msg`).
+
+Format: `<type>: <subject>` — header max **100** characters, subject starts lowercase.
+
+| Type | Typical use |
+| --- | --- |
+| `feat` | New app behavior |
+| `fix` | Bug fix |
+| `docs` | Documentation content |
+| `i18n` | Translations / locale JSON |
+| `ci` / `chore` / `build` | Tooling, deps, hooks |
+
+Examples:
 
 ```text
-feat: soft-focus overlay on home particles
+feat: add version select to docs sidebar
 fix: allow @tsparticles/engine builds on Vercel
 docs: clarify python getting started
 i18n: wire fa locale in i18n config
 ```
+
+Validate locally: `echo "docs: my subject" | pnpm exec commitlint`
+
+Full guide: [`.agents/skills/git-commit/SKILL.md`](./.agents/skills/git-commit/SKILL.md).
 
 ## Pull requests
 
@@ -137,18 +202,19 @@ i18n: wire fa locale in i18n config
 git push -u origin HEAD
 ```
 
-Open a PR with:
+Include in the PR description:
 
-- What changed and why
-- How you tested (`pnpm check`, `pnpm build`, browser checks)
+- What changed and **why**
+- How you tested (`pnpm check`, `pnpm exec next build`, browser checks)
 - Screenshots for UI changes
+- Locales touched (`en` / `fa` / `ru`)
 
-## Notes for CI / Vercel
+## CI / Vercel notes
 
-pnpm 11 requires explicit approval for dependency build scripts in `pnpm-workspace.yaml` (`allowBuilds`). If install fails with `ERR_PNPM_IGNORED_BUILDS`, add or set the package there (do not leave placeholder values).
+pnpm 11 requires explicit build-script approval in `pnpm-workspace.yaml` (`allowBuilds`). If install fails with `ERR_PNPM_IGNORED_BUILDS`, add the package there with a real `true`/`false` value.
 
-## Thank you
+---
 
 Improvements to UX, a11y, performance, docs tooling, and SDK guides all count. Welcome aboard.
 
-Back to the main [README](./README.md).
+Back to [README](./README.md).
