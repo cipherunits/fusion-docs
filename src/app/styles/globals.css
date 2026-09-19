@@ -41,6 +41,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-lang-python: var(--lang-python);
+  --color-lang-typescript: var(--lang-typescript);
+  --color-lang-csharp: var(--lang-csharp);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -83,6 +86,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Landing “powered by” accents (circuit + card glows) */
+  --lang-python: oklch(0.62 0.14 230);
+  --lang-typescript: oklch(0.62 0.18 330);
+  --lang-csharp: oklch(0.7 0.16 55);
 }
 
 .dark {
@@ -117,6 +124,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --lang-python: oklch(0.78 0.12 230);
+  --lang-typescript: oklch(0.78 0.16 330);
+  --lang-csharp: oklch(0.82 0.14 55);
 }
 
 @layer base {
@@ -128,6 +138,15 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Selection: dark highlight in light theme, light highlight in dark theme */
+  ::selection {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+  ::-moz-selection {
+    background-color: var(--foreground);
+    color: var(--background);
   }
   /* Tailwind v4 no longer sets pointer on buttons by default */
   button:not(:disabled),
@@ -171,4 +190,61 @@
   margin-bottom: 0;
   flex: 1;
   min-width: 0;
+}
+
+/* Landing — circuit endpoint pulse (powered-by section) */
+@keyframes fusion-circuit-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+.fusion-circuit-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fusion-circuit-dot.is-active {
+    animation: fusion-circuit-pulse 2.2s ease-in-out infinite;
+  }
+}
+
+/* Traveling energy pulses along PCB traces */
+@keyframes fusion-trace-flow {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.fusion-trace-pulse {
+  stroke-dasharray: 14 86;
+  stroke-dashoffset: 100;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fusion-trace-pulse.is-active {
+    opacity: 0.95;
+    animation: fusion-trace-flow var(--fusion-trace-duration, 2.8s) linear
+      infinite;
+    animation-delay: var(--fusion-trace-delay, 0s);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fusion-trace-pulse.is-active {
+    opacity: 0.7;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
 }
