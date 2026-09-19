@@ -1,6 +1,195 @@
 {
-  "welcome": "Фреймворк для бэкенда",
-  "description": "Один фреймворк, несколько языков — создавайте современные бэкенды с Fusion для Node.js, Python и C#. Официальная документация Cipher Unit.",
+  "welcome": "Fusion Framework",
+  "description": "Один фреймворк, несколько языков — создавайте современные бэкенды с Fusion для Node.js, Python и C#.",
   "openDocs": "Начать работу",
-  "openLearn": "Изучить Fusion"
+  "openLearn": "Изучить Fusion",
+  "features": {
+    "eyebrow": "Платформа",
+    "title": "Всё необходимое для выпуска API",
+    "description": "Общее ядро на Rust, тонкие языковые биндинги и классовая модульная модель — одна и та же HTTP-семантика везде, где вы работаете.",
+    "items": [
+      {
+        "title": "Общее ядро на Rust",
+        "description": "HTTP-сервер, маршрутизация, настройки и сериализация живут один раз в fusion-core — биндинги сосредоточены на DX."
+      },
+      {
+        "title": "Классовые API",
+        "description": "Описывайте модули как классы FusionBaseApi, явно регистрируйте маршруты и держите каждый ресурс в одном модуле."
+      },
+      {
+        "title": "Роутер и middleware",
+        "description": "Собирайте цепочки запросов с одной и той же моделью маршрутизации в Python, TypeScript и C#."
+      },
+      {
+        "title": "Fusion Tool CLI",
+        "description": "Создавайте приложения, управляйте окружениями и ставьте переиспользуемые пакеты официальным бинарником fusion."
+      },
+      {
+        "title": "Модули FMA",
+        "description": "Собирайте приложения из route-модулей и публикуемых пакетов — чёткая граница между HTTP-поверхностью и общими библиотеками."
+      },
+      {
+        "title": "Готовность к OpenAPI",
+        "description": "Генерируйте документацию API из модулей, чтобы клиенты и команда оставались синхронизированы с живой поверхностью."
+      }
+    ]
+  },
+  "languages": {
+    "eyebrow": "Биндинги",
+    "title": "Одна ментальная модель. Три runtime.",
+    "description": "Пишите идиоматичный Python, TypeScript или C# поверх одних и тех же концепций Fusion — устанавливайте, скаффолдите и выпускайте.",
+    "items": [
+      {
+        "id": "python",
+        "name": "Python",
+        "blurb": "Декораторы, async и модули, дружелюбные к Swagger.",
+        "install": "pip install fusion-framework",
+        "cta": "Документация Python"
+      },
+      {
+        "id": "typescript",
+        "name": "TypeScript",
+        "blurb": "Биндинги Node.js со знакомым типизированным DX.",
+        "install": "npm install fusion-framework",
+        "cta": "Документация TypeScript"
+      },
+      {
+        "id": "csharp",
+        "name": "C#",
+        "blurb": "Атрибуты .NET и FusionApp для классовых HTTP API.",
+        "install": "dotnet add package Fusion-Framework",
+        "cta": "Документация C#"
+      }
+    ]
+  },
+  "poweredBy": {
+    "title": "На трёх языках. Одно общее ядро.",
+    "chip": "Powered By",
+    "items": [
+      {
+        "id": "python",
+        "name": "Python",
+        "description": "Декораторы, async-обработчики и модули со Swagger поверх той же HTTP-модели Fusion."
+      },
+      {
+        "id": "typescript",
+        "name": "TypeScript",
+        "description": "Типизированные биндинги Node.js со знакомым DX — те же маршруты, middleware и config."
+      },
+      {
+        "id": "csharp",
+        "name": "C#",
+        "description": "Атрибуты .NET и FusionApp для классовых HTTP API без ухода от семантики Fusion."
+      }
+    ]
+  },
+  "benchmarks": {
+    "eyebrow": "Архитектура",
+    "title": "Производительность начинается в ядре",
+    "description": "Fusion держит горячий путь в Rust, а языковые биндинги — тонкими. Одна модель маршрутизации, единые helper’ы для заголовков и статусов и меньше разъезда фреймворков между командами.",
+    "stats": [
+      {
+        "value": "1",
+        "label": "Общее HTTP-ядро",
+        "detail": "fusion-core на Rust"
+      },
+      {
+        "value": "3",
+        "label": "Языковых биндинга",
+        "detail": "Python · TypeScript · C#"
+      },
+      {
+        "value": "0",
+        "label": "Магических автосканов",
+        "detail": "Явная регистрация маршрутов"
+      },
+      {
+        "value": "FMA",
+        "label": "Модульная архитектура",
+        "detail": "Композируемые пакеты"
+      }
+    ],
+    "pillars": [
+      {
+        "title": "Нативный serving path",
+        "description": "Сервер на Hyper, токены маршрутизации и сериализация ответа реализованы один раз — не для каждого языка отдельно."
+      },
+      {
+        "title": "Тонкие биндинги",
+        "description": "Python, Node и C# отражают одну HTTP-семантику идиоматичным синтаксисом вместо трёх расходящихся фреймворков."
+      },
+      {
+        "title": "Предсказуемый DX",
+        "description": "Config, middleware, pagination, status и headers следуют одним концепциям во всех официальных биндингах."
+      }
+    ]
+  },
+  "workflow": {
+    "eyebrow": "Процесс",
+    "title": "От нуля до работающего API",
+    "description": "Скаффолдите через Fusion Tool, установите биндинг языка, опишите модуль и запустите listen.",
+    "steps": [
+      {
+        "title": "Initialize",
+        "description": "Создайте структуру проекта через fusion init и выбранный язык."
+      },
+      {
+        "title": "Install",
+        "description": "Добавьте fusion-framework (или Fusion-Framework в NuGet) для вашего runtime."
+      },
+      {
+        "title": "Опишите модули",
+        "description": "Владейте каждым ресурсом через класс FusionBaseApi и явную регистрацию маршрутов."
+      },
+      {
+        "title": "Выпускайте",
+        "description": "Собирайте middleware, настраивайте окружения и растите через переиспользуемые пакеты."
+      }
+    ]
+  },
+  "ecosystem": {
+    "eyebrow": "Документация",
+    "title": "Изучите стек Fusion",
+    "description": "Архитектурные материалы, справочник CLI и языковые гайды — версионированы для production-команд.",
+    "items": [
+      {
+        "title": "Архитектура",
+        "description": "Ядро на Rust, FMA, структура workspace и границы дизайна.",
+        "href": "architecture"
+      },
+      {
+        "title": "Fusion Tool",
+        "description": "CLI для init, модулей, обновлений и desktop-сценариев.",
+        "href": "cli"
+      },
+      {
+        "title": "Языковые гайды",
+        "description": "Старт, роутер, middleware, config и многое другое.",
+        "href": "python"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Готовы строить на Fusion?",
+    "description": "Читайте документацию, скаффолдите первое приложение или попробуйте десктоп-компаньон от Cipher Unit.",
+    "primary": "Открыть документацию",
+    "secondary": "Скачать desktop"
+  },
+  "footer": {
+    "tagline": "Бэкенд-фреймворк с единым developer experience для Node.js, Python и C#.",
+    "product": "Продукт",
+    "languages": "Языки",
+    "resources": "Ресурсы",
+    "docs": "Документация",
+    "architecture": "Архитектура",
+    "cli": "Fusion Tool",
+    "desktop": "Desktop",
+    "python": "Python",
+    "typescript": "TypeScript",
+    "csharp": "C#",
+    "github": "GitHub",
+    "framework": "fusion-framework",
+    "website": "Cipher Unit",
+    "copyright": "© {{year}} Cipher Unit. Все права защищены."
+  }
 }

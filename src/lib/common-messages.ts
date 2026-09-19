@@ -54,27 +54,30 @@ function loadFallback<T extends Record<string, unknown>>(namespace: string): T {
     {}) as T;
 }
 
-const commonFallback = loadFallback<CommonMessages>('common');
-const homeFallback = loadFallback<HomeMessages>('home');
-const guiFallback = loadFallback<GuiMessages>('gui');
-const seoFallback = loadFallback<SeoMessages>('seo');
-
 /** Shared chrome copy (nav, language switcher labels, etc.). */
 export function getCommon(locale: string): CommonMessages {
-  return getNamespaceMessages(locale, 'common', commonFallback);
+  return getNamespaceMessages(
+    locale,
+    'common',
+    loadFallback<CommonMessages>('common'),
+  );
 }
 
 /** Home page copy. */
 export function getHome(locale: string): HomeMessages {
-  return getNamespaceMessages(locale, 'home', homeFallback);
+  return getNamespaceMessages(
+    locale,
+    'home',
+    loadFallback<HomeMessages>('home'),
+  );
 }
 
 /** Desktop / GUI download page copy. */
 export function getGui(locale: string): GuiMessages {
-  return getNamespaceMessages(locale, 'gui', guiFallback);
+  return getNamespaceMessages(locale, 'gui', loadFallback<GuiMessages>('gui'));
 }
 
 /** Localized SEO strings (descriptions, keywords, image alts). */
 export function getSeo(locale: string): SeoMessages {
-  return getNamespaceMessages(locale, 'seo', seoFallback);
+  return getNamespaceMessages(locale, 'seo', loadFallback<SeoMessages>('seo'));
 }

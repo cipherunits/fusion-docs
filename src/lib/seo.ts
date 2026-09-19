@@ -221,6 +221,10 @@ export function buildPageMetadata(options: {
         'max-video-preview': -1,
       },
     },
+    other: {
+      language: locale,
+      'content-language': locale,
+    },
   };
 }
 
@@ -354,6 +358,7 @@ export function docsJsonLd(options: {
         description: resolvedDescription,
         url,
         inLanguage: locale,
+        isAccessibleForFree: true,
         isPartOf: { '@id': `${getSiteUrl()}/#website` },
         author: { '@id': `${siteConfig.org.url}/#organization` },
         publisher: { '@id': `${siteConfig.org.url}/#organization` },
@@ -372,7 +377,18 @@ export function docsJsonLd(options: {
           : [{ '@id': `${getSiteUrl()}/#logo` }],
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': url,
+          '@id': `${url}#webpage`,
+          url,
+          name: title,
+          description: resolvedDescription,
+          inLanguage: locale,
+          isPartOf: { '@id': `${getSiteUrl()}/#website` },
+          primaryImageOfPage: image
+            ? {
+                '@type': 'ImageObject',
+                url: image.startsWith('http') ? image : absoluteUrl(image),
+              }
+            : { '@id': `${getSiteUrl()}/#logo` },
         },
       },
       breadcrumbJsonLd(url, breadcrumbs),
