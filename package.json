@@ -18,6 +18,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "build": "next build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --noEmit",

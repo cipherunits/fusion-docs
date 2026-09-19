@@ -2,5 +2,194 @@
   "welcome": "Fusion Framework",
   "description": "One framework, multiple languages — build modern backends with Fusion across Node.js, Python, and C#.",
   "openDocs": "Get Started",
-  "openLearn": "Learn Fusion"
+  "openLearn": "Learn Fusion",
+  "features": {
+    "eyebrow": "Platform",
+    "title": "Everything you need to ship APIs",
+    "description": "A shared Rust core, thin language bindings, and a class-based module model — the same HTTP semantics everywhere you work.",
+    "items": [
+      {
+        "title": "Shared Rust core",
+        "description": "HTTP serving, routing, settings, and serialization live once in fusion-core — bindings stay focused on developer experience."
+      },
+      {
+        "title": "Class-based APIs",
+        "description": "Define modules as FusionBaseApi classes, register routes explicitly, and keep each resource surface owned by one module."
+      },
+      {
+        "title": "Router & middleware",
+        "description": "Compose request pipelines with the same routing model across Python, TypeScript, and C#."
+      },
+      {
+        "title": "Fusion Tool CLI",
+        "description": "Scaffold apps, manage environments, and install reusable packages with the official fusion binary."
+      },
+      {
+        "title": "FMA modules",
+        "description": "Compose applications from route modules and publishable packages — clear boundaries between HTTP surface and shared libraries."
+      },
+      {
+        "title": "OpenAPI ready",
+        "description": "Generate API docs from your modules so clients and teammates stay aligned with the live surface."
+      }
+    ]
+  },
+  "languages": {
+    "eyebrow": "Bindings",
+    "title": "One mental model. Three runtimes.",
+    "description": "Write idiomatic Python, TypeScript, or C# against the same Fusion concepts — install, scaffold, and ship.",
+    "items": [
+      {
+        "id": "python",
+        "name": "Python",
+        "blurb": "Decorators, async support, and Swagger-friendly modules.",
+        "install": "pip install fusion-framework",
+        "cta": "Python docs"
+      },
+      {
+        "id": "typescript",
+        "name": "TypeScript",
+        "blurb": "Node.js bindings with a familiar, typed developer experience.",
+        "install": "npm install fusion-framework",
+        "cta": "TypeScript docs"
+      },
+      {
+        "id": "csharp",
+        "name": "C#",
+        "blurb": ".NET attributes and FusionApp for class-based HTTP APIs.",
+        "install": "dotnet add package Fusion-Framework",
+        "cta": "C# docs"
+      }
+    ]
+  },
+  "poweredBy": {
+    "title": "Powered by three languages. One shared core.",
+    "chip": "Powered By",
+    "items": [
+      {
+        "id": "python",
+        "name": "Python",
+        "description": "Decorators, async handlers, and Swagger-friendly modules on top of the same Fusion HTTP model."
+      },
+      {
+        "id": "typescript",
+        "name": "TypeScript",
+        "description": "Typed Node.js bindings with a familiar DX — same routing, middleware, and config concepts."
+      },
+      {
+        "id": "csharp",
+        "name": "C#",
+        "description": ".NET attributes and FusionApp for class-based HTTP APIs without leaving the Fusion semantics."
+      }
+    ]
+  },
+  "benchmarks": {
+    "eyebrow": "Architecture",
+    "title": "Performance starts in the core",
+    "description": "Fusion keeps the hot path in Rust while language bindings stay thin. You get one routing model, consistent headers and status helpers, and less framework drift between teams.",
+    "stats": [
+      {
+        "value": "1",
+        "label": "Shared HTTP core",
+        "detail": "fusion-core in Rust"
+      },
+      {
+        "value": "3",
+        "label": "Language bindings",
+        "detail": "Python · TypeScript · C#"
+      },
+      {
+        "value": "0",
+        "label": "Magic auto-scans",
+        "detail": "Explicit route registration"
+      },
+      {
+        "value": "FMA",
+        "label": "Module architecture",
+        "detail": "Composable packages"
+      }
+    ],
+    "pillars": [
+      {
+        "title": "Native serving path",
+        "description": "Hyper-backed serving, routing tokens, and response serialization are implemented once — not reimplemented per language."
+      },
+      {
+        "title": "Thin bindings",
+        "description": "Python, Node, and C# mirror the same HTTP semantics with idiomatic syntax instead of shipping three divergent frameworks."
+      },
+      {
+        "title": "Predictable DX",
+        "description": "Config, middleware, pagination, status codes, and headers follow the same concepts across every official binding."
+      }
+    ]
+  },
+  "workflow": {
+    "eyebrow": "Workflow",
+    "title": "From zero to a running API",
+    "description": "Scaffold with Fusion Tool, install the binding for your language, define a module, and listen.",
+    "steps": [
+      {
+        "title": "Initialize",
+        "description": "Create a project layout with fusion init and the language of your choice."
+      },
+      {
+        "title": "Install",
+        "description": "Add fusion-framework (or Fusion-Framework on NuGet) for your runtime."
+      },
+      {
+        "title": "Define modules",
+        "description": "Own each resource with a FusionBaseApi class and explicit route registration."
+      },
+      {
+        "title": "Ship",
+        "description": "Compose middleware, configure environments, and grow with reusable packages."
+      }
+    ]
+  },
+  "ecosystem": {
+    "eyebrow": "Docs",
+    "title": "Explore the Fusion stack",
+    "description": "Architecture deep-dives, CLI reference, and language guides — versioned and ready for production teams.",
+    "items": [
+      {
+        "title": "Architecture",
+        "description": "Rust core, FMA, workspace layout, and design boundaries.",
+        "href": "architecture"
+      },
+      {
+        "title": "Fusion Tool",
+        "description": "CLI for init, modules, updates, and desktop workflows.",
+        "href": "cli"
+      },
+      {
+        "title": "Language guides",
+        "description": "Getting started, router, middleware, config, and more.",
+        "href": "python"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to build with Fusion?",
+    "description": "Read the docs, scaffold your first app, or try the desktop companion from Cipher Unit.",
+    "primary": "Open documentation",
+    "secondary": "Download desktop"
+  },
+  "footer": {
+    "tagline": "The backend framework with a unified developer experience across Node.js, Python, and C#.",
+    "product": "Product",
+    "languages": "Languages",
+    "resources": "Resources",
+    "docs": "Documentation",
+    "architecture": "Architecture",
+    "cli": "Fusion Tool",
+    "desktop": "Desktop",
+    "python": "Python",
+    "typescript": "TypeScript",
+    "csharp": "C#",
+    "github": "GitHub",
+    "framework": "fusion-framework",
+    "website": "Cipher Unit",
+    "copyright": "© {{year}} Cipher Unit. All rights reserved."
+  }
 }

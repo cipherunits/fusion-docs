@@ -1,6 +1,195 @@
 {
-  "welcome": "فریم‌ورک برای بک‌اندها",
-  "description": "یک فریم‌ورک، چند زبان — بک‌اندهای مدرن را با Fusion در Node.js، Python و C# بسازید. مستندات رسمی Cipher Unit.",
+  "welcome": "Fusion Framework",
+  "description": "یک فریم‌ورک، چند زبان — بک‌اندهای مدرن را با Fusion در Node.js، Python و C# بسازید.",
   "openDocs": "شروع کنید",
-  "openLearn": "یادگیری Fusion"
+  "openLearn": "یادگیری Fusion",
+  "features": {
+    "eyebrow": "پلتفرم",
+    "title": "همه‌چیز برای ساخت و انتشار API",
+    "description": "هستهٔ مشترک Rust، بایندینگ‌های سبک زبانی، و مدل ماژول کلاس‌محور — همان معنای HTTP در هر زبانی که کار می‌کنید.",
+    "items": [
+      {
+        "title": "هستهٔ مشترک Rust",
+        "description": "سرو کردن HTTP، مسیریابی، تنظیمات و سریالایز در fusion-core یک‌بار پیاده شده — بایندینگ‌ها روی تجربهٔ توسعه‌دهنده تمرکز می‌کنند."
+      },
+      {
+        "title": "APIهای کلاس‌محور",
+        "description": "ماژول‌ها را به‌صورت کلاس‌های FusionBaseApi تعریف کنید، مسیرها را صریح ثبت کنید و مالکیت هر resource را در یک ماژول نگه دارید."
+      },
+      {
+        "title": "روتر و middleware",
+        "description": "زنجیرهٔ درخواست را با همان مدل مسیریابی در Python، TypeScript و C# ترکیب کنید."
+      },
+      {
+        "title": "Fusion Tool CLI",
+        "description": "با باینری رسمی fusion پروژه بسازید، محیط‌ها را مدیریت کنید و پکیج‌های قابل‌استفاده مجدد نصب کنید."
+      },
+      {
+        "title": "ماژول‌های FMA",
+        "description": "اپلیکیشن را از route moduleها و پکیج‌های قابل‌انتشار بسازید — مرز شفاف بین سطح HTTP و کتابخانه‌های مشترک."
+      },
+      {
+        "title": "آمادهٔ OpenAPI",
+        "description": "مستندات API را از روی ماژول‌ها بسازید تا کلاینت‌ها و تیم با سطح واقعی سرویس هم‌تراز بمانند."
+      }
+    ]
+  },
+  "languages": {
+    "eyebrow": "بایندینگ‌ها",
+    "title": "یک مدل ذهنی. سه runtime.",
+    "description": "Python، TypeScript یا C# را به‌صورت idiomatic روی همان مفاهیم Fusion بنویسید — نصب کنید، scaffold کنید و منتشر کنید.",
+    "items": [
+      {
+        "id": "python",
+        "name": "Python",
+        "blurb": "دکوراتورها، پشتیبانی async و ماژول‌های سازگار با Swagger.",
+        "install": "pip install fusion-framework",
+        "cta": "مستندات Python"
+      },
+      {
+        "id": "typescript",
+        "name": "TypeScript",
+        "blurb": "بایندینگ Node.js با تجربهٔ تایپ‌شده و آشنا.",
+        "install": "npm install fusion-framework",
+        "cta": "مستندات TypeScript"
+      },
+      {
+        "id": "csharp",
+        "name": "C#",
+        "blurb": "Attributeهای .NET و FusionApp برای APIهای HTTP کلاس‌محور.",
+        "install": "dotnet add package Fusion-Framework",
+        "cta": "مستندات C#"
+      }
+    ]
+  },
+  "poweredBy": {
+    "title": "قدرت‌گرفته از سه زبان. یک هستهٔ مشترک.",
+    "chip": "Powered By",
+    "items": [
+      {
+        "id": "python",
+        "name": "Python",
+        "description": "دکوراتورها، handlerهای async و ماژول‌های سازگار با Swagger روی همان مدل HTTPِ Fusion."
+      },
+      {
+        "id": "typescript",
+        "name": "TypeScript",
+        "description": "بایندینگ تایپ‌شدهٔ Node.js با DX آشنا — همان مفاهیم مسیریابی، middleware و config."
+      },
+      {
+        "id": "csharp",
+        "name": "C#",
+        "description": "Attributeهای .NET و FusionApp برای APIهای HTTP کلاس‌محور بدون ترک معنای Fusion."
+      }
+    ]
+  },
+  "benchmarks": {
+    "eyebrow": "معماری",
+    "title": "کارایی از هسته شروع می‌شود",
+    "description": "Fusion مسیر داغ را در Rust نگه می‌دارد و بایندینگ‌های زبانی را سبک می‌گذارد. یک مدل مسیریابی، helperهای یکسان برای header و status، و کمتر شدن پراکندگی فریم‌ورک بین تیم‌ها.",
+    "stats": [
+      {
+        "value": "1",
+        "label": "هستهٔ HTTP مشترک",
+        "detail": "fusion-core در Rust"
+      },
+      {
+        "value": "3",
+        "label": "بایندینگ زبانی",
+        "detail": "Python · TypeScript · C#"
+      },
+      {
+        "value": "0",
+        "label": "اسکن خودکار جادویی",
+        "detail": "ثبت صریح مسیرها"
+      },
+      {
+        "value": "FMA",
+        "label": "معماری ماژولار",
+        "detail": "پکیج‌های قابل‌ترکیب"
+      }
+    ],
+    "pillars": [
+      {
+        "title": "مسیر سرو بومی",
+        "description": "سرو روی Hyper، توکن‌های مسیریابی و سریالایز پاسخ یک‌بار پیاده شده‌اند — نه سه‌بار برای سه زبان."
+      },
+      {
+        "title": "بایندینگ‌های نازک",
+        "description": "Python، Node و C# همان معنای HTTP را با سینتکس idiomatic منعکس می‌کنند، نه سه فریم‌ورک واگرا."
+      },
+      {
+        "title": "DX قابل‌پیش‌بینی",
+        "description": "Config، middleware، pagination، status و header در همهٔ بایندینگ‌های رسمی از یک مفهوم پیروی می‌کنند."
+      }
+    ]
+  },
+  "workflow": {
+    "eyebrow": "گردش کار",
+    "title": "از صفر تا API در حال اجرا",
+    "description": "با Fusion Tool اسکفلد کنید، بایندینگ زبان را نصب کنید، ماژول بسازید و listen کنید.",
+    "steps": [
+      {
+        "title": "Initialize",
+        "description": "با fusion init و زبان موردنظرتان ساختار پروژه را بسازید."
+      },
+      {
+        "title": "Install",
+        "description": "fusion-framework (یا Fusion-Framework در NuGet) را برای runtime خود اضافه کنید."
+      },
+      {
+        "title": "تعریف ماژول",
+        "description": "هر resource را با کلاس FusionBaseApi و ثبت صریح مسیرها مالک شوید."
+      },
+      {
+        "title": "انتشار",
+        "description": "middleware را ترکیب کنید، محیط‌ها را تنظیم کنید و با پکیج‌های قابل‌استفاده مجدد رشد کنید."
+      }
+    ]
+  },
+  "ecosystem": {
+    "eyebrow": "مستندات",
+    "title": "استک Fusion را کاوش کنید",
+    "description": "عمق معماری، مرجع CLI و راهنمای زبان‌ها — نسخه‌بندی‌شده برای تیم‌های production.",
+    "items": [
+      {
+        "title": "معماری",
+        "description": "هستهٔ Rust، FMA، چیدمان workspace و مرزهای طراحی.",
+        "href": "architecture"
+      },
+      {
+        "title": "Fusion Tool",
+        "description": "CLI برای init، ماژول‌ها، آپدیت و جریان دسکتاپ.",
+        "href": "cli"
+      },
+      {
+        "title": "راهنمای زبان‌ها",
+        "description": "شروع به کار، روتر، middleware، config و بیشتر.",
+        "href": "python"
+      }
+    ]
+  },
+  "cta": {
+    "title": "آماده‌اید با Fusion بسازید؟",
+    "description": "مستندات را بخوانید، اولین اپ را اسکفلد کنید یا همراه دسکتاپ Cipher Unit را امتحان کنید.",
+    "primary": "باز کردن مستندات",
+    "secondary": "دانلود دسکتاپ"
+  },
+  "footer": {
+    "tagline": "فریم‌ورک بک‌اند با تجربهٔ توسعه‌دهندهٔ یکپارچه در Node.js، Python و C#.",
+    "product": "محصول",
+    "languages": "زبان‌ها",
+    "resources": "منابع",
+    "docs": "مستندات",
+    "architecture": "معماری",
+    "cli": "Fusion Tool",
+    "desktop": "دسکتاپ",
+    "python": "Python",
+    "typescript": "TypeScript",
+    "csharp": "C#",
+    "github": "GitHub",
+    "framework": "fusion-framework",
+    "website": "Cipher Unit",
+    "copyright": "© {{year}} Cipher Unit. همهٔ حقوق محفوظ است."
+  }
 }
